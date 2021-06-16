@@ -1,0 +1,2 @@
+./janus.py --num 10 --seed 1 --time 10000 --rtime 9000 --dt 1 --sigma 0.35 --filebase data/chimera/
+31.126524193 0.7405982290949469
