@@ -26,6 +26,7 @@ def janus(t, phases, N, omega, sigma, beta, gamma, sigma0, t0):
     return np.concatenate([dxdt,dydt,dudt,dvdt])
 ###########################################################################
 
+#TODO: Calculate Jacobian
 ###########################################################################
 def janus_jac(t, phases, N, omega, sigma, beta, gamma, sigma0, t0):
     sigmat=sigma
@@ -59,6 +60,7 @@ def runsim (N, t1, t3, dt, omega, beta, sigma, gamma, phase_init, sigma0=0.35, t
     return phases,times,r
 ######################################################################################
 
+#TODO: Calculate Floquet exponents
 ######################################################################################
 def cont (omega,beta,gamma,sigma0,x0,y0,p0,sigmamin,sigmamax,dsigma,dsigmamax=1e-3,dsigmamin=1e-6,verbose=True, maxnodes=1000, tol=1e-1, bctol=1e-2, SNum=5):
     sols=[]
@@ -66,6 +68,7 @@ def cont (omega,beta,gamma,sigma0,x0,y0,p0,sigmamin,sigmamax,dsigma,dsigmamax=1e
     start=timeit.default_timer()
     N=int(len(y0)/4)
     bc=y0[0,0]
+    SNcount=0
 
     sigma=sigma0
     start2=timeit.default_timer()
@@ -123,10 +126,11 @@ def cont (omega,beta,gamma,sigma0,x0,y0,p0,sigmamin,sigmamax,dsigma,dsigmamax=1e
         x0=sol.x
         y0=sol.y
         p0=sol.p[0]
+        SNcount=SNcount+1
 
         #Checkk for saddle-node
         bif=0
-        if len(sigmas)>SNum:
+        if SNcount>SNum:
             ys=np.array([sols[i].p[0] for i in np.arange(-SNum,0,1)])
             xs=sigmas[-SNum:]
             xm=xs[-1]-(xs[-1]-xs[-3])/(ys[-1]-ys[-3])*ys[-1]
@@ -165,12 +169,14 @@ def cont (omega,beta,gamma,sigma0,x0,y0,p0,sigmamin,sigmamax,dsigma,dsigmamax=1e
                 y0=sol2.y
                 p0=sol2.p[0]
                 dsigma=-dsigma
+                SNcount=0
 
         if count>10:
             dsigma=np.sign(dsigma)*np.min([dsigmamax,np.abs(dsigma)*2])
             count=1
 
     return sigmas,sols
+######################################################################################
 
 if __name__ == "__main__":
 
