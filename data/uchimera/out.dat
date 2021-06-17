@@ -1,0 +1,2 @@
+./janus.py --beta -0.25 --sigma -0.35 --num 10 --filebase data/uchimera/ --seed 1
+33.406478352 0.44195967451253204
