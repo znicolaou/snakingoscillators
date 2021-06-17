@@ -62,7 +62,7 @@ def runsim (N, t1, t3, dt, omega, beta, sigma, gamma, phase_init, sigma0=0.35, t
 
 #TODO: Calculate Floquet exponents
 ######################################################################################
-def cont (omega,beta,gamma,sigma0,x0,y0,p0,sigmamin,sigmamax,dsigma,dsigmamax=1e-3,dsigmamin=1e-6,verbose=True, maxnodes=1000, tol=1e-1, bctol=1e-2, stol=5e-4, SNum=5):
+def cont (omega,beta,gamma,sigma0,x0,y0,p0,sigmamin,sigmamax,dsigma,dsigmamax=1e-3,dsigmamin=1e-6,verbose=True, maxnodes=1000, minnodes=100, tol=1e-1, bctol=1e-2, stol=5e-4, SNum=5):
     sols=[]
     sigmas=[]
     start=timeit.default_timer()
@@ -171,8 +171,13 @@ def cont (omega,beta,gamma,sigma0,x0,y0,p0,sigmamin,sigmamax,dsigma,dsigmamax=1e
                 dsigma=-dsigma
                 SNcount=0
 
+
+        #Try to increase the timestep and coarsen the mesh after 10 successful steps
         if count>10:
             dsigma=np.sign(dsigma)*np.min([dsigmamax,np.abs(dsigma)*2])
+            if(len(x0)>2*minnodes):
+                x0=x0[::2]
+                y0=y0[:,::2]
             count=1
 
     return sigmas,sols
