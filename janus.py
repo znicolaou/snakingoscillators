@@ -76,8 +76,8 @@ def cont (omega,beta,gamma,sigma0,x0,y0,p0,sigmamin,sigmamax,dsigma,dsigmamax=1e
     sol=solve_bvp(lambda ts,Xts,p: p[0]*np.transpose([janus(p[0]*ts[i],Xts[:,i], N, omega, sigma, beta, gamma,sigma,0) for i in range(len(ts))]), lambda xa,xb,p: (np.concatenate((xb-xa,[xa[0]-bc]))), x0, y0, p=np.array([p0]), max_nodes=maxnodes,tol=tol,bc_tol=bctol)
     stop2=timeit.default_timer()
     if verbose:
-        print(sol.message)
-        print('%f\t%.3e\t%i\t%f\t%i\t%f\t'%(sigma, dsigma,len(sol.x),sol.p[0],sol.niter,stop2-start2),end='\n')
+        print(sol.message,flush=True)
+        print('%f\t%.3e\t%i\t%f\t%i\t%f\t'%(sigma, dsigma,len(sol.x),sol.p[0],sol.niter,stop2-start2),end='\n',flush=True)
     sols.append(sol)
     sigmas.append(sigma)
     count=1
@@ -102,22 +102,22 @@ def cont (omega,beta,gamma,sigma0,x0,y0,p0,sigmamin,sigmamax,dsigma,dsigmamax=1e
                 raise Exception('period changed too much '+ str(p0)+' '+str(sol.p[0]))
 
         except Exception as e:
-            print(str(e))
+            print(str(e),flush=True)
             sigma=sigma-dsigma
             dsigma=dsigma/2
             sol=sols[-1]
             count=1
             if verbose:
-                print('%f\t%.3e\t%i\t%f\t%i\t%f\t'%(sigma, dsigma,len(sol.x),sol.p[0],sol.niter,stop2-start2),end='\n')
+                print('%f\t%.3e\t%i\t%f\t%i\t%f\t'%(sigma, dsigma,len(sol.x),sol.p[0],sol.niter,stop2-start2),end='\n',flush=True)
             if np.abs(dsigma)>dsigmamin:
                 continue
             else:
                 if verbose:
-                    print('step size too small')
+                    print('step size too small',flush=True)
                 break
 
         if verbose:
-            print('%f\t%.3e\t%i\t%f\t%i\t%f\t'%(sigma, dsigma,len(sol.x),sol.p[0],sol.niter,stop2-start2),end='\n')
+            print('%f\t%.3e\t%i\t%f\t%i\t%f\t'%(sigma, dsigma,len(sol.x),sol.p[0],sol.niter,stop2-start2),end='\n',flush=True)
 
         sols.append(sol)
         sigmas.append(sigma)
@@ -140,7 +140,7 @@ def cont (omega,beta,gamma,sigma0,x0,y0,p0,sigmamin,sigmamax,dsigma,dsigmamax=1e
                 bif=1
         if bif:
             if verbose:
-                print("Saddle-node expected at %f. Looking for second branch"%(x[0]))
+                print("Saddle-node expected at %f. Looking for second branch"%(x[0]),flush=True)
             x0=sols[-2].x
             y0=2*np.array([sols[-1].sol(t) for t in x0]).T-sols[-2].y
             p0=2*sols[-1].p[0]-sols[-2].p[0]
@@ -152,8 +152,8 @@ def cont (omega,beta,gamma,sigma0,x0,y0,p0,sigmamin,sigmamax,dsigma,dsigmamax=1e
 
             if (not sol2.success) or (np.abs(sol2.p[0]-p0) > np.abs(sol2.p[0]-sols[-2].p[0])):
                 if verbose:
-                    print("Couldn't find second branch.", sol.message, sols[-2].p[0],sol2.p[0], p0)
-                    print('%f\t%.3e\t%i\t%f\t%i\t%f\t'%(sigma, dsigma,len(sol2.x),sol2.p[0],sol2.niter,stop2-start2),end='\n')
+                    print("Couldn't find second branch.", sol.message, sols[-2].p[0],sol2.p[0], p0,flush=True)
+                    print('%f\t%.3e\t%i\t%f\t%i\t%f\t'%(sigma, dsigma,len(sol2.x),sol2.p[0],sol2.niter,stop2-start2),end='\n',flush=True)
                 x0=sol.x
                 y0=sol.y
                 p0=sol.p[0]
@@ -167,12 +167,12 @@ def cont (omega,beta,gamma,sigma0,x0,y0,p0,sigmamin,sigmamax,dsigma,dsigmamax=1e
                 dsigma=-dsigma
                 SNcount=0
                 if verbose:
-                    print("Found second branch. Continuing.", sols[-2].p[0],sol2.p[0], p0)
-                    print('%f\t%.3e\t%i\t%f\t%i\t%f\t'%(sigma, dsigma,len(sol2.x),sol2.p[0],sol2.niter,stop2-start2),end='\n')
+                    print("Found second branch. Continuing.", sols[-2].p[0],sol2.p[0], p0,flush=True)
+                    print('%f\t%.3e\t%i\t%f\t%i\t%f\t'%(sigma, dsigma,len(sol2.x),sol2.p[0],sol2.niter,stop2-start2),end='\n',flush=True)
 
         #Try to increase the timestep and coarsen the mesh after 5 successful steps
         if count>5:
-            print("Trying to increase step and coarsen.")
+            print("Trying to increase step and coarsen.",flush=True)
             dsigma=np.sign(dsigma)*np.min([dsigmamax,np.abs(dsigma)*2])
             if(len(x0)>2*minnodes):
                 x0=x0[::2]
@@ -268,7 +268,7 @@ if __name__ == "__main__":
         np.save(filebase+'order.npy', r)
         np.save(filebase+'phases.npy', phases[int(t3/dt):])
         print(filebase, np.mean(r[int(t3 / dt):]))
-        print('runtime: %f' % (stop - start))
+        print('runtime: %f' % (stop - start),flush=True)
 
     np.save(filebase+'fs.npy', phases[-1, :])
     f = open(filebase + 'out.dat', 'w')
@@ -286,7 +286,7 @@ if __name__ == "__main__":
         sigmas,sols=cont(omega,beta,gamma,sigma,x0,y0,p0,sigmamin,sigmamax,dsigma,maxnodes=maxnodes,minnodes=minnodes,tol=tol)
         sigmas2,sols2=cont(omega,beta,gamma,sigma,x0,y0,p0,sigmamin,sigmamax,-dsigma,maxnodes=maxnodes,minnodes=minnodes,tol=tol)
         stop = timeit.default_timer()
-        print('runtime: %f' % (stop - start))
+        print('runtime: %f' % (stop - start),flush=True)
 
         Sigmas=[sigmas2[-i] for i in range(1,len(sols2))]+[sigmas[i] for i in range(len(sols))]
         Periods=[sols2[-i].p[0] for i in range(1,len(sols2))]+[sols[i].p[0] for i in range(len(sols))]
