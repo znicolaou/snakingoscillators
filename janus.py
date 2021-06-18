@@ -278,10 +278,14 @@ if __name__ == "__main__":
 
     #TODO: Improve the period estimate here...
     if args.cont:
-        minds=find_peaks(phases[int(t3/dt):,0],height=0.9)
-        p0=dt*np.mean(np.diff(minds[0]))
-        x0=(times[-int(p0/dt):]-times[-int(p0/dt)])/p0
-        y0=phases[-int(p0/dt):].T
+        # minds=find_peaks(phases[int(t3/dt):,0],height=0.9)
+        # p0=dt*np.mean(np.diff(minds[0]))
+        # x0=(times[-int(p0/dt):]-times[-int(p0/dt)])/p0
+        # y0=phases[-int(p0/dt):].T
+        minds=find_peaks(phases[:,0],height=0.9)[0]
+        p0=times[minds[1]]-times[minds[0]]
+        x0=(times[minds[0]:minds[1]]-times[minds[0]])/p0
+        y0=phases[minds[0]:minds[1]].T
         start = timeit.default_timer()
         sigmas,sols=cont(omega,beta,gamma,sigma,x0,y0,p0,sigmamin,sigmamax,dsigma,maxnodes=maxnodes,minnodes=minnodes,tol=tol)
         sigmas2,sols2=cont(omega,beta,gamma,sigma,x0,y0,p0,sigmamin,sigmamax,-dsigma,maxnodes=maxnodes,minnodes=minnodes,tol=tol)
