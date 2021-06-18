@@ -7,6 +7,7 @@ from scipy.sparse import csr_matrix, save_npz, load_npz, diags
 from scipy.integrate import solve_ivp, solve_bvp
 from scipy.fft import fft2,ifft2
 from scipy.optimize import leastsq
+from scipy.signal import argrelmax,find_peaks,argrelmin
 import argparse
 
 ###########################################################################
@@ -79,7 +80,6 @@ def cont (omega,beta,gamma,sigma0,x0,y0,p0,sigmamin,sigmamax,dsigma,dsigmamax=1e
         print('%f\t%.3e\t%i\t%f\t%i\t%f\t'%(sigma, dsigma,len(sol.x),sol.p[0],sol.niter,stop2-start2),end='\n')
     sols.append(sol)
     sigmas.append(sigma)
-
     count=1
 
     while sol.success and sigma<sigmamax and sigma>sigmamin:
@@ -95,9 +95,7 @@ def cont (omega,beta,gamma,sigma0,x0,y0,p0,sigmamin,sigmamax,dsigma,dsigmamax=1e
             stop2=timeit.default_timer()
 
             if not sol.success:
-                count=0
                 raise Exception(sol.message)
-            count=count+1
             if (np.abs(np.max(y0)-np.max(sol.y))/np.max(y0)>5e-1):
                 raise Exception('solution changed too much')
             if (np.abs((p0-sol.p[0])/p0)>5e-1):
@@ -108,9 +106,9 @@ def cont (omega,beta,gamma,sigma0,x0,y0,p0,sigmamin,sigmamax,dsigma,dsigmamax=1e
             sigma=sigma-dsigma
             dsigma=dsigma/2
             sol=sols[-1]
+            count=1
             if verbose:
                 print('%f\t%.3e\t%i\t%f\t%i\t%f\t'%(sigma, dsigma,len(sol.x),sol.p[0],sol.niter,stop2-start2),end='\n')
-
             if np.abs(dsigma)>dsigmamin:
                 continue
             else:
@@ -127,8 +125,9 @@ def cont (omega,beta,gamma,sigma0,x0,y0,p0,sigmamin,sigmamax,dsigma,dsigmamax=1e
         y0=sol.y
         p0=sol.p[0]
         SNcount=SNcount+1
+        count=count+1
 
-        #Checkk for saddle-node
+        #Check for saddle-node
         bif=0
         if SNcount>SNum:
             ys=np.array([sols[i].p[0] for i in np.arange(-SNum,0,1)])
@@ -141,7 +140,7 @@ def cont (omega,beta,gamma,sigma0,x0,y0,p0,sigmamin,sigmamax,dsigma,dsigmamax=1e
                 bif=1
         if bif:
             if verbose:
-                print("Saddle-node expected at ", x[0], ". Looking for second branch")
+                print("Saddle-node expected at %f. Looking for second branch"%(x[0]))
             x0=sols[-2].x
             y0=2*np.array([sols[-1].sol(t) for t in x0]).T-sols[-2].y
             p0=2*sols[-1].p[0]-sols[-2].p[0]
@@ -151,18 +150,15 @@ def cont (omega,beta,gamma,sigma0,x0,y0,p0,sigmamin,sigmamax,dsigma,dsigmamax=1e
             stop2=timeit.default_timer()
 
 
-            if not sol.success or (np.abs(sol.p[0]-p0) > np.abs(sol.p[0]-sols[-2].p[0])):
+            if (not sol2.success) or (np.abs(sol2.p[0]-p0) > np.abs(sol2.p[0]-sols[-2].p[0])):
                 if verbose:
-                    print("Couldn't find second branch.", sol.message, sol.p[0],sol2.p[0], p0)
+                    print("Couldn't find second branch.", sol.message, sols[-2].p[0],sol2.p[0], p0)
                     print('%f\t%.3e\t%i\t%f\t%i\t%f\t'%(sigma, dsigma,len(sol2.x),sol2.p[0],sol2.niter,stop2-start2),end='\n')
                 x0=sol.x
                 y0=sol.y
                 p0=sol.p[0]
 
             else:
-                if verbose:
-                    print("Found second branch. Continuing.", sol.p[0],sol2.p[0], p0)
-                    print('%f\t%.3e\t%i\t%f\t%i\t%f\t'%(sigma, dsigma,len(sol2.x),sol2.p[0],sol2.niter,stop2-start2),end='\n')
                 sols.append(sol)
                 sigmas.append(sigma)
                 x0=sol2.x
@@ -170,10 +166,13 @@ def cont (omega,beta,gamma,sigma0,x0,y0,p0,sigmamin,sigmamax,dsigma,dsigmamax=1e
                 p0=sol2.p[0]
                 dsigma=-dsigma
                 SNcount=0
+                if verbose:
+                    print("Found second branch. Continuing.", sols[-2].p[0],sol2.p[0], p0)
+                    print('%f\t%.3e\t%i\t%f\t%i\t%f\t'%(sigma, dsigma,len(sol2.x),sol2.p[0],sol2.niter,stop2-start2),end='\n')
 
-
-        #Try to increase the timestep and coarsen the mesh after 10 successful steps
-        if count>10:
+        #Try to increase the timestep and coarsen the mesh after 5 successful steps
+        if count>5:
+            print("Trying to increase step and coarsen.")
             dsigma=np.sign(dsigma)*np.min([dsigmamax,np.abs(dsigma)*2])
             if(len(x0)>2*minnodes):
                 x0=x0[::2]
@@ -198,6 +197,16 @@ if __name__ == "__main__":
     parser.add_argument("--rtime", type=float, required=False, dest='rtime', default=9000., help='Time to start averaging order parameter. Default 1000.')
     parser.add_argument("--dt", type=float, required=False, dest='dt', default=0.5, help='Time step for averaging and output. Default 0.1.')
     parser.add_argument("--seed", type=int, required=False, dest='seed', default=1, help='Initial condition random seed. Default 1.')
+    parser.add_argument("--continue", type=int, required=False, dest='cont', default=0, help='Continue the solution. Default 0.')
+    parser.add_argument("--dsigma", type=float, required=False, dest='dsigma', default=5e-4, help='Sigma step for continuation. Default 5e-4.')
+    parser.add_argument("--dsigmamax", type=float, required=False, dest='dsigmamax', default=1e-3, help='Maximum continuation step. Default 1e-3.')
+    parser.add_argument("--dsigmamin", type=float, required=False, dest='dsigmamin', default=1e-6, help='Minimum continuation step. Default 1e-6.')
+    parser.add_argument("--sigmamax", type=float, required=False, dest='sigmamax', default=0.5, help='Maximum sigma for continuation. Default 0.5.')
+    parser.add_argument("--sigmamin", type=float, required=False, dest='sigmamin', default=0.25, help='Minimum sigma for continuation. Default 0.25.')
+    parser.add_argument("--tol", type=float, required=False, dest='tol', default=1e-1, help='Tolerance for boundary value problem. Default 1e-1.')
+    parser.add_argument("--maxnodes", type=int, required=False, dest='maxnodes', default=2000, help='Maximum nodes for limit cycles. Default 2000.')
+    parser.add_argument("--minnodes", type=int, required=False, dest='minnodes', default=100, help='Maximum nodes for limit cycles. Default 100.')
+
     args = parser.parse_args()
 
     N = args.num  # oscillators
@@ -211,6 +220,14 @@ if __name__ == "__main__":
     seed = args.seed  # random seed
     filebase = args.filebase  # output file name
     output = args.output  # output flag
+    sigmamin = args.sigmamin
+    sigmamax = args.sigmamax
+    dsigmamin = args.dsigmamin
+    dsigmamax = args.dsigmamax
+    dsigma = args.dsigma
+    maxnodes = args.maxnodes
+    minnodes = args.minnodes
+    tol = args.tol
 
 
     if t3>t1:
@@ -258,3 +275,25 @@ if __name__ == "__main__":
     print(*(sys.argv), sep=' ', file=f)
     print(stop - start, np.mean(r[int(t3 / dt):]), file=f)
     f.close()
+
+    #TODO: Improve the period estimate here...
+    if args.cont:
+        minds=find_peaks(phases[int(t3/dt):,0],height=0.9)
+        p0=dt*np.mean(np.diff(minds[0]))
+        x0=(times[-int(p0/dt):]-times[-int(p0/dt)])/p0
+        y0=phases[-int(p0/dt):].T
+        start = timeit.default_timer()
+        sigmas,sols=cont(omega,beta,gamma,sigma,x0,y0,p0,sigmamin,sigmamax,dsigma,maxnodes=maxnodes,minnodes=minnodes,tol=tol)
+        sigmas2,sols2=cont(omega,beta,gamma,sigma,x0,y0,p0,sigmamin,sigmamax,-dsigma,maxnodes=maxnodes,minnodes=minnodes,tol=tol)
+        stop = timeit.default_timer()
+        print('runtime: %f' % (stop - start))
+
+        Sigmas=[sigmas2[-i] for i in range(1,len(sols2))]+[sigmas[i] for i in range(len(sols))]
+        Periods=[sols2[-i].p[0] for i in range(1,len(sols2))]+[sols[i].p[0] for i in range(len(sols))]
+        Ts=[sols2[-i].x for i in range(1,len(sols2))]+[sols[i].x for i in range(len(sols))]
+        Ys=[sols2[-i].y for i in range(1,len(sols2))]+[sols[i].y for i in range(len(sols))]
+        np.save(filebase+'lcsigmas.npy',Sigmas)
+        np.save(filebase+'lcperiods.npy',Periods)
+        for i in range(len(Sigmas)):
+            np.save(filebase+'lctimes_'+str(i)+'.npy',Ts[i])
+            np.save(filebase+'lcphases_'+str(i)+'.npy',Ys[i])
