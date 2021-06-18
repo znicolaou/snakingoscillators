@@ -239,7 +239,7 @@ if __name__ == "__main__":
     phase_init = np.zeros(4*N,dtype=np.float64)
 
     if os.path.isfile(filebase + 'ic.npy'):
-        phase_init = np.concatenate(np.load(filebase + 'ic.npy'))
+        phase_init = np.load(filebase + 'ic.npy')
         if output>0:
             print('using initial conditions from file',flush=True)
 
