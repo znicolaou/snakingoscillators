@@ -10,6 +10,8 @@ from scipy.optimize import leastsq
 from scipy.signal import argrelmax,find_peaks,argrelmin
 import argparse
 
+#Can we make t and phases vectors??
+#This will speed up the evaluation at mesh points
 ###########################################################################
 def janus(t, phases, N, omega, sigma, beta, gamma, sigma0, t0):
     sigmat=sigma
@@ -75,12 +77,17 @@ def runsim (N, t1, t3, dt, omega, beta, sigma, gamma, phase_init, sigma0=0.35, t
     return phases,times,r
 ######################################################################################
 
+def order(x,y):
+    return np.sum(np.diff(x)*np.abs(np.sum(y[:N]+1j*y[N:2*N],axis=0)+np.sum(y[2*N:3*N]+1j*y[3*N:],axis=0))[:-1]/(2*N))
+
 #TODO: Calculate Floquet exponents
+#TODO: Can we estimate the new limit cycle from dsigma and the Jacobian?
 ######################################################################################
-def cont (filebase,omega,beta,gamma,sigma0,x0,y0,p0,sigmamin,sigmamax,dsigma,dsigmamax=1e-3,dsigmamin=1e-6,verbose=True, maxnodes=1000, minnodes=100, tol=1e-3, bctol=1e-3, stol=2e-4, SNum=10, coarsen=10):
+def cont (filebase,omega,beta,gamma,sigma0,x0,y0,p0,sigmamin,sigmamax,dsigma,dsigmamax=1e-3,dsigmamin=1e-6,verbose=True, maxnodes=10000, minnodes=100, tol=1e-3, bctol=1e-3, stol=2e-4, SNum=6, coarsen=10):
     sols=[]
     sigmas=[]
     periods=[]
+    orders=[]
     start=timeit.default_timer()
     N=int(len(y0)/4)
     bc=y0[0,0]
@@ -107,12 +114,13 @@ def cont (filebase,omega,beta,gamma,sigma0,x0,y0,p0,sigmamin,sigmamax,dsigma,dsi
     sols.append(sol)
     sigmas.append(sigma)
     periods.append(sol.p[0])
+    orders.append(order(sol.x,sol.y))
 
     np.save(filebase+'_sigmas.npy',sigmas)
     np.save(filebase+'_periods.npy',periods)
-    i=len(sigmas)-1
-    np.save(filebase+'_times_'+str(i)+'.npy',sol.x)
-    np.save(filebase+'_phases_'+str(i)+'.npy',sol.y)
+    np.save(filebase+'_orders.npy',orders)
+    np.save(filebase+'_times_'+str(len(sigmas)-1)+'.npy',sol.x)
+    np.save(filebase+'_phases_'+str(len(sigmas)-1)+'.npy',sol.y)
 
     x0=sol.x
     y0=sol.y
@@ -160,11 +168,13 @@ def cont (filebase,omega,beta,gamma,sigma0,x0,y0,p0,sigmamin,sigmamax,dsigma,dsi
         sols.append(sol)
         sigmas.append(sigma)
         periods.append(sol.p[0])
+        orders.append(order(sol.x,sol.y))
+
         np.save(filebase+'_sigmas.npy',sigmas)
         np.save(filebase+'_periods.npy',periods)
-        i=len(sigmas)-1
-        np.save(filebase+'_times_'+str(i)+'.npy',sol.x)
-        np.save(filebase+'_phases_'+str(i)+'.npy',sol.y)
+        np.save(filebase+'_orders.npy',orders)
+        np.save(filebase+'_times_'+str(len(sigmas)-1)+'.npy',sol.x)
+        np.save(filebase+'_phases_'+str(len(sigmas)-1)+'.npy',sol.y)
 
         x0=sol.x
         y0=sol.y
@@ -205,11 +215,18 @@ def cont (filebase,omega,beta,gamma,sigma0,x0,y0,p0,sigmamin,sigmamax,dsigma,dsi
                 p0=sol.p[0]
 
             else:
+                if np.abs(sol2.p[0]-sols[-2].p[0])/sol2.p[0] < tol:
+                    print("Cannot distinguish branches with current tolerance")
+                    break
+
                 sols.append(sol2)
                 sigmas.append(sigma)
                 periods.append(sol2.p[0])
+                orders.append(order(sol2.x,sol2.y))
+
                 np.save(filebase+'_sigmas.npy',sigmas)
                 np.save(filebase+'_periods.npy',periods)
+                np.save(filebase+'_orders.npy',orders)
                 np.save(filebase+'_times_'+str(len(sigmas)-1)+'.npy',sol2.x)
                 np.save(filebase+'_phases_'+str(len(sigmas)-1)+'.npy',sol2.y)
 
