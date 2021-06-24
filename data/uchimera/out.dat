@@ -1,2 +1,2 @@
-./janus.py --beta -0.25 --sigma -0.35 --num 10 --filebase data/uchimera/ --seed 1
-33.406478352 0.44195967451253204
+./janus.py --num 10 --tol 1e-3 --maxnodes 10000 --minnodes 200 --sigma -0.35 --beta -0.25 --sigmamin -0.5 --sigmamax -0.25 --filebase data/uchimera/ --cont 1
+22.28320857300423 0.4420486612575761
