@@ -27,7 +27,6 @@ def janus(t, phases, N, omega, sigma, beta, gamma, sigma0, t0):
     return np.concatenate([dxdt,dydt,dudt,dvdt])
 ###########################################################################
 
-#TODO: Calculate Jacobian
 ###########################################################################
 def janus_jac(t, phases, N, omega, sigma, beta, gamma, sigma0, t0):
     sigmat=sigma
@@ -39,20 +38,35 @@ def janus_jac(t, phases, N, omega, sigma, beta, gamma, sigma0, t0):
     u=phases[2*N:3*N]
     v=phases[3*N:4*N]
 
-    Jxx=-y*(omega/2-beta*(-v)-sigmat*(-np.roll(v,-1)))+gamma*(1-3*x**2-y**2)
-    Jxy=-y*(omega/2-beta*(-x*v+y*u)-sigmat*(-x*np.roll(v,-1)+y*np.roll(u,-1)))+gamma*(1-x**2-y**2)*x
-    Jxu=-y*(omega/2-beta*(y)-sigmat*(np.roll(y,1)))
-    Jxv=-y*(omega/2-beta*(-x)-sigmat*(-np.roll(x,1)))
+    I1=np.identity(N)
+    I2=np.roll(I1,1,axis=0)
+    I3=np.roll(I1,-1,axis=0)
+    # dxdt=-y*(omega/2-beta*(-x*v+y*u)-sigmat*(-x*np.roll(v,-1)+y*np.roll(u,-1)))+gamma*(1-x**2-y**2)*x
+    Jxx=(-y*(-beta*(-v)-sigmat*(-np.roll(v,-1)))+gamma*(1-3*x**2-y**2))*I1
+    Jxy=(-(omega/2-beta*(-x*v+2*y*u)-sigmat*(-x*np.roll(v,-1)+2*y*np.roll(u,-1)))+gamma*(-2*y)*x)*I1
+    Jxu=-y*(-beta*(y*I1)-sigmat*(y*I2))
+    Jxv=-y*(-beta*(-x*I1)-sigmat*(-x*I2))
+    # dydt= x*(omega/2-beta*(-x*v+y*u)-sigmat*(-x*np.roll(v,-1)+y*np.roll(u,-1)))+gamma*(1-x**2-y**2)*y
+    Jyx=((omega/2-beta*(-2*x*v+y*u)-sigmat*(-2*x*np.roll(v,-1)+y*np.roll(u,-1)))+gamma*(-2*x)*y)*I1
+    Jyy=(x*(-beta*(u)-sigmat*(np.roll(u,-1)))+gamma*(1-x**2-3*y**2))*I1
+    Jyu=x*(-beta*(y*I1)-sigmat*(y*I2))
+    Jyv=x*(-beta*(-x*I1)-sigmat*(-x*I2))
+    # dudt=-v*(-omega/2-beta*(x*v-y*u)-sigmat*(np.roll(x,1)*v-np.roll(y,1)*u))+gamma*(1-u**2-v**2)*u
+    Jux=-v*(-beta*(v*I1)-sigmat*(v*I3))
+    Juy=-v*(-beta*(-u*I1)-sigmat*(-u*I3))
+    Juu=(-v*(-beta*(-y)-sigmat*(-np.roll(y,1)))+gamma*(1-3*u**2-v**2))*I1
+    Juv=(-(-omega/2-beta*(2*x*v-y*u)-sigmat*(2*np.roll(x,1)*v-np.roll(y,1)*u))+gamma*(-2*v)*u)*I1
+    # dvdt= u*(-omega/2-beta*(x*v-y*u)-sigmat*(np.roll(x,1)*v-np.roll(y,1)*u))+gamma*(1-u**2-v**2)*v
+    Jvx=u*(-beta*(v*I1)-sigmat*(v*I3))
+    Jvy=u*(-beta*(-u*I1)-sigmat*(-u*I3))
+    Jvu=((-omega/2-beta*(x*v-2*y*u)-sigmat*(np.roll(x,1)*v-2*np.roll(y,1)*u))+gamma*(-2*u)*v)*I1
+    Jvv=(u*(-beta*(x)-sigmat*(np.roll(x,1)))+gamma*(1-u**2-3*v**2))*I1
 
-    dxdt=-y*(omega/2-beta*(-x*v+y*u)-sigmat*(-x*np.roll(v,-1)+y*np.roll(u,-1)))+gamma*(1-x**2-y**2)*x
-    dydt= x*(omega/2-beta*(-x*v+y*u)-sigmat*(-x*np.roll(v,-1)+y*np.roll(u,-1)))+gamma*(1-x**2-y**2)*y
-    dudt=-v*(-omega/2-beta*(x*v-y*u)-sigmat*(np.roll(x,1)*v-np.roll(y,1)*u))+gamma*(1-u**2-v**2)*u
-    dvdt= u*(-omega/2-beta*(x*v-y*u)-sigmat*(np.roll(x,1)*v-np.roll(y,1)*u))+gamma*(1-u**2-v**2)*v
-    return np.concatenate([dxdt,dydt,dudt,dvdt])
+    return np.block([[Jxx.T,Jxy.T,Jxu.T,Jxv.T],[Jyx.T,Jyy.T,Jyu.T,Jyv.T],[Jux.T,Juy.T,Juu.T,Juv.T],[Jvx.T,Jvy.T,Jvu.T,Jvv.T]])
 ###########################################################################
 
 ###########################################################################
-def runsim (N, t1, t3, dt, omega, beta, sigma, gamma, phase_init, sigma0=0.35, t0=0):
+def runsim (N, t1, t3, dt, omega, beta, sigma, gamma, phase_init, sigma0=0.35, t0=-1):
     sol=solve_ivp(janus, [0,t1], phase_init, method='RK45', args=(N,omega, sigma, beta, gamma, sigma0, t0), rtol=1e-6, atol=1e-6, t_eval=dt*np.arange(t1/dt))
     phases=sol.y.T.copy()
     times=sol.t
@@ -63,24 +77,45 @@ def runsim (N, t1, t3, dt, omega, beta, sigma, gamma, phase_init, sigma0=0.35, t
 
 #TODO: Calculate Floquet exponents
 ######################################################################################
-def cont (omega,beta,gamma,sigma0,x0,y0,p0,sigmamin,sigmamax,dsigma,dsigmamax=1e-3,dsigmamin=1e-6,verbose=True, maxnodes=1000, minnodes=100, tol=1e-1, bctol=1e-2, stol=5e-4, SNum=5):
+def cont (filebase,omega,beta,gamma,sigma0,x0,y0,p0,sigmamin,sigmamax,dsigma,dsigmamax=1e-3,dsigmamin=1e-6,verbose=True, maxnodes=1000, minnodes=100, tol=1e-1, bctol=1e-2, stol=5e-4, SNum=5, coarsen=10):
     sols=[]
     sigmas=[]
     start=timeit.default_timer()
     N=int(len(y0)/4)
     bc=y0[0,0]
-    SNcount=0
-
     sigma=sigma0
+
+    def fun(ts,Xts,p):
+        return p[0]*np.transpose([janus(p[0]*ts[i],Xts[:,i], N, omega, sigma, beta, gamma,sigma,-1) for i in range(len(ts))])
+    def pbc(xa,xb,p):
+        return np.concatenate([xb-xa,[xa[0]-bc]])
+    def funjac(ts,Xts,p):
+        return p[0]*np.transpose([janus_jac(p[0]*ts[i],Xts[:,i], N, omega, sigma, beta, gamma,sigma,-1) for i in range(len(ts))],(1,2,0)),  np.transpose([fun(ts,Xts,p)/p[0]],(1,0,2))
+
     start2=timeit.default_timer()
-    sol=solve_bvp(lambda ts,Xts,p: p[0]*np.transpose([janus(p[0]*ts[i],Xts[:,i], N, omega, sigma, beta, gamma,sigma,0) for i in range(len(ts))]), lambda xa,xb,p: (np.concatenate((xb-xa,[xa[0]-bc]))), x0, y0, p=np.array([p0]), max_nodes=maxnodes,tol=tol,bc_tol=bctol)
+    sol=solve_bvp(fun, pbc, x0, y0, p=np.array([p0]), fun_jac=funjac,max_nodes=maxnodes,tol=tol,bc_tol=bctol)
     stop2=timeit.default_timer()
     if verbose:
         print(sol.message,flush=True)
         print('%f\t%.3e\t%i\t%f\t%i\t%f\t'%(sigma, dsigma,len(sol.x),sol.p[0],sol.niter,stop2-start2),end='\n',flush=True)
     sols.append(sol)
     sigmas.append(sigma)
+    i=0
+    Sigmas=[sigma]
+    Periods=[sol.p[0]]
+    if os.path.isfile(filebase + 'lcsigmas.npy'):
+        Sigmas=np.load(filebase+'lcsigmas.npy')
+        Periods=np.load(filebase+'lcperiods.npy')
+        Sigmas=np.concatenate([Sigmas,[sigma]])
+        Periods=np.concatenate([Periods,[sol.p[0]]])
+    np.save(filebase+'lcsigmas.npy',Sigmas)
+    np.save(filebase+'lcperiods.npy',Periods)
+    i=len(Sigmas)-1
+    np.save(filebase+'lctimes_'+str(i)+'.npy',sol.x)
+    np.save(filebase+'lcphases_'+str(i)+'.npy',sol.y)
+
     count=1
+    SNcount=1
 
     while sol.success and sigma<sigmamax and sigma>sigmamin:
         sigma=sigma+dsigma
@@ -91,7 +126,7 @@ def cont (omega,beta,gamma,sigma0,x0,y0,p0,sigmamin,sigmamax,dsigma,dsigmamax=1e
 
         try:
             start2=timeit.default_timer()
-            sol=solve_bvp(lambda ts,Xts,p: p[0]*np.transpose([janus(p[0]*ts[i],Xts[:,i], N, omega, sigma, beta, gamma,sigma,0) for i in range(len(ts))]), lambda xa,xb,p: (np.concatenate((xb-xa,[xa[0]-bc]))), x0, y0, p=np.array([p0]), max_nodes=maxnodes,tol=tol, bc_tol=bctol)
+            sol=solve_bvp(fun, pbc, x0, y0, p=np.array([p0]), fun_jac=funjac,max_nodes=maxnodes,tol=tol,bc_tol=bctol)
             stop2=timeit.default_timer()
 
             if not sol.success:
@@ -121,6 +156,16 @@ def cont (omega,beta,gamma,sigma0,x0,y0,p0,sigmamin,sigmamax,dsigma,dsigmamax=1e
 
         sols.append(sol)
         sigmas.append(sigma)
+        Sigmas=np.load(filebase+'lcsigmas.npy')
+        Periods=np.load(filebase+'lcperiods.npy')
+        Sigmas=np.concatenate([Sigmas,[sigma]])
+        Periods=np.concatenate([Periods,[sol.p[0]]])
+        np.save(filebase+'lcsigmas.npy',Sigmas)
+        np.save(filebase+'lcperiods.npy',Periods)
+        i=len(Sigmas)-1
+        np.save(filebase+'lctimes_'+str(i)+'.npy',sol.x)
+        np.save(filebase+'lcphases_'+str(i)+'.npy',sol.y)
+
         x0=sol.x
         y0=sol.y
         p0=sol.p[0]
@@ -139,6 +184,7 @@ def cont (omega,beta,gamma,sigma0,x0,y0,p0,sigmamin,sigmamax,dsigma,dsigmamax=1e
             if np.abs(x[0]-sigmas[-1])<stol:
                 bif=1
         if bif:
+            count=1
             if verbose:
                 print("Saddle-node expected at %f. Looking for second branch"%(x[0]),flush=True)
             x0=sols[-2].x
@@ -146,7 +192,7 @@ def cont (omega,beta,gamma,sigma0,x0,y0,p0,sigmamin,sigmamax,dsigma,dsigmamax=1e
             p0=2*sols[-1].p[0]-sols[-2].p[0]
 
             start2=timeit.default_timer()
-            sol2=solve_bvp(lambda ts,Xts,p: p[0]*np.transpose([janus(p[0]*ts[i],Xts[:,i], N, omega, sigma-dsigma, beta, gamma,sigma-dsigma,0) for i in range(len(ts))]), lambda xa,xb,p: (np.concatenate((xb-xa,[xa[0]-bc]))), x0, y0, p=np.array([p0]), max_nodes=maxnodes,tol=tol,bc_tol=bctol)
+            sol2=solve_bvp(fun, pbc, x0, y0, p=np.array([p0]), fun_jac=funjac,max_nodes=maxnodes,tol=tol,bc_tol=bctol)
             stop2=timeit.default_timer()
 
 
@@ -159,20 +205,30 @@ def cont (omega,beta,gamma,sigma0,x0,y0,p0,sigmamin,sigmamax,dsigma,dsigmamax=1e
                 p0=sol.p[0]
 
             else:
-                sols.append(sol)
+                sols.append(sol2)
                 sigmas.append(sigma)
+                Sigmas=np.load(filebase+'lcsigmas.npy')
+                Periods=np.load(filebase+'lcperiods.npy')
+                Sigmas=np.concatenate([Sigmas,[sigma]])
+                Periods=np.concatenate([Periods,[sol2.p[0]]])
+                np.save(filebase+'lcsigmas.npy',Sigmas)
+                np.save(filebase+'lcperiods.npy',Periods)
+                i=len(Sigmas)-1
+                np.save(filebase+'lctimes_'+str(i)+'.npy',sol2.x)
+                np.save(filebase+'lcphases_'+str(i)+'.npy',sol2.y)
+
                 x0=sol2.x
                 y0=sol2.y
                 p0=sol2.p[0]
                 dsigma=-dsigma
-                SNcount=0
+                SNcount=1
                 if verbose:
                     print("Found second branch. Continuing.", sols[-2].p[0],sol2.p[0], p0,flush=True)
                     print('%f\t%.3e\t%i\t%f\t%i\t%f\t'%(sigma, dsigma,len(sol2.x),sol2.p[0],sol2.niter,stop2-start2),end='\n',flush=True)
 
-        #Try to increase the timestep and coarsen the mesh after 5 successful steps
-        if count>5:
-            print("Trying to increase step and coarsen.",flush=True)
+        #Try to increase the timestep and coarsen the mesh
+        if count>coarsen:
+            print("Trying to increase step and/or coarsen.",flush=True)
             dsigma=np.sign(dsigma)*np.min([dsigmamax,np.abs(dsigma)*2])
             if(len(x0)>2*minnodes):
                 x0=x0[::2]
@@ -278,26 +334,23 @@ if __name__ == "__main__":
 
     #TODO: Improve the period estimate here...
     if args.cont:
-        # minds=find_peaks(phases[int(t3/dt):,0],height=0.9)
-        # p0=dt*np.mean(np.diff(minds[0]))
-        # x0=(times[-int(p0/dt):]-times[-int(p0/dt)])/p0
-        # y0=phases[-int(p0/dt):].T
         minds=find_peaks(phases[:,0],height=0.9)[0]
         p0=times[minds[1]]-times[minds[0]]
-        x0=(times[minds[0]:minds[1]]-times[minds[0]])/p0
-        y0=phases[minds[0]:minds[1]].T
+        x0=(times[minds[0]:minds[1]+1]-times[minds[0]])/p0
+        y0=phases[minds[0]:minds[1]+1].T
         start = timeit.default_timer()
-        sigmas,sols=cont(omega,beta,gamma,sigma,x0,y0,p0,sigmamin,sigmamax,dsigma,maxnodes=maxnodes,minnodes=minnodes,tol=tol)
-        sigmas2,sols2=cont(omega,beta,gamma,sigma,x0,y0,p0,sigmamin,sigmamax,-dsigma,maxnodes=maxnodes,minnodes=minnodes,tol=tol)
+        sigmas,sols=cont(filebase,omega,beta,gamma,sigma,x0,y0,p0,sigmamin,sigmamax,dsigma,maxnodes=maxnodes,minnodes=minnodes,tol=tol)
+        sigmas2,sols2=cont(filebase,omega,beta,gamma,sigma,x0,y0,p0,sigmamin,sigmamax,-dsigma,maxnodes=maxnodes,minnodes=minnodes,tol=tol)
         stop = timeit.default_timer()
         print('runtime: %f' % (stop - start),flush=True)
 
-        Sigmas=[sigmas2[-i] for i in range(1,len(sols2))]+[sigmas[i] for i in range(len(sols))]
-        Periods=[sols2[-i].p[0] for i in range(1,len(sols2))]+[sols[i].p[0] for i in range(len(sols))]
-        Ts=[sols2[-i].x for i in range(1,len(sols2))]+[sols[i].x for i in range(len(sols))]
-        Ys=[sols2[-i].y for i in range(1,len(sols2))]+[sols[i].y for i in range(len(sols))]
-        np.save(filebase+'lcsigmas.npy',Sigmas)
-        np.save(filebase+'lcperiods.npy',Periods)
-        for i in range(len(Sigmas)):
-            np.save(filebase+'lctimes_'+str(i)+'.npy',Ts[i])
-            np.save(filebase+'lcphases_'+str(i)+'.npy',Ys[i])
+        #Save the files during the continuation??
+        # Sigmas=[sigmas2[-i] for i in range(1,len(sols2))]+[sigmas[i] for i in range(len(sols))]
+        # Periods=[sols2[-i].p[0] for i in range(1,len(sols2))]+[sols[i].p[0] for i in range(len(sols))]
+        # Ts=[sols2[-i].x for i in range(1,len(sols2))]+[sols[i].x for i in range(len(sols))]
+        # Ys=[sols2[-i].y for i in range(1,len(sols2))]+[sols[i].y for i in range(len(sols))]
+        # np.save(filebase+'lcsigmas.npy',Sigmas)
+        # np.save(filebase+'lcperiods.npy',Periods)
+        # for i in range(len(Sigmas)):
+        #     np.save(filebase+'lctimes_'+str(i)+'.npy',Ts[i])
+        #     np.save(filebase+'lcphases_'+str(i)+'.npy',Ys[i])

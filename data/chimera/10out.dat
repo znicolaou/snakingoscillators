@@ -1,2 +1,0 @@
-./janus.py --num 16 --filebase data/chimera/10 --seed 10
-45.162050544982776 0.7928814847127926
