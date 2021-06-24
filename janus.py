@@ -114,6 +114,9 @@ def cont (filebase,omega,beta,gamma,sigma0,x0,y0,p0,sigmamin,sigmamax,dsigma,dsi
     np.save(filebase+'lctimes_'+str(i)+'.npy',sol.x)
     np.save(filebase+'lcphases_'+str(i)+'.npy',sol.y)
 
+    x0=sol.x
+    y0=sol.y
+    p0=sol.p[0]
     count=1
     SNcount=1
 
