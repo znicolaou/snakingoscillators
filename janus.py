@@ -100,7 +100,6 @@ def cont (filebase,omega,beta,gamma,sigma0,x0,y0,p0,sigmamin,sigmamax,dsigma,dsi
         print('%f\t%.3e\t%i\t%f\t%i\t%f\t'%(sigma, dsigma,len(sol.x),sol.p[0],sol.niter,stop2-start2),end='\n',flush=True)
     sols.append(sol)
     sigmas.append(sigma)
-    i=0
     Sigmas=[sigma]
     Periods=[sol.p[0]]
     if os.path.isfile(filebase + 'lcsigmas.npy'):
@@ -339,8 +338,9 @@ if __name__ == "__main__":
     if args.cont:
         minds=find_peaks(phases[:,0],height=0.9)[0]
         p0=times[minds[1]]-times[minds[0]]
-        x0=(times[minds[0]:minds[1]+1]-times[minds[0]])/p0
-        y0=phases[minds[0]:minds[1]+1].T
+        x0=(times[minds[0]:minds[1]]-times[minds[0]])/p0
+        y0=phases[minds[0]:minds[1]].T
+
         start = timeit.default_timer()
         sigmas,sols=cont(filebase,omega,beta,gamma,sigma,x0,y0,p0,sigmamin,sigmamax,dsigma,maxnodes=maxnodes,minnodes=minnodes,tol=tol)
         sigmas2,sols2=cont(filebase,omega,beta,gamma,sigma,x0,y0,p0,sigmamin,sigmamax,-dsigma,maxnodes=maxnodes,minnodes=minnodes,tol=tol)
