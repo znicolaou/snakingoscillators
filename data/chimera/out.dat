@@ -1,2 +1,2 @@
-./janus.py --num 10 --tol 1e-2 --maxnodes 10000 --minnodes 200 --filebase data/chimera/ --cont 1
-20.481967377942055 0.7405739202691332
+./janus.py --num 10 --tol 1e-3 --maxnodes 10000 --minnodes 200 --dsigmamin 1e-8 --filebase data/chimera/ --cont 1
+23.227730753831565 0.7405739202691332
