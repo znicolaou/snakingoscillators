@@ -1,0 +1,11 @@
+#=========
+# Demo lor
+#=========
+
+pgm = 'janus'
+
+print pgm, ": first run : a solution branch starting from numerical data"
+janus=run('janus')
+
+save(janus,'janus')
+janus.writeRawFilename('test.dat')
