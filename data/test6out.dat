@@ -1,0 +1,2 @@
+./janus.py --time 10000 --rtime 9000 --seed 6 --filebase data/test6
+13.207137772000351 0.8811274175371896

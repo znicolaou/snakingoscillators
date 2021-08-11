@@ -1,0 +1,6 @@
+janus=[]
+janus=janus+run('janus',c='janus')
+sv(janus,'janus')
+janus=janus+run('janus',c='janus.2')
+janus=rl(janus)
+sv(janus,'janus')
