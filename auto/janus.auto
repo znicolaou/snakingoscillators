@@ -1,12 +1,7 @@
-#=========
-# Demo lor
-#=========
-
-pgm = 'janus'
-
-clean()
-print pgm, ": first run : a solution branch starting from numerical data"
-janus=run('janus_rel', c='janus_rel')
+janus=[]
+janus=janus+run('janus_rel', c='janus_rel')
+sv(janus,'janus')
 janus=janus+run('janus_rel', c='janus_rel.2')
-relabel()
-save(janus,'janus')
+janus=rl(janus)
+sv(janus,'janus')
+cl()

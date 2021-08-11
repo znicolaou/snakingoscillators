@@ -39,27 +39,6 @@ int func (integer ndim, const doublereal *u, const integer *icp,
     f[2*(N-1)+N+j]=w[j]*(-omega+beta*(w[j]*y[j-1]-v[j]*x[j-1]-v[0])+sigma*(w[j]*y[j-2]-v[j]*x[j-2]-v[1]))+gamma*(1-w[j]*w[j]-v[j]*v[j])*v[j];
   }
 
-  // for(j=0; j<N-1; j++){
-  //   printf("%f ",f[j]);
-  // }
-  // printf("\n");
-  //
-  // for(j=N-1; j<2*(N-1); j++){
-  //   printf("%f ",f[j]);
-  // }
-  // printf("\n");
-  //
-  // for(j=2*(N-1); j<2*(N-1)+N; j++){
-  //   printf("%f ",f[j]);
-  // }
-  // printf("\n");
-  //
-  // for(j=2*(N-1)+N; j<2*(N-1)+2*N; j++){
-  //   printf("%f ",f[j]);
-  // }
-  // printf("\n");
-  // exit(0);
-
   if (ijac == 0) {
     return 0;
   }
@@ -84,7 +63,6 @@ int stpnt (integer ndim, doublereal t,
            doublereal *u, doublereal *par)
 {
   par[0] = 0.35;
-  // par[11] = 110;
   return 0;
 }
 /* ---------------------------------------------------------------------- */

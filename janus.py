@@ -11,8 +11,6 @@ from scipy.signal import argrelmax,find_peaks,argrelmin
 from scipy.interpolate import interp1d
 import argparse
 
-#Can we make t and phases vectors??
-#This will speed up the evaluation at mesh points
 ###########################################################################
 def janus(t, phases, N, omega, sigma, beta, gamma, sigma0, t0):
     sigmat=sigma
@@ -84,7 +82,7 @@ def order(x,y):
 #TODO: Calculate Floquet exponents
 #TODO: Can we estimate the new limit cycle from dsigma and the Jacobian?
 ######################################################################################
-def cont (filebase,omega,beta,gamma,sigma0,x0,y0,p0,sigmamin,sigmamax,dsigma,dsigmamax=1e-3,dsigmamin=1e-6,verbose=True, maxnodes=10000, minnodes=100, tol=1e-3, bctol=1e-3, stol=1e-4, SNum=6, coarsen=5):
+def cont (filebase,omega,beta,gamma,sigma0,x0,y0,p0,sigmamin,sigmamax,dsigma,dsigmamax=1e-3,dsigmamin=1e-6,verbose=True, maxnodes=10000, minnodes=100, tol=1e-3, bctol=1e-3, stol=1e-4, SNum=4, coarsen=5):
     sols=[]
     sigmas=[]
     periods=[]
@@ -131,7 +129,7 @@ def cont (filebase,omega,beta,gamma,sigma0,x0,y0,p0,sigmamin,sigmamax,dsigma,dsi
 
     while sol.success and sigma<sigmamax and sigma>sigmamin and len(x0)<=maxnodes:
         sigma=sigma+dsigma
-        maxn=1.5*len(x0)
+        maxn=2*len(x0)
         if(sigma>sigmamax):
             sigma=sigmamax
         if(sigma<sigmamin):
@@ -195,7 +193,7 @@ def cont (filebase,omega,beta,gamma,sigma0,x0,y0,p0,sigmamin,sigmamax,dsigma,dsi
             ym=ys[-1]
             x,n=leastsq(lambda x: x[0]+x[1]*(ys-x[2])**2-xs,[xm,(xm-xs[0])/(ys[0]-ym)**2,ym])
             bif=0
-            if np.abs(x[0]-sigmas[-1])<stol and (x[0]-sigmas[-1])/dsigma>0 and np.abs(x[0]-sigmas[-1])<2*np.abs(dsigma):
+            if np.abs(x[0]-sigmas[-1])<stol and (x[0]-sigmas[-1])/dsigma>0:
                 bif=1
         if bif:
             count=1
@@ -218,11 +216,13 @@ def cont (filebase,omega,beta,gamma,sigma0,x0,y0,p0,sigmamin,sigmamax,dsigma,dsi
 
             if (not sol2.success) or (np.abs(sol2.p[0]-p0) > np.abs(sol2.p[0]-periods[-1])):
                 if verbose:
-                    print("Couldn't find second branch.", (not sol2.success), np.abs(sol2.p[0]-p0), np.abs(sol2.p[0]-periods[-1]), sol2.message, flush=True)
+                    print("Couldn't find second branch.", (sol2.success), np.abs(sol2.p[0]-p0), np.abs(sol2.p[0]-periods[-1]), sol2.message, flush=True)
                     print('%f\t%.3e\t%i\t%f\t%i\t%f\t'%(sigma, dsigma,len(sol2.x),sol2.p[0],sol2.niter,stop2-start2),end='\n',flush=True)
                 x0=sol.x
                 y0=sol.y
                 p0=sol.p[0]
+                while np.abs((sigma-x[0])/dsigma)<1:
+                    dsigma=dsigma/2
 
             else:
                 if np.abs(sol2.p[0]-periods[-1])/sol2.p[0] < tol/(np.max(np.diff(x0))):
@@ -292,25 +292,25 @@ if __name__ == "__main__":
     parser.add_argument("--filebase", type=str, required=True, dest='filebase', help='Base string for file output.')
     parser.add_argument("--output", type=int, required=False, dest='output', default=1, help='Output style, 0 for no stdout and sparse output, 1 for stdout and sparse output, 2 for stdout and dense output. Default 1.')
     parser.add_argument("--num", type=int, required=False, dest='num', default=16, help='Number of Janus oscillators. Default 16.')
-    parser.add_argument("--time", type=float, required=False, dest='time', default=10000., help='Total integration time. Detault 2000.')
+    parser.add_argument("--time", type=float, required=False, dest='time', default=1000., help='Total integration time. Detault 2000.')
     parser.add_argument("--beta", type=float, required=False, dest='beta', default=0.25, help='Internal coupling strength. Default 0.25.')
     parser.add_argument("--sigma", type=float, required=False, dest='sigma', default=0.35, help='Coupling strength. Default 1.')
     parser.add_argument("--gamma", type=float, required=False, dest='gamma', default=0.1, help='Coefficient for amplitude terms. Default 0.1.')
     parser.add_argument("--omega", type=float, required=False, dest='omega', default=1.0, help='Natural frequency gap. Default 1.0.')
-    parser.add_argument("--rtime", type=float, required=False, dest='rtime', default=9000., help='Time to start averaging order parameter. Default 1000.')
-    parser.add_argument("--dt", type=float, required=False, dest='dt', default=0.5, help='Time step for averaging and output. Default 0.1.')
+    parser.add_argument("--rtime", type=float, required=False, dest='rtime', default=0., help='Time to start averaging order parameter. Default 1000.')
+    parser.add_argument("--dt", type=float, required=False, dest='dt', default=0.1, help='Time step for averaging and output. Default 0.1.')
     parser.add_argument("--seed", type=int, required=False, dest='seed', default=1, help='Initial condition random seed. Default 1.')
     parser.add_argument("--continue", type=int, required=False, dest='cont', default=0, help='Continue the solution. Default 0.')
-    parser.add_argument("--dsigma", type=float, required=False, dest='dsigma', default=5e-4, help='Sigma step for continuation. Default 5e-4.')
+    parser.add_argument("--dsigma", type=float, required=False, dest='dsigma', default=1e-3, help='Sigma step for continuation. Default 5e-4.')
     parser.add_argument("--dsigmamax", type=float, required=False, dest='dsigmamax', default=1e-3, help='Maximum continuation step. Default 1e-3.')
-    parser.add_argument("--dsigmamin", type=float, required=False, dest='dsigmamin', default=1e-6, help='Minimum continuation step. Default 1e-6.')
+    parser.add_argument("--dsigmamin", type=float, required=False, dest='dsigmamin', default=1e-8, help='Minimum continuation step. Default 1e-6.')
     parser.add_argument("--sigmamax", type=float, required=False, dest='sigmamax', default=0.5, help='Maximum sigma for continuation. Default 0.5.')
-    parser.add_argument("--sigmamin", type=float, required=False, dest='sigmamin', default=0.25, help='Minimum sigma for continuation. Default 0.25.')
+    parser.add_argument("--sigmamin", type=float, required=False, dest='sigmamin', default=0.2501, help='Minimum sigma for continuation. Default 0.2501.')
     parser.add_argument("--tol", type=float, required=False, dest='tol', default=1e-4, help='Tolerance for boundary value problem. Default 1e-4.')
     parser.add_argument("--stol", type=float, required=False, dest='stol', default=1e-4, help='Tolerance for saddle-node position. Default 1e-4.')
     parser.add_argument("--coarsen", type=int, required=False, dest='coarsen', default=5, help='Number of successful steps before attempting to coarsen. Default 5.')
     parser.add_argument("--maxnodes", type=int, required=False, dest='maxnodes', default=10000, help='Maximum nodes for limit cycles. Default 10000.')
-    parser.add_argument("--minnodes", type=int, required=False, dest='minnodes', default=100, help='Minimum nodes for limit cycles. Default 100.')
+    parser.add_argument("--minnodes", type=int, required=False, dest='minnodes', default=500, help='Minimum nodes for limit cycles. Default 500.')
 
     args = parser.parse_args()
 
@@ -392,5 +392,20 @@ if __name__ == "__main__":
         start = timeit.default_timer()
         sigmas,sols=cont(filebase+'lc_forward',omega,beta,gamma,sigma,x0,y0,p0,sigmamin,sigmamax,dsigma,dsigmamin=dsigmamin,dsigmamax=dsigmamax,maxnodes=maxnodes,minnodes=minnodes,tol=tol,bctol=tol,stol=stol,coarsen=coarsen)
         sigmas2,sols2=cont(filebase+'lc_backward',omega,beta,gamma,sigma,x0,y0,p0,sigmamin,sigmamax,-dsigma,dsigmamin=dsigmamin,dsigmamax=dsigmamax,maxnodes=maxnodes,minnodes=minnodes,tol=tol,bctol=tol,stol=stol,coarsen=coarsen)
+
+        y0=np.concatenate([-np.flip(y0[2*N:3*N],axis=0),-np.flip(y0[3*N:],axis=0),np.flip(y0[:N],axis=0),np.flip(y0[N:2*N],axis=0)])
+        p0=times[minds[1]]-times[minds[0]]
+        x0=1-np.flip((times[minds[0]:minds[1]+1]-times[minds[0]])/p0)
+        sigmas,sols=cont(filebase+'lc_uforward',-omega,-beta,gamma,-sigma,x0,y0,p0,-sigmamax,-sigmamin,dsigma,dsigmamin=dsigmamin,dsigmamax=dsigmamax,maxnodes=maxnodes,minnodes=minnodes,tol=tol,bctol=tol,stol=stol,coarsen=coarsen)
+        sigmas,sols=cont(filebase+'lc_ubackward',-omega,-beta,gamma,-sigma,x0,y0,p0,-sigmamax,-sigmamin,-dsigma,dsigmamin=dsigmamin,dsigmamax=dsigmamax,maxnodes=maxnodes,minnodes=minnodes,tol=tol,bctol=tol,stol=stol,coarsen=coarsen)
+
+        # phases=sols[0].y.T.copy()
+        # y0=np.concatenate([-np.flip(phases[:,2*N:3*N]),-np.flip(phases[:,3*N:]),np.flip(phases[:,:N]),np.flip(phases[:,N:2*N])],axis=1).T
+        # x0=1-np.flip(sols[0].x)
+        # x0=1-np.flip(x0)
+        # sigmas,sols=cont(filebase+'lc_uforward',-omega,-beta,gamma,-sigma,x0,y0,p0,-sigmamax,-sigmamin,dsigma,dsigmamin=dsigmamin,dsigmamax=dsigmamax,maxnodes=maxnodes,minnodes=minnodes,tol=tol,bctol=tol,stol=stol,coarsen=coarsen)
+        # sigmas,sols=cont(filebase+'lc_uforward',-omega,-beta,gamma,-sigma,x0,y0,p0,-sigmamax,-sigmamin,-dsigma,dsigmamin=dsigmamin,dsigmamax=dsigmamax,maxnodes=maxnodes,minnodes=minnodes,tol=tol,bctol=tol,stol=stol,coarsen=coarsen)
+        # sigmas2,sols2=cont(filebase+'lc_ubackward',omega,beta,gamma,sigma,x0,y0,p0,sigmamin,sigmamax,-dsigma,dsigmamin=dsigmamin,dsigmamax=dsigmamax,maxnodes=maxnodes,minnodes=minnodes,tol=tol,bctol=tol,stol=stol,coarsen=coarsen)
+
         stop = timeit.default_timer()
         print('runtime: %f' % (stop - start),flush=True)
