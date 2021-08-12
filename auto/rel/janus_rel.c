@@ -89,12 +89,15 @@ int stpnt (integer ndim, doublereal t,
 {
   par[0] = 0.35;
   int N = (ndim+2)/4;
+  double phi0=-asin(1.0/1.2);
   for (int k=0; k<N-1; k++){
-    u[k]=1;
-    u[(N-1)+k]=0;
-    u[+2*(N-1)]=cos();
-    u[2*(N-1)+N+k]=sin();
+      u[k]=1.0;
+      u[(N-1)+k]=0;
+      u[2*(N-1)+k]=cos(phi0);
+      u[2*(N-1)+N+k]=sin(phi0);
   }
+  u[3*(N-1)]=cos(phi0);
+  u[3*(N-1)+N]=sin(phi0);
   return 0;
 }
 /* ---------------------------------------------------------------------- */
@@ -106,30 +109,43 @@ int pvls (integer ndim, const doublereal *u,
   integer NDX  = getp("NDX", 0, u);
   integer NTST  = getp("NTST", 0, u);
   integer NCOL  = getp("NCOL", 0, u);
+  integer IPS  = getp("IPS", 0, u);
   integer u_dim1 = NDX;
   int N = (ndim+2)/4;
 
 
   doublereal order=0,t=0;
   doublereal dt,dorder,weight,csum,ssum;
+  dt = getp("DTM",1,u);
 
-  for (int i=0; i<NTST; i++){
-    dt = getp("DTM",i+1,u);
-    dorder=0;
-    for (int j=0; j<NCOL; j++){
-      weight = getp("WINT",j,u);
-      csum=1.0/(2*N)*(1.0+ARRAY2D(u,3*(N-1),NCOL*i+j));
-      ssum=1.0/(2*N)*(0.0+ARRAY2D(u,3*(N-1)+N,NCOL*i+j));
-      for (int k=0; k<N-1; k++){
-        csum+=1.0/(2*N)*(ARRAY2D(u,k,NCOL*i+j)+ARRAY2D(u,2*(N-1)+k,NCOL*i+j));
-        ssum+=1.0/(2*N)*(ARRAY2D(u,(N-1)+k,NCOL*i+j)+ARRAY2D(u,2*(N-1)+N+k,NCOL*i+j));
-      }
-      dorder+=weight*pow((csum*csum+ssum*ssum),0.5);
+  if(dt==0.0){
+    csum=1.0/(2*N)*(1.0+u[3*(N-1)]);
+    ssum=1.0/(2*N)*(0.0+u[3*(N-1)+N]);
+    for (int k=0; k<N-1; k++){
+      csum+=1.0/(2*N)*(u[k]+u[2*(N-1)]);
+      ssum+=1.0/(2*N)*(u[(N-1)+k]+u[2*(N-1)+N+k]);
     }
-    t+=dt;
-    order+=dt*dorder;
+    order=pow((csum*csum+ssum*ssum),0.5);
   }
 
+  else{
+    for (int i=0; i<NTST; i++){
+      dt = getp("DTM",i+1,u);
+      dorder=0;
+      for (int j=0; j<NCOL; j++){
+        weight = getp("WINT",j,u);
+        csum=1.0/(2*N)*(1.0+ARRAY2D(u,3*(N-1),NCOL*i+j));
+        ssum=1.0/(2*N)*(0.0+ARRAY2D(u,3*(N-1)+N,NCOL*i+j));
+        for (int k=0; k<N-1; k++){
+          csum+=1.0/(2*N)*(ARRAY2D(u,k,NCOL*i+j)+ARRAY2D(u,2*(N-1)+k,NCOL*i+j));
+          ssum+=1.0/(2*N)*(ARRAY2D(u,(N-1)+k,NCOL*i+j)+ARRAY2D(u,2*(N-1)+N+k,NCOL*i+j));
+        }
+        dorder+=weight*pow((csum*csum+ssum*ssum),0.5);
+      }
+      t+=dt;
+      order+=dt*dorder;
+    }
+  }
   par[1]=order;
   return 0;
 }
