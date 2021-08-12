@@ -20,64 +20,57 @@ int func (integer ndim, const doublereal *u, const integer *icp,
   const doublereal *w=u+2*N;
   const doublereal *v=u+3*N;
 
-  for(j=0; j<N-1; j++){
-    f[j]=-y[j]*(omega/2+beta*(x[j]*v[j]-w[j]*y[j])+sigma*(x[j]*v[j+1]-w[j+1]*y[j]))+gamma*(1-x[j]*x[j]-y[j]*y[j])*x[j];
-    f[N+j]=x[j]*(omega/2+beta*(x[j]*v[j]-w[j]*y[j])+sigma*(x[j]*v[j+1]-w[j+1]*y[j]))+gamma*(1-x[j]*x[j]-y[j]*y[j])*y[j];
-  }
-
-  f[N-1]=-y[N-1]*(omega/2+beta*(x[N-1]*v[N-1]-w[N-1]*y[N-1])+sigma*(x[N-1]*v[0]-w[0]*y[N-1]))+gamma*(1-x[N-1]*x[N-1]-y[N-1]*y[N-1])*x[N-1];
-  f[2*N-1]=x[N-1]*(omega/2+beta*(x[N-1]*v[N-1]-w[N-1]*y[N-1])+sigma*(x[N-1]*v[0]-w[0]*y[N-1]))+gamma*(1-x[N-1]*x[N-1]-y[N-1]*y[N-1])*y[N-1];
-
-  f[2*N]=-v[0]*(-omega/2+beta*(w[0]*y[0]-v[0]*x[0])+sigma*(w[0]*y[N-1]-v[0]*x[N-1]))+gamma*(1-w[0]*w[0]-v[0]*v[0])*w[0];
-  f[3*N]=w[0]*(-omega/2+beta*(w[0]*y[0]-v[0]*x[0])+sigma*(w[0]*y[N-1]-v[0]*x[N-1]))+gamma*(1-w[0]*w[0]-v[0]*v[0])*v[0];
-
-  for(j=1; j<N; j++){
-    f[2*N+j]=-v[j]*(-omega/2+beta*(w[j]*y[j]-v[j]*x[j])+sigma*(w[j]*y[j-1]-v[j]*x[j-1]))+gamma*(1-w[j]*w[j]-v[j]*v[j])*w[j];
-    f[3*N+j]=w[j]*(-omega/2+beta*(w[j]*y[j]-v[j]*x[j])+sigma*(w[j]*y[j-1]-v[j]*x[j-1]))+gamma*(1-w[j]*w[j]-v[j]*v[j])*v[j];
+  for(j=0; j<N; j++){
+    f[j]=-y[j]*(omega/2+beta*(x[j]*v[j]-w[j]*y[j])+sigma*(x[j]*v[(j+1)%N]-w[(j+1)%N]*y[j]))+gamma*(1-x[j]*x[j]-y[j]*y[j])*x[j];
+    f[N+j]=x[j]*(omega/2+beta*(x[j]*v[j]-w[j]*y[j])+sigma*(x[j]*v[(j+1)%N]-w[(j+1)%N]*y[j]))+gamma*(1-x[j]*x[j]-y[j]*y[j])*y[j];
+    f[2*N+j]=-v[j]*(-omega/2+beta*(w[j]*y[j]-v[j]*x[j])+sigma*(w[j]*y[(N+j-1)%N]-v[j]*x[(N+j-1)%N]))+gamma*(1-w[j]*w[j]-v[j]*v[j])*w[j];
+    f[3*N+j]=w[j]*(-omega/2+beta*(w[j]*y[j]-v[j]*x[j])+sigma*(w[j]*y[(N+j-1)%N]-v[j]*x[(N+j-1)%N]))+gamma*(1-w[j]*w[j]-v[j]*v[j])*v[j];
   }
 
   if (ijac == 0) {
     return 0;
   }
 
-  //Note: that Jacobian is sparse, but auto does not employ sparsity here
+  for(j=0; j<N; j++){
+    ARRAY2D(dfdu,j,j)=-y[j]*(beta*v[j]+sigma*v[(j+1)%N])+gamma*(1-3*x[j]*x[j]-y[j]*y[j]); //Jxx
+    ARRAY2D(dfdu,j,N+j)=-(omega/2+beta*(x[j]*v[j]-2*w[j]*y[j])+sigma*(x[j]*v[(j+1)%N]-2*w[(j+1)%N]*y[j]))+gamma*(-2*y[j])*x[j]; //Jxy
+    ARRAY2D(dfdu,j,2*N+j)=-y[j]*(-beta*y[j]); //Jxw
+    ARRAY2D(dfdu,j,2*N+(j+1)%N)=-y[j]*(-sigma*y[j]); //Jxw
+    ARRAY2D(dfdu,j,3*N+j)=-y[j]*(beta*x[j]); //Jxv
+    ARRAY2D(dfdu,j,3*N+(j+1)%N)=-y[j]*(sigma*x[j]); //Jxv
 
-  // I1=np.identity(N)
-  // I2=np.roll(I1,1,axis=0)
-  // I3=np.roll(I1,-1,axis=0)
-  // # dxdt=-y*(omega/2-beta*(-x*v+y*u)-sigmat*(-x*np.roll(v,-1)+y*np.roll(u,-1)))+gamma*(1-x**2-y**2)*x
-  // Jxx=(-y*(-beta*(-v)-sigmat*(-np.roll(v,-1)))+gamma*(1-3*x**2-y**2))*I1
-  // Jxy=(-(omega/2-beta*(-x*v+2*y*u)-sigmat*(-x*np.roll(v,-1)+2*y*np.roll(u,-1)))+gamma*(-2*y)*x)*I1
-  // Jxu=-y*(-beta*(y*I1)-sigmat*(y*I2))
-  // Jxv=-y*(-beta*(-x*I1)-sigmat*(-x*I2))
-  // # dydt= x*(omega/2-beta*(-x*v+y*u)-sigmat*(-x*np.roll(v,-1)+y*np.roll(u,-1)))+gamma*(1-x**2-y**2)*y
-  // Jyx=((omega/2-beta*(-2*x*v+y*u)-sigmat*(-2*x*np.roll(v,-1)+y*np.roll(u,-1)))+gamma*(-2*x)*y)*I1
-  // Jyy=(x*(-beta*(u)-sigmat*(np.roll(u,-1)))+gamma*(1-x**2-3*y**2))*I1
-  // Jyu=x*(-beta*(y*I1)-sigmat*(y*I2))
-  // Jyv=x*(-beta*(-x*I1)-sigmat*(-x*I2))
-  // # dudt=-v*(-omega/2-beta*(x*v-y*u)-sigmat*(np.roll(x,1)*v-np.roll(y,1)*u))+gamma*(1-u**2-v**2)*u
-  // Jux=-v*(-beta*(v*I1)-sigmat*(v*I3))
-  // Juy=-v*(-beta*(-u*I1)-sigmat*(-u*I3))
-  // Juu=(-v*(-beta*(-y)-sigmat*(-np.roll(y,1)))+gamma*(1-3*u**2-v**2))*I1
-  // Juv=(-(-omega/2-beta*(2*x*v-y*u)-sigmat*(2*np.roll(x,1)*v-np.roll(y,1)*u))+gamma*(-2*v)*u)*I1
-  // # dvdt= u*(-omega/2-beta*(x*v-y*u)-sigmat*(np.roll(x,1)*v-np.roll(y,1)*u))+gamma*(1-u**2-v**2)*v
-  // Jvx=u*(-beta*(v*I1)-sigmat*(v*I3))
-  // Jvy=u*(-beta*(-u*I1)-sigmat*(-u*I3))
-  // Jvu=((-omega/2-beta*(x*v-2*y*u)-sigmat*(np.roll(x,1)*v-2*np.roll(y,1)*u))+gamma*(-2*u)*v)*I1
-  // Jvv=(u*(-beta*(x)-sigmat*(np.roll(x,1)))+gamma*(1-u**2-3*v**2))*I1
+    ARRAY2D(dfdu,N+j,j)=(omega/2+beta*(2*x[j]*v[j]-w[j]*y[j])+sigma*(2*x[j]*v[(j+1)%N]-w[(j+1)%N]*y[j]))+gamma*(-2*x[j])*y[j]; //Jyx
+    ARRAY2D(dfdu,N+j,N+j)=x[j]*(-beta*w[j]-sigma*w[(j+1)%N])+gamma*(1-x[j]*x[j]-3*y[j]*y[j]); //Jyy
+    ARRAY2D(dfdu,N+j,2*N+j)=x[j]*(-beta*y[j]); //Jyw
+    ARRAY2D(dfdu,N+j,2*N+(j+1)%N)=x[j]*(-sigma*y[j]); //Jyw
+    ARRAY2D(dfdu,N+j,3*N+j)=x[j]*(beta*x[j]); //Jyv
+    ARRAY2D(dfdu,N+j,3*N+(j+1)%N)=x[j]*(sigma*x[j]); //Jyv
 
-  //
-  // for(j=0; j<N; j++){
-  //   ARRAY2D(dfdu,j,j) = 0;
-  // }
+    ARRAY2D(dfdu,2*N+j,j)=-v[j]*(-beta*v[j]); //Jwx
+    ARRAY2D(dfdu,2*N+j,(N+j-1)%N)=-v[j]*(-sigma*v[j]); //Jwx
+    ARRAY2D(dfdu,2*N+j,N+j)=-v[j]*(beta*w[j]); //Jwy
+    ARRAY2D(dfdu,2*N+j,N+(N+j-1)%N)=-v[j]*(sigma*w[j]); //Jwy
+    ARRAY2D(dfdu,2*N+j,2*N+j)=-v[j]*(beta*y[j]+sigma*y[(N+j-1)%N])+gamma*(1-3*w[j]*w[j]-v[j]*v[j]); //Jww
+    ARRAY2D(dfdu,2*N+j,3*N+j)=-(-omega/2+beta*(w[j]*y[j]-2*v[j]*x[j])+sigma*(w[j]*y[(N+j-1)%N]-2*v[j]*x[(N+j-1)%N]))+gamma*(-2*v[j])*w[j]; //Jwv
+
+    ARRAY2D(dfdu,3*N+j,j)=w[j]*(-beta*v[j]); //Jvx
+    ARRAY2D(dfdu,3*N+j,(N+j-1)%N)=w[j]*(-sigma*v[j]); //Jvx
+    ARRAY2D(dfdu,3*N+j,N+j)=w[j]*(beta*w[j]); //Jvy
+    ARRAY2D(dfdu,3*N+j,N+(N+j-1)%N)=w[j]*(sigma*w[j]); //Jvy
+    ARRAY2D(dfdu,3*N+j,2*N+j)=(-omega/2+beta*(2*w[j]*y[j]-v[j]*x[j])+sigma*(2*w[j]*y[(N+j-1)%N]-v[j]*x[(N+j-1)%N]))+gamma*(-2*w[j])*v[j]; //Jvw
+    ARRAY2D(dfdu,3*N+j,3*N+j)=w[j]*(-beta*x[j]-sigma*x[(N+j-1)%N])+gamma*(1-w[j]*w[j]-3*v[j]*v[j]); //Jvv
+  }
 
   if (ijac == 1) {
     return 0;
   }
 
-  // for(j=0; j<N; j++){
-  //   ARRAY2D(dfdp,0,0) = 0;
-  // }
+  for(j=0; j<N; j++){
+    ARRAY2D(dfdp,j,0)=-y[j]*((x[j]*v[(j+1)%N]-w[(j+1)%N]*y[j]));
+    ARRAY2D(dfdp,N+j,0)=x[j]*((x[j]*v[(j+1)%N]-w[(j+1)%N]*y[j]));
+    ARRAY2D(dfdp,2*N+j,0)=-v[j]*((w[j]*y[(N+j-1)%N]-v[j]*x[(N+j-1)%N]));
+    ARRAY2D(dfdp,3*N+j,0)=w[j]*((w[j]*y[(N+j-1)%N]-v[j]*x[(N+j-1)%N]));
+  }
 
   return 0;
 }
@@ -87,6 +80,14 @@ int stpnt (integer ndim, doublereal t,
            doublereal *u, doublereal *par)
 {
   par[0] = 0.35;
+  int N = (ndim)/4;
+  double phi0=-asin(1.0/1.2);
+  for (int k=0; k<N; k++){
+      u[k]=1.0;
+      u[N+k]=0;
+      u[2*N+k]=cos(phi0);
+      u[3*N+k]=sin(phi0);
+  }
   return 0;
 }
 /* ---------------------------------------------------------------------- */
@@ -105,21 +106,37 @@ int pvls (integer ndim, const doublereal *u,
   doublereal order=0,t=0;
   doublereal dt,dorder,weight,csum,ssum;
 
-  for (int i=0; i<NTST; i++){
-    dt = getp("DTM",i+1,u);
-    dorder=0;
-    for (int j=0; j<NCOL; j++){
-      weight = getp("WINT",j,u);
-      csum=0;
-      ssum=0;
-      for (int k=0; k<N; k++){
-        csum+=1.0/(2*N)*(ARRAY2D(u,k,NCOL*i+j)+ARRAY2D(u,2*N+k,NCOL*i+j));
-        ssum+=1.0/(2*N)*(ARRAY2D(u,N+k,NCOL*i+j)+ARRAY2D(u,3*N+k,NCOL*i+j));
-      }
-      dorder+=weight*pow((csum*csum+ssum*ssum),0.5);
+
+  dt = getp("DTM",1,u);
+
+  if(dt==0.0){
+    csum=1.0/(2*N)*(1.0+u[3*(N-1)]);
+    ssum=1.0/(2*N)*(0.0+u[3*(N-1)+N]);
+    for (int k=0; k<N; k++){
+      csum+=1.0/(2*N)*(u[k]+u[2*N+k]);
+      ssum+=1.0/(2*N)*(u[N+k]+u[3*N+k]);
     }
-    t+=dt;
-    order+=dt*dorder;
+    order=pow((csum*csum+ssum*ssum),0.5);
+    par[10]=0;
+  }
+
+  else{
+    for (int i=0; i<NTST; i++){
+      dt = getp("DTM",i+1,u);
+      dorder=0;
+      for (int j=0; j<NCOL; j++){
+        weight = getp("WINT",j,u);
+        csum=0;
+        ssum=0;
+        for (int k=0; k<N; k++){
+          csum+=1.0/(2*N)*(ARRAY2D(u,k,NCOL*i+j)+ARRAY2D(u,2*N+k,NCOL*i+j));
+          ssum+=1.0/(2*N)*(ARRAY2D(u,N+k,NCOL*i+j)+ARRAY2D(u,3*N+k,NCOL*i+j));
+        }
+        dorder+=weight*pow((csum*csum+ssum*ssum),0.5);
+      }
+      t+=dt;
+      order+=dt*dorder;
+    }
   }
 
   par[1]=order;
