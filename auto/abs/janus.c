@@ -99,28 +99,30 @@ int pvls (integer ndim, const doublereal *u,
   integer NTST  = getp("NTST", 0, u);
   integer NCOL  = getp("NCOL", 0, u);
   integer u_dim1 = NDX;
+  int N = NDX/4;
 
-  double r=0;
-  printf("%i\n",NDX);
-  //ARRAY2D(u,i,j) contains solution component i at time point j
-  //We can get WINT integration weights for collocation points as well.
+
+  doublereal order=0,t=0;
+  doublereal dt,dorder,weight,csum,ssum;
+
   for (int i=0; i<NTST; i++){
-    doublereal dt = getp("DTM",i+1,u);
-    printf("%f\n",dt);
+    dt = getp("DTM",i+1,u);
+    dorder=0;
     for (int j=0; j<NCOL; j++){
-      doublereal weight = getp("WINT",j,u);
-      printf("%f\n",weight);
-      for (int k=0; k<NDX; k++){
-        //We should loop over NDX/2 and add the weighted contribution rdt
-        printf("%f ",ARRAY2D(u,k,NCOL*i+j));
+      weight = getp("WINT",j,u);
+      csum=0;
+      ssum=0;
+      for (int k=0; k<N; k++){
+        csum+=1.0/(2*N)*(ARRAY2D(u,k,NCOL*i+j)+ARRAY2D(u,2*N+k,NCOL*i+j));
+        ssum+=1.0/(2*N)*(ARRAY2D(u,N+k,NCOL*i+j)+ARRAY2D(u,3*N+k,NCOL*i+j));
       }
-      printf("\n");
+      dorder+=weight*pow((csum*csum+ssum*ssum),0.5);
     }
-    printf("\n");
+    t+=dt;
+    order+=dt*dorder;
   }
 
-  printf("\n");
-  par[2]=ARRAY2D(u,0,0);
+  par[1]=order;
   return 0;
 }
 /* ---------------------------------------------------------------------- */

@@ -5,8 +5,8 @@ int func (integer ndim, const doublereal *u, const integer *icp,
           doublereal *f, doublereal *dfdu, doublereal *dfdp)
 {
   /* System generated locals */
-  // integer dfdu_dim1 = ndim;
-  // integer dfdp_dim1 = ndim;
+  integer dfdu_dim1 = ndim;
+  integer dfdp_dim1 = ndim;
 
   double sigma = par[0];
   double omega=1.0;
@@ -42,6 +42,31 @@ int func (integer ndim, const doublereal *u, const integer *icp,
   if (ijac == 0) {
     return 0;
   }
+  //Replace I1, I2, and I3 with loops over nonzero indices i=j, i=j+1, i=j-1...
+  // I1=np.identity(N)
+  // I2=np.roll(I1,1,axis=0)
+  // I3=np.roll(I1,-1,axis=0)
+  // # dxdt=-y*(omega/2-beta*(-x*v+y*u)-sigmat*(-x*np.roll(v,-1)+y*np.roll(u,-1)))+gamma*(1-x**2-y**2)*x
+  // Jxx=(-y*(-beta*(-v)-sigmat*(-np.roll(v,-1)))+gamma*(1-3*x**2-y**2))*I1
+  // Jxy=(-(omega/2-beta*(-x*v+2*y*u)-sigmat*(-x*np.roll(v,-1)+2*y*np.roll(u,-1)))+gamma*(-2*y)*x)*I1
+  // Jxu=-y*(-beta*(y*I1)-sigmat*(y*I2))
+  // Jxv=-y*(-beta*(-x*I1)-sigmat*(-x*I2))
+  // # dydt= x*(omega/2-beta*(-x*v+y*u)-sigmat*(-x*np.roll(v,-1)+y*np.roll(u,-1)))+gamma*(1-x**2-y**2)*y
+  // Jyx=((omega/2-beta*(-2*x*v+y*u)-sigmat*(-2*x*np.roll(v,-1)+y*np.roll(u,-1)))+gamma*(-2*x)*y)*I1
+  // Jyy=(x*(-beta*(u)-sigmat*(np.roll(u,-1)))+gamma*(1-x**2-3*y**2))*I1
+  // Jyu=x*(-beta*(y*I1)-sigmat*(y*I2))
+  // Jyv=x*(-beta*(-x*I1)-sigmat*(-x*I2))
+  // # dudt=-v*(-omega/2-beta*(x*v-y*u)-sigmat*(np.roll(x,1)*v-np.roll(y,1)*u))+gamma*(1-u**2-v**2)*u
+  // Jux=-v*(-beta*(v*I1)-sigmat*(v*I3))
+  // Juy=-v*(-beta*(-u*I1)-sigmat*(-u*I3))
+  // Juu=(-v*(-beta*(-y)-sigmat*(-np.roll(y,1)))+gamma*(1-3*u**2-v**2))*I1
+  // Juv=(-(-omega/2-beta*(2*x*v-y*u)-sigmat*(2*np.roll(x,1)*v-np.roll(y,1)*u))+gamma*(-2*v)*u)*I1
+  // # dvdt= u*(-omega/2-beta*(x*v-y*u)-sigmat*(np.roll(x,1)*v-np.roll(y,1)*u))+gamma*(1-u**2-v**2)*v
+  // Jvx=u*(-beta*(v*I1)-sigmat*(v*I3))
+  // Jvy=u*(-beta*(-u*I1)-sigmat*(-u*I3))
+  // Jvu=((-omega/2-beta*(x*v-2*y*u)-sigmat*(np.roll(x,1)*v-2*np.roll(y,1)*u))+gamma*(-2*u)*v)*I1
+  // Jvv=(u*(-beta*(x)-sigmat*(np.roll(x,1)))+gamma*(1-u**2-3*v**2))*I1
+
   //
   // for(j=0; j<N; j++){
   //   ARRAY2D(dfdu,j,j) = 0;
@@ -63,6 +88,13 @@ int stpnt (integer ndim, doublereal t,
            doublereal *u, doublereal *par)
 {
   par[0] = 0.35;
+  int N = (ndim+2)/4;
+  for (int k=0; k<N-1; k++){
+    u[k]=1;
+    u[(N-1)+k]=0;
+    u[+2*(N-1)]=cos();
+    u[2*(N-1)+N+k]=sin();
+  }
   return 0;
 }
 /* ---------------------------------------------------------------------- */
@@ -70,7 +102,35 @@ int stpnt (integer ndim, doublereal t,
 int pvls (integer ndim, const doublereal *u,
           doublereal *par)
 {
+  extern double getp();
+  integer NDX  = getp("NDX", 0, u);
+  integer NTST  = getp("NTST", 0, u);
+  integer NCOL  = getp("NCOL", 0, u);
+  integer u_dim1 = NDX;
+  int N = (ndim+2)/4;
 
+
+  doublereal order=0,t=0;
+  doublereal dt,dorder,weight,csum,ssum;
+
+  for (int i=0; i<NTST; i++){
+    dt = getp("DTM",i+1,u);
+    dorder=0;
+    for (int j=0; j<NCOL; j++){
+      weight = getp("WINT",j,u);
+      csum=1.0/(2*N)*(1.0+ARRAY2D(u,3*(N-1),NCOL*i+j));
+      ssum=1.0/(2*N)*(0.0+ARRAY2D(u,3*(N-1)+N,NCOL*i+j));
+      for (int k=0; k<N-1; k++){
+        csum+=1.0/(2*N)*(ARRAY2D(u,k,NCOL*i+j)+ARRAY2D(u,2*(N-1)+k,NCOL*i+j));
+        ssum+=1.0/(2*N)*(ARRAY2D(u,(N-1)+k,NCOL*i+j)+ARRAY2D(u,2*(N-1)+N+k,NCOL*i+j));
+      }
+      dorder+=weight*pow((csum*csum+ssum*ssum),0.5);
+    }
+    t+=dt;
+    order+=dt*dorder;
+  }
+
+  par[1]=order;
   return 0;
 }
 /* ---------------------------------------------------------------------- */
