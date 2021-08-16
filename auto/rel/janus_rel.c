@@ -170,7 +170,7 @@ int func (integer ndim, const doublereal *u, const integer *icp,
 int stpnt (integer ndim, doublereal t,
            doublereal *u, doublereal *par)
 {
-  par[0] = 0.35;
+  par[0] = 0.33;
   int N = (ndim+2)/4;
   double phi0=-asin(1.0/1.2);
   for (int k=0; k<N-1; k++){

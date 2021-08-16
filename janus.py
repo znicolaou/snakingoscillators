@@ -378,7 +378,15 @@ if __name__ == "__main__":
 
     np.save(filebase+'fs.npy', phases[-1, :])
     f = open(filebase + 'out.dat', 'w')
+    phases=phases[int(t3/dt):]
+    times=times[int(t3/dt):]
+    minds=find_peaks(np.diff(phases[:,0]),height=0.9*np.max(np.diff(phases[:,0])))[0]
+    print(times[minds])
+    p0=times[minds[1]]-times[minds[0]]
+    print(p0,np.mean(np.diff(times[minds])))
+
     print(*(sys.argv), sep=' ', file=f)
+
     print(stop - start, np.mean(r[int(t3 / dt):]), file=f)
     f.close()
 
