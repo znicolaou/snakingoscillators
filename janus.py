@@ -380,23 +380,31 @@ if __name__ == "__main__":
     f = open(filebase + 'out.dat', 'w')
     phases=phases[int(t3/dt):]
     times=times[int(t3/dt):]
-    minds=find_peaks(np.diff(phases[:,0]),height=0.9*np.max(np.diff(phases[:,0])))[0]
-    print(times[minds])
-    p0=times[minds[1]]-times[minds[0]]
-    print(p0,np.mean(np.diff(times[minds])))
+    thetas=np.arctan2(phases[:,N:2*N],phases[:,:N])
+    phis=np.arctan2(phases[:,3*N:],phases[:,2*N:3*N])
+    angles=np.concatenate([thetas-thetas[:,0][:,np.newaxis],phis-thetas[:,0][:,np.newaxis]],axis=1)
+    norms=np.linalg.norm(angles-angles[-1],axis=1)
+    mins=np.array(argrelmin(norms))[0]
+    mins=mins[np.where(norms[mins]<1)[0]]
 
+    p0=0
+    order=np.mean(r[int(t3 / dt):])
+    norm=0
+
+    if(len(mins)>2):
+        p0=np.mean(np.diff(times[mins]))
+        norm=np.linalg.norm(angles[-int(p0/dt):]-angles[-1],ord=2)
+        order=np.mean(r[-int(p0/dt):])
+
+    print(order,p0,norm)
     print(*(sys.argv), sep=' ', file=f)
-
-    print(stop - start, np.mean(r[int(t3 / dt):]), file=f)
+    print(stop - start, file=f)
+    print(seed,order,p0,norm, file=f)
     f.close()
 
     if args.cont:
-        phases=phases[int(t3/dt):]
-        times=times[int(t3/dt):]
-        minds=find_peaks(np.diff(phases[:,0]),height=0.9*np.max(np.diff(phases[:,0])))[0]
-        p0=times[minds[1]]-times[minds[0]]
-        x0=(times[minds[0]:minds[1]+1]-times[minds[0]])/p0
-        y0=phases[minds[0]:minds[1]+1].T
+        x0=(times[-int(p0/dt):]-times[-int(p0/dt)])/p0
+        y0=phases[-int(p0/dt):].T
         start = timeit.default_timer()
         sigmas,sols=cont(filebase+'lc_forward',omega,beta,gamma,sigma,x0,y0,p0,sigmamin,sigmamax,dsigma,dsigmamin=dsigmamin,dsigmamax=dsigmamax,maxnodes=maxnodes,minnodes=minnodes,tol=tol,bctol=tol,stol=stol,coarsen=coarsen)
         sigmas2,sols2=cont(filebase+'lc_backward',omega,beta,gamma,sigma,x0,y0,p0,sigmamin,sigmamax,-dsigma,dsigmamin=dsigmamin,dsigmamax=dsigmamax,maxnodes=maxnodes,minnodes=minnodes,tol=tol,bctol=tol,stol=stol,coarsen=coarsen)
