@@ -385,7 +385,7 @@ if __name__ == "__main__":
     angles=np.concatenate([thetas-thetas[:,0][:,np.newaxis],phis-thetas[:,0][:,np.newaxis]],axis=1)
     norms=np.linalg.norm(angles-angles[-1],axis=1)
     mins=np.array(argrelmin(norms))[0]
-    mins=mins[np.where(norms[mins]<1)[0]]
+    mins=mins[np.where(norms[mins]<0.1)[0]]
 
     p0=0
     order=np.mean(r[int(t3 / dt):])
@@ -403,7 +403,10 @@ if __name__ == "__main__":
             p0=0
 
     if(output>0):
-        print(seed, order,p0,norm)
+        print(seed, order, p0, norm)
+
+    if(output>1):
+        np.savetxt(filebase+'cycle.dat',np.concatenate([dt*np.arange(int(p0/dt))[:,np.newaxis],np.cos(angles[-int(p0/dt):,1:N]),np.sin(angles[-int(p0/dt):,1:N]),np.cos(angles[-int(p0/dt):,N+1:]),np.sin(angles[-int(p0/dt):,N+1:])],axis=1))
 
     print(*(sys.argv), sep=' ', file=f)
     print(stop - start, file=f)
