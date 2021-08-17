@@ -1,8 +1,0 @@
-janus=[]
-janus=janus+run('janus_rel',c='janus_rel.5')
-sv(janus,'janus_rels')
-janus=janus+run('janus_rel',c='janus_rel.6')
-janus=rl(janus)
-janus=mb(janus)
-sv(janus,'janus_rels')
-cl()

@@ -1,9 +1,0 @@
-dat = 'chimera1'
-NDIM=   64, NPR=1, IPS =   2, IRS =   0
-ICP =  [1, 11, 2], SP = ['LP0','TR0','HB0','BP0']
-NTST=  200, NCOL=   5, IAD =   3, ISW = 1, IPLT= 129, NBC= 0, NINT= 0
-NMX=   20, NPR=  1, MXBF=  10, IID =   2, ITMX= 11, ITNW= 10, NWTN= 5, JAC= 0
-EPSL= 1e-04, EPSU = 1e-04, EPSS = 1e-03
-DS  =  0.001, DSMIN=  0.000001, DSMAX=  0.1, IADS=   1
-NPAR = 3, THL =  {11: 0.0}, THU =  {}
-UZSTOP = {1: 0.5}

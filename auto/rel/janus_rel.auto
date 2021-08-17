@@ -1,4 +1,0 @@
-auto('janus_rels.auto')
-auto('janus_rel1.auto')
-auto('janus_rel2.auto')
-pl(bd('janus_rels')+bd('janus_rel1')+bd('janus_rel2'))
