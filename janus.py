@@ -393,10 +393,18 @@ if __name__ == "__main__":
 
     if(len(mins)>2):
         p0=np.mean(np.diff(times[mins]))
-        norm=np.linalg.norm(angles[-int(p0/dt):]-angles[-1],ord=2)
-        order=np.mean(r[-int(p0/dt):])
+        n0=10*int(p0/dt)
+        if n0>int((t1-t3)/dt):
+            n0=0
+        norm=np.linalg.norm(np.diff(angles[-n0:],axis=0),ord=2)/10**0.5
+        order=np.mean(r[-n0:])
+        if norm<1:
+            norm=0
+            p0=0
 
-    print(order,p0,norm)
+    if(output>0):
+        print(seed, order,p0,norm)
+
     print(*(sys.argv), sep=' ', file=f)
     print(stop - start, file=f)
     print(seed,order,p0,norm, file=f)
