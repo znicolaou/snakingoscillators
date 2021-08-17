@@ -1,10 +1,11 @@
 import os.path
 
 for i in range(33):
+  print("chimera"+str(i)+"\n\n\n")
   if(os.path.exists('chimeras/'+str(i)+'cycle.txt')):
     branch=[]
     branch=branch+run('janus_rel',c='forward',dat='chimeras/'+str(i)+'cycle.txt')
     branch=branch+run('janus_rel',c='reverse',dat='chimeras/'+str(i)+'cycle.txt')
     branch=rl(branch)
     branch=mb(branch)
-    sv(branch,'chimeras/'+str(i))
+    sv(branch,str(i))
