@@ -406,7 +406,8 @@ if __name__ == "__main__":
         print(seed, order, p0, norm)
 
     if(output>1):
-        np.savetxt(filebase+'cycle.dat',np.concatenate([dt*np.arange(int(p0/dt))[:,np.newaxis],np.cos(angles[-int(p0/dt):,1:N]),np.sin(angles[-int(p0/dt):,1:N]),np.cos(angles[-int(p0/dt):,N+1:]),np.sin(angles[-int(p0/dt):,N+1:])],axis=1))
+        if p0>0:
+            np.savetxt(filebase+'cycle.dat',np.concatenate([dt*np.arange(int(p0/dt))[:,np.newaxis],np.cos(angles[-int(p0/dt):,1:N]),np.sin(angles[-int(p0/dt):,1:N]),np.cos(angles[-int(p0/dt):,N:]),np.sin(angles[-int(p0/dt):,N:])],axis=1))
 
     print(*(sys.argv), sep=' ', file=f)
     print(stop - start, file=f)
