@@ -231,6 +231,21 @@ int pvls (integer ndim, const doublereal *u,
     }
   }
   par[1]=order;
+  par[2]=getp("STA",0,u);
+  par[3]=fabs(getp("STP",0,u));
+  double mx=0,mr=0,mi=0;
+  for(int i=1; i<ndim; i++){
+    double re=getp("EIG",2*i+1,u);
+    double im=getp("EIG",2*i+2,u);
+    if(re*re+im*im>mx){
+      mx=re*re+im*im;
+      mr=re;
+      mi=im;
+    }
+  }
+  par[4]=mr;
+  par[5]=mi;
+
   return 0;
 }
 /* ---------------------------------------------------------------------- */
