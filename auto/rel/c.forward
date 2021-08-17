@@ -1,7 +1,7 @@
 NDIM=   62, NPR=1, IPS =   2, IRS =   0
 ICP =  [1, 11, 2, 3, 4, 5, 6], SP = ['LP','TR','PD','HB','BP0']
-NTST=  500, NCOL=   5, IAD =   3, ISW = 1, IPLT= 125, NBC= 0, NINT= 0
-NMX=   1000, NPR=  100, MXBF=  10, IID =   2, ITMX= 11, ITNW= 10, NWTN= 5, JAC= 1
+NTST=  200, NCOL=   5, IAD =   3, ISW = 1, IPLT= 125, NBC= 0, NINT= 0
+NMX=   50, NPR=  100, MXBF=  10, IID =   2, ITMX= 11, ITNW= 10, NWTN= 5, JAC= 1
 EPSL= 1e-06, EPSU = 1e-06, EPSS = 1e-05
 DS  =  0.001, DSMIN=  0.000001, DSMAX=  0.1, IADS=   1
 NPAR = 7, THL =  {11: 0.0}, THU =  {}
