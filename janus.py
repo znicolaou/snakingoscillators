@@ -404,9 +404,9 @@ if __name__ == "__main__":
         wind2=np.mean(np.mod(np.diff(phis[-n0:],axis=1)+np.pi,2*np.pi)-np.pi)
         norm=(wind1**2+wind2**2)**0.5
 
-        if norm<1:
-            norm=0
-            p0=0
+        # if norm<1:
+        #     norm=0
+        #     p0=0
 
     if(output>0):
         print(seed, order, p0, norm)
