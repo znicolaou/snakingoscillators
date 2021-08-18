@@ -385,14 +385,14 @@ if __name__ == "__main__":
     angles=np.concatenate([np.mod(thetas-thetas[:,0][:,np.newaxis]+np.pi,2*np.pi)-np.pi,np.mod(phis-thetas[:,0][:,np.newaxis]+np.pi,2*np.pi)-np.pi],axis=1)
     norms=np.linalg.norm(np.mod(angles-angles[-1]+np.pi,2*np.pi)-np.pi,axis=1)
     mins=np.array(argrelmin(norms))[0]
-    mins=mins[np.where(norms[mins]<0.1)[0]]
+    mins=mins[np.where(norms[mins]<1)[0]]
 
     p0=0
     order=np.mean(r[int(t3 / dt):])
     norm=0
 
     if(len(mins)>2):
-        p0=np.mean(np.diff(times[mins]))
+        p0=np.median(np.diff(times[mins]))
         n0=10*int(p0/dt)
         if n0>int((t1-t3)/dt):
             n0=0
