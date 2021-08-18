@@ -382,7 +382,7 @@ if __name__ == "__main__":
     times=times[int(t3/dt):]
     thetas=np.arctan2(phases[:,N:2*N],phases[:,:N])
     phis=np.arctan2(phases[:,3*N:],phases[:,2*N:3*N])
-    angles=np.concatenate([thetas-thetas[:,0][:,np.newaxis],phis-thetas[:,0][:,np.newaxis]],axis=1)
+    angles=np.concatenate([np.mod(thetas-thetas[:,0][:,np.newaxis]+np.pi,2*np.pi)-np.pi,np.mod(phis-thetas[:,0][:,np.newaxis]+np.pi,2*np.pi)-np.pi],axis=1)
     norms=np.linalg.norm(angles-angles[-1],axis=1)
     mins=np.array(argrelmin(norms))[0]
     mins=mins[np.where(norms[mins]<0.1)[0]]

@@ -172,7 +172,7 @@ int stpnt (integer ndim, doublereal t,
 {
   par[0] = 0.33;
   int N = (ndim+2)/4;
-  double phi0=-asin(1.0/1.2);
+  double phi0=-asin(1.0/(2*(par[0]+0.25)));
   for (int k=0; k<N-1; k++){
       u[k]=1.0;
       u[(N-1)+k]=0;
