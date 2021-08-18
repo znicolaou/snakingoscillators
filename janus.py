@@ -389,6 +389,8 @@ if __name__ == "__main__":
 
     p0=0
     order=np.mean(r[int(t3 / dt):])
+    wind1=0
+    wind2=0
     norm=0
 
     if(len(mins)>2):
@@ -396,8 +398,12 @@ if __name__ == "__main__":
         n0=10*int(p0/dt)
         if n0>int((t1-t3)/dt):
             n0=0
-        norm=np.linalg.norm(np.diff(angles[-n0:],axis=0),ord=2)/10**0.5
+        # norm=np.linalg.norm(np.diff(angles[-n0:],axis=0),ord=2)/10**0.5
         order=np.mean(r[-n0:])
+        wind1=np.mean(np.mod(np.diff(thetas[-n0:],axis=1)+np.pi,2*np.pi)-np.pi)
+        wind2=np.mean(np.mod(np.diff(phis[-n0:],axis=1)+np.pi,2*np.pi)-np.pi)
+        norm=(wind1**2+wind2**2)**0.5
+
         if norm<1:
             norm=0
             p0=0
