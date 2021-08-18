@@ -392,7 +392,7 @@ if __name__ == "__main__":
     norm=0
 
     if(len(mins)>2):
-        p0=np.median(np.diff(times[mins]))
+        p0=np.mean(np.diff(times[mins]))
         n0=10*int(p0/dt)
         if n0>int((t1-t3)/dt):
             n0=0
