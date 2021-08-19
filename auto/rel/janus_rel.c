@@ -208,7 +208,7 @@ int pvls (integer ndim, const doublereal *u,
       csum+=1.0/(2*N)*(u[k]+u[2*(N-1)]);
       ssum+=1.0/(2*N)*(u[(N-1)+k]+u[2*(N-1)+N+k]);
     }
-    order=pow((csum*csum+ssum*ssum),0.5);
+    order=csum*csum+ssum*ssum;
     par[10]=0;
   }
 
