@@ -198,7 +198,7 @@ int pvls (integer ndim, const doublereal *u,
 
 
   doublereal order=0,t=0;
-  doublereal dt,dorder,weight,csum,ssum;
+  doublereal dt,weight,csum,ssum;
   dt = getp("DTM",1,u);
 
   if(dt==0.0){
@@ -213,10 +213,10 @@ int pvls (integer ndim, const doublereal *u,
   }
 
   else{
+    order=0;
     for (int i=0; i<NTST; i++){
       dt = getp("DTM",i+1,u);
-      dorder=0;
-      for (int j=0; j<NCOL; j++){
+      for (int j=0; j<NCOL+1; j++){
         weight = getp("WINT",j,u);
         csum=1.0/(2*N)*(1.0+ARRAY2D(u,3*(N-1),NCOL*i+j));
         ssum=1.0/(2*N)*(0.0+ARRAY2D(u,3*(N-1)+N,NCOL*i+j));
@@ -224,13 +224,11 @@ int pvls (integer ndim, const doublereal *u,
           csum+=1.0/(2*N)*(ARRAY2D(u,k,NCOL*i+j)+ARRAY2D(u,2*(N-1)+k,NCOL*i+j));
           ssum+=1.0/(2*N)*(ARRAY2D(u,(N-1)+k,NCOL*i+j)+ARRAY2D(u,2*(N-1)+N+k,NCOL*i+j));
         }
-        dorder+=weight*pow((csum*csum+ssum*ssum),0.5);
+        order+=dt*weight*(csum*csum+ssum*ssum);
       }
-      t+=dt;
-      order+=dt*dorder;
     }
   }
-  par[1]=order;
+  par[1]=pow(order,0.5);
   par[2]=getp("STA",0,u);
   par[3]=fabs(getp("STP",0,u));
   double mx=0,mr=0,mi=0;

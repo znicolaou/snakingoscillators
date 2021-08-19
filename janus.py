@@ -71,220 +71,14 @@ def runsim (N, t1, t3, dt, omega, beta, sigma, gamma, phase_init, sigma0=0.35, t
     sol=solve_ivp(janus, [0,t1], phase_init, method='RK45', args=(N,omega, sigma, beta, gamma, sigma0, t0), rtol=1e-6, atol=1e-6, t_eval=dt*np.arange(t1/dt))
     phases=sol.y.T.copy()
     times=sol.t
-    r=np.abs(np.sum(phases[:,:N]+1j*phases[:,N:2*N],axis=1)+np.sum(phases[:,2*N:3*N]+1j*phases[:,3*N:4*N],axis=1))/(2*N)
+    csum=1/(2*N)*np.sum(phases[:,:N]+phases[:,2*N:3*N],axis=1)
+    ssum=1/(2*N)*np.sum(phases[:,N:2*N]+phases[:,3*N:4*N],axis=1)
+    r=csum*csum+ssum*ssum
 
     return phases,times,r
 ######################################################################################
 
-def order(x,y):
-    return np.sum(np.diff(x)*np.abs(np.sum(y[:N]+1j*y[N:2*N],axis=0)+np.sum(y[2*N:3*N]+1j*y[3*N:],axis=0))[:-1]/(2*N))
-
-#TODO: Calculate Floquet exponents
-#TODO: Can we estimate the new limit cycle from dsigma and the Jacobian?
 ######################################################################################
-def cont (filebase,omega,beta,gamma,sigma0,x0,y0,p0,sigmamin,sigmamax,dsigma,dsigmamax=1e-3,dsigmamin=1e-6,verbose=True, maxnodes=10000, minnodes=100, tol=1e-3, bctol=1e-3, stol=1e-4, SNum=4, coarsen=5):
-    sols=[]
-    sigmas=[]
-    periods=[]
-    orders=[]
-    start=timeit.default_timer()
-    N=int(len(y0)/4)
-    bc=y0[0,0]
-    sigma=sigma0
-
-    def fun(ts,Xts,p):
-        return p[0]*np.transpose([janus(p[0]*ts[i],Xts[:,i], N, omega, sigma, beta, gamma,sigma,-1) for i in range(len(ts))])
-    def pbc(xa,xb,p):
-        return np.concatenate([xb-xa,[xa[0]-bc]])
-    def funjac(ts,Xts,p):
-        return p[0]*np.transpose([janus_jac(p[0]*ts[i],Xts[:,i], N, omega, sigma, beta, gamma,sigma,-1) for i in range(len(ts))],(1,2,0)),  np.transpose([fun(ts,Xts,p)/p[0]],(1,0,2))
-    def bcjac(xa,xb,p):
-        ret0=np.zeros(4*N)
-        ret1=np.zeros(4*N)
-        ret0[0]=1
-        return np.concatenate([-np.identity(4*N),ret0[np.newaxis,:]],axis=0),np.concatenate([np.identity(4*N),ret1[np.newaxis,:]],axis=0),np.zeros((4*N+1,1))
-
-    start2=timeit.default_timer()
-    sol=solve_bvp(fun, pbc, x0, y0, p=np.array([p0]), fun_jac=funjac, bc_jac=bcjac, max_nodes=maxnodes,tol=tol/(np.max(np.diff(x0))),bc_tol=bctol)
-    stop2=timeit.default_timer()
-    if verbose:
-        print(sol.message,flush=True)
-        print('%f\t%.3e\t%i\t%f\t%i\t%f\t'%(sigma, dsigma,len(sol.x),sol.p[0],sol.niter,stop2-start2),end='\n',flush=True)
-    sols.append(sol)
-    sigmas.append(sigma)
-    periods.append(sol.p[0])
-    orders.append(order(sol.x,sol.y))
-
-    np.save(filebase+'_sigmas.npy',sigmas)
-    np.save(filebase+'_periods.npy',periods)
-    np.save(filebase+'_orders.npy',orders)
-    np.save(filebase+'_times_'+str(len(sigmas)-1)+'.npy',sol.x)
-    np.save(filebase+'_phases_'+str(len(sigmas)-1)+'.npy',sol.y)
-
-    x0=sol.x
-    y0=sol.y
-    p0=sol.p[0]
-    count=1
-    SNcount=1
-
-    while sol.success and sigma<sigmamax and sigma>sigmamin and len(x0)<=maxnodes:
-        sigma=sigma+dsigma
-        maxn=2*len(x0)
-        if(sigma>sigmamax):
-            sigma=sigmamax
-        if(sigma<sigmamin):
-            sigma=sigmamin
-
-        try:
-            start2=timeit.default_timer()
-            sol=solve_bvp(fun, pbc, x0, y0, p=np.array([p0]), fun_jac=funjac, bc_jac=bcjac, max_nodes=maxn,tol=tol/(np.max(np.diff(x0))),bc_tol=bctol)
-            stop2=timeit.default_timer()
-
-            if not sol.success:
-                raise Exception(sol.message)
-            if (np.abs(np.max(y0)-np.max(sol.y))/np.max(y0)>5e-1):
-                raise Exception('solution changed too much')
-            if (len(sol.x)>maxnodes):
-                raise Exception('mesh increased too much')
-            if (np.abs((p0-sol.p[0])/p0)>5e-1):
-                raise Exception('period changed too much '+ str(p0)+' '+str(sol.p[0]))
-
-        except Exception as e:
-            print(str(e),flush=True)
-            if verbose:
-                print('%f\t%.3e\t%i\t%f\t%i\t%f\t'%(sigma, dsigma,len(sol.x),sol.p[0],sol.niter,stop2-start2),end='\n',flush=True)
-            sigma=sigma-dsigma
-            dsigma=dsigma/2
-            sol=sols[-1]
-            count=1
-            if np.abs(dsigma)>dsigmamin:
-                continue
-            else:
-                if verbose:
-                    print('step size too small',flush=True)
-                break
-
-        if verbose:
-            print('%f\t%.3e\t%i\t%f\t%i\t%f\t'%(sigma, dsigma,len(sol.x),sol.p[0],sol.niter,stop2-start2),end='\n',flush=True)
-
-        sols.append(sol)
-        sigmas.append(sigma)
-        periods.append(sol.p[0])
-        orders.append(order(sol.x,sol.y))
-
-        np.save(filebase+'_sigmas.npy',sigmas)
-        np.save(filebase+'_periods.npy',periods)
-        np.save(filebase+'_orders.npy',orders)
-        np.save(filebase+'_times_'+str(len(sigmas)-1)+'.npy',sol.x)
-        np.save(filebase+'_phases_'+str(len(sigmas)-1)+'.npy',sol.y)
-
-        x0=sol.x
-        y0=sol.y
-        p0=sol.p[0]
-        SNcount=SNcount+1
-        count=count+1
-
-        #Check for saddle-node
-        bif=0
-        if SNcount>SNum:
-            ys=periods[-SNum:]
-            xs=sigmas[-SNum:]
-            xm=xs[-1]-(xs[-1]-xs[-3])/(ys[-1]-ys[-3])*ys[-1]
-            ym=ys[-1]
-            x,n=leastsq(lambda x: x[0]+x[1]*(ys-x[2])**2-xs,[xm,(xm-xs[0])/(ys[0]-ym)**2,ym])
-            bif=0
-            if np.abs(x[0]-sigmas[-1])<stol and (x[0]-sigmas[-1])/dsigma>0:
-                bif=1
-        if bif:
-            count=1
-            if verbose:
-                print("Saddle-node expected at %f %f. Looking for second branch"%(x[0],x[2]),flush=True)
-            y1=sols[-1].y
-            x0=sols[-1].x
-            interp=interp1d(sols[-2].x, sols[-2].y,axis=1)
-            y2=np.array([interp(t) for t in x0]).T
-
-            a=(y1*np.abs(sigmas[-2]-x[0])**0.5-y2*np.abs(sigmas[-1]-x[0])**0.5)/(np.abs(sigmas[-2]-x[0])**0.5-np.abs(sigmas[-1]-x[0])**0.5)
-            b=(y2-y1)/(np.abs(sigmas[-2]-x[0])**0.5-np.abs(sigmas[-1]-x[0])**0.5)
-            y0=a-b*np.abs(sigmas[-1]-x[0])**0.5
-            p0=2*x[2]-periods[-1]
-
-            start2=timeit.default_timer()
-            sol2=solve_bvp(fun, pbc, x0, y0, p=np.array([p0]), fun_jac=funjac, bc_jac=bcjac, max_nodes=maxn,tol=tol/(np.max(np.diff(x0))),bc_tol=bctol)
-            stop2=timeit.default_timer()
-
-
-            if (not sol2.success) or (np.abs(sol2.p[0]-p0) > np.abs(sol2.p[0]-periods[-1])):
-                if verbose:
-                    print("Couldn't find second branch.", (sol2.success), np.abs(sol2.p[0]-p0), np.abs(sol2.p[0]-periods[-1]), sol2.message, flush=True)
-                    print('%f\t%.3e\t%i\t%f\t%i\t%f\t'%(sigma, dsigma,len(sol2.x),sol2.p[0],sol2.niter,stop2-start2),end='\n',flush=True)
-                x0=sol.x
-                y0=sol.y
-                p0=sol.p[0]
-                while np.abs((sigma-x[0])/dsigma)<1:
-                    dsigma=dsigma/2
-
-            else:
-                if np.abs(sol2.p[0]-periods[-1])/sol2.p[0] < tol/(np.max(np.diff(x0))):
-                    if verbose:
-                        print("Cannot distinguish branches with current tolerance",periods[-1],sol2.p[0],0,flush=True)
-                    break
-                if verbose:
-                    print("Found second branch. Continuing.", periods[-1],sol2.p[0],flush=True)
-                    print('%f\t%.3e\t%i\t%f\t%i\t%f\t'%(sigma, -dsigma,len(sol2.x),sol2.p[0],sol2.niter,stop2-start2),end='\n',flush=True)
-
-                sols.append(sol2)
-                sigmas.append(sigma)
-                periods.append(sol2.p[0])
-                orders.append(order(sol2.x,sol2.y))
-
-                np.save(filebase+'_sigmas.npy',sigmas)
-                np.save(filebase+'_periods.npy',periods)
-                np.save(filebase+'_orders.npy',orders)
-                np.save(filebase+'_times_'+str(len(sigmas)-1)+'.npy',sol2.x)
-                np.save(filebase+'_phases_'+str(len(sigmas)-1)+'.npy',sol2.y)
-
-                x0=sol2.x
-                y0=sol2.y
-                p0=sol2.p[0]
-                dsigma=-dsigma
-                SNcount=1
-
-        if count>coarsen:
-            if len(x0)>2*minnodes:
-                print("Trying to coarsen.",flush=True)
-                #check sol.rms_residuals to decide whether/where to coarsen?
-                x1=np.concatenate([[x0[0]],x0[1:-1:2],[x0[-1]]])
-                y1=np.concatenate([y0[:,:1],y0[:,1:-1:2],y0[:,-1:]],axis=1)
-                start2=timeit.default_timer()
-                sol2=solve_bvp(fun, pbc, x1, y1, p=np.array([p0]), fun_jac=funjac, bc_jac=bcjac, max_nodes=maxn,tol=tol/(np.max(np.diff(x1))),bc_tol=bctol)
-                stop2=timeit.default_timer()
-                print('%f\t%.3e\t%i\t%f\t%i\t%f\t'%(sigma, dsigma,len(sol2.x),sol2.p[0],sol2.niter,stop2-start2),end='\n',flush=True)
-
-                if (sol2.success and len(sol2.x)<len(x0)):
-                    sols.append(sol2)
-                    sigmas.append(sigma)
-                    periods.append(sol2.p[0])
-                    orders.append(order(sol2.x,sol2.y))
-
-                    np.save(filebase+'_sigmas.npy',sigmas)
-                    np.save(filebase+'_periods.npy',periods)
-                    np.save(filebase+'_orders.npy',orders)
-                    np.save(filebase+'_times_'+str(len(sigmas)-1)+'.npy',sol2.x)
-                    np.save(filebase+'_phases_'+str(len(sigmas)-1)+'.npy',sol2.y)
-
-                    x0=sol2.x
-                    y0=sol2.y
-                    p0=sol2.p[0]
-
-            if np.abs(dsigma)<dsigmamax:
-                print("Trying to increase step.",flush=True)
-                dsigma=np.sign(dsigma)*np.min([dsigmamax,np.abs(dsigma)*2])
-            count=1
-
-    return sigmas,sols
-######################################################################################
-
 if __name__ == "__main__":
 
     #Command line arguments
@@ -300,17 +94,6 @@ if __name__ == "__main__":
     parser.add_argument("--rtime", type=float, required=False, dest='rtime', default=0., help='Time to start averaging order parameter. Default 1000.')
     parser.add_argument("--dt", type=float, required=False, dest='dt', default=0.1, help='Time step for averaging and output. Default 0.1.')
     parser.add_argument("--seed", type=int, required=False, dest='seed', default=1, help='Initial condition random seed. Default 1.')
-    parser.add_argument("--continue", type=int, required=False, dest='cont', default=0, help='Continue the solution. Default 0.')
-    parser.add_argument("--dsigma", type=float, required=False, dest='dsigma', default=1e-3, help='Sigma step for continuation. Default 5e-4.')
-    parser.add_argument("--dsigmamax", type=float, required=False, dest='dsigmamax', default=1e-3, help='Maximum continuation step. Default 1e-3.')
-    parser.add_argument("--dsigmamin", type=float, required=False, dest='dsigmamin', default=1e-8, help='Minimum continuation step. Default 1e-6.')
-    parser.add_argument("--sigmamax", type=float, required=False, dest='sigmamax', default=0.5, help='Maximum sigma for continuation. Default 0.5.')
-    parser.add_argument("--sigmamin", type=float, required=False, dest='sigmamin', default=0.2501, help='Minimum sigma for continuation. Default 0.2501.')
-    parser.add_argument("--tol", type=float, required=False, dest='tol', default=1e-4, help='Tolerance for boundary value problem. Default 1e-4.')
-    parser.add_argument("--stol", type=float, required=False, dest='stol', default=1e-4, help='Tolerance for saddle-node position. Default 1e-4.')
-    parser.add_argument("--coarsen", type=int, required=False, dest='coarsen', default=5, help='Number of successful steps before attempting to coarsen. Default 5.')
-    parser.add_argument("--maxnodes", type=int, required=False, dest='maxnodes', default=10000, help='Maximum nodes for limit cycles. Default 10000.')
-    parser.add_argument("--minnodes", type=int, required=False, dest='minnodes', default=500, help='Minimum nodes for limit cycles. Default 500.')
 
     args = parser.parse_args()
 
@@ -325,16 +108,6 @@ if __name__ == "__main__":
     seed = args.seed
     filebase = args.filebase
     output = args.output
-    sigmamin = args.sigmamin
-    sigmamax = args.sigmamax
-    dsigmamin = args.dsigmamin
-    dsigmamax = args.dsigmamax
-    dsigma = args.dsigma
-    maxnodes = args.maxnodes
-    minnodes = args.minnodes
-    tol = args.tol
-    stol = args.stol
-    coarsen = args.coarsen
 
     if t3>t1:
         t3=t1-dt
@@ -388,9 +161,7 @@ if __name__ == "__main__":
     mins=mins[np.where(norms[mins]<1)[0]]
 
     p0=0
-    order=np.mean(r[int(t3 / dt):])
-    wind1=0
-    wind2=0
+    order=np.mean(r[int(t3 / dt):])**0.5
     norm=0
 
     if(len(mins)>2):
@@ -399,14 +170,11 @@ if __name__ == "__main__":
         if n0>int((t1-t3)/dt):
             n0=0
         # norm=np.linalg.norm(np.diff(angles[-n0:],axis=0),ord=2)/10**0.5
-        order=np.mean(r[-n0:])
+        order=np.mean(r[-n0:])**0.5
         wind1=np.mean(np.mod(np.diff(thetas[-n0:],axis=1)+np.pi,2*np.pi)-np.pi)
         wind2=np.mean(np.mod(np.diff(phis[-n0:],axis=1)+np.pi,2*np.pi)-np.pi)
         norm=(wind1**2+wind2**2)**0.5
 
-        # if norm<1:
-        #     norm=0
-        #     p0=0
 
     if(output>0):
         print(seed, order, p0, norm)
@@ -419,27 +187,3 @@ if __name__ == "__main__":
     print(stop - start, file=f)
     print(seed,order,p0,norm, file=f)
     f.close()
-
-    if args.cont:
-        x0=(times[-int(p0/dt):]-times[-int(p0/dt)])/p0
-        y0=phases[-int(p0/dt):].T
-        start = timeit.default_timer()
-        sigmas,sols=cont(filebase+'lc_forward',omega,beta,gamma,sigma,x0,y0,p0,sigmamin,sigmamax,dsigma,dsigmamin=dsigmamin,dsigmamax=dsigmamax,maxnodes=maxnodes,minnodes=minnodes,tol=tol,bctol=tol,stol=stol,coarsen=coarsen)
-        sigmas2,sols2=cont(filebase+'lc_backward',omega,beta,gamma,sigma,x0,y0,p0,sigmamin,sigmamax,-dsigma,dsigmamin=dsigmamin,dsigmamax=dsigmamax,maxnodes=maxnodes,minnodes=minnodes,tol=tol,bctol=tol,stol=stol,coarsen=coarsen)
-
-        y0=np.concatenate([-np.flip(y0[2*N:3*N],axis=0),-np.flip(y0[3*N:],axis=0),np.flip(y0[:N],axis=0),np.flip(y0[N:2*N],axis=0)])
-        p0=times[minds[1]]-times[minds[0]]
-        x0=1-np.flip((times[minds[0]:minds[1]+1]-times[minds[0]])/p0)
-        sigmas,sols=cont(filebase+'lc_uforward',-omega,-beta,gamma,-sigma,x0,y0,p0,-sigmamax,-sigmamin,dsigma,dsigmamin=dsigmamin,dsigmamax=dsigmamax,maxnodes=maxnodes,minnodes=minnodes,tol=tol,bctol=tol,stol=stol,coarsen=coarsen)
-        sigmas,sols=cont(filebase+'lc_ubackward',-omega,-beta,gamma,-sigma,x0,y0,p0,-sigmamax,-sigmamin,-dsigma,dsigmamin=dsigmamin,dsigmamax=dsigmamax,maxnodes=maxnodes,minnodes=minnodes,tol=tol,bctol=tol,stol=stol,coarsen=coarsen)
-
-        # phases=sols[0].y.T.copy()
-        # y0=np.concatenate([-np.flip(phases[:,2*N:3*N]),-np.flip(phases[:,3*N:]),np.flip(phases[:,:N]),np.flip(phases[:,N:2*N])],axis=1).T
-        # x0=1-np.flip(sols[0].x)
-        # x0=1-np.flip(x0)
-        # sigmas,sols=cont(filebase+'lc_uforward',-omega,-beta,gamma,-sigma,x0,y0,p0,-sigmamax,-sigmamin,dsigma,dsigmamin=dsigmamin,dsigmamax=dsigmamax,maxnodes=maxnodes,minnodes=minnodes,tol=tol,bctol=tol,stol=stol,coarsen=coarsen)
-        # sigmas,sols=cont(filebase+'lc_uforward',-omega,-beta,gamma,-sigma,x0,y0,p0,-sigmamax,-sigmamin,-dsigma,dsigmamin=dsigmamin,dsigmamax=dsigmamax,maxnodes=maxnodes,minnodes=minnodes,tol=tol,bctol=tol,stol=stol,coarsen=coarsen)
-        # sigmas2,sols2=cont(filebase+'lc_ubackward',omega,beta,gamma,sigma,x0,y0,p0,sigmamin,sigmamax,-dsigma,dsigmamin=dsigmamin,dsigmamax=dsigmamax,maxnodes=maxnodes,minnodes=minnodes,tol=tol,bctol=tol,stol=stol,coarsen=coarsen)
-
-        stop = timeit.default_timer()
-        print('runtime: %f' % (stop - start),flush=True)
