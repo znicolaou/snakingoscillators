@@ -1,6 +1,6 @@
 import os.path
 
-for i in range(41,0,-1):
+for i in range(30,0,-1):
   if(os.path.exists('chimeras/'+str(i)+'cycle.dat')):
     print("chimera"+str(i)+"\n\n")
     forward=run('janus_rel',c='forward',dat='chimeras/'+str(i)+'cycle.dat')
