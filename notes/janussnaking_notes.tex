@@ -68,10 +68,9 @@ Since the phase equations depend only on phase differences, the equations are in
 It is straightforward to continue of the Cartesian form of Eqs.~\eqref{janus_rot1}-\eqref{janus_rot2} in AUTO.
 
 \section{Numerical continuation}
-We have continued one chimera branch in a ring of $10$ Janus oscillators using custom python code, which were validated against AUTO when possible. Figure \ref{fig1} shows the results of thi continuation. The stable chimera branch (labeled SC) undergoes a torus bifurcation (TB) near $\sigma = 0.3728$ and becomes unstable. The two unstable Floquet multipliers then coalesce just above (TB) and one unstable multiplier then coalesces with the neutrally stable multipliers at a saddle-node bifurcation (SN1) at $\sigma =0.373$
+We have continued chimera branches in a ring of $16$ Janus oscillators using custom python code and AUTO. Figure \ref{fig1} shows the results of this continuation. OBSERVATIONS: i) The period of each chimera branch increases with the continuation and eventually causes a stop. Is this a sign that they undergo SNIC? Can we find the corresponding saddle and node? ii) Chimera branches have a dual time/parity reversal. Several branches appear become self-dual at a limit point around $0.25<\sigma<0.27$. This is a branch point, since all Floquet multipliers must be neutrally stable by symmetry. AUTO struggles here, and our python BVP may be improved. Can we implement the OK Floquet multipliers in solvebvp??
 
 
- neutrally stable remotely synchronized solution branch undergoes a similar bifurcation at the saddle-node on the invariant circle bifurcation at $\sigma=0.25$.  With increasing $\sigma$, the stable chimera limit cycle branch eventually reaches undergoes a torus bifurcation before reaching a limit point and turning around. The continuation fails to converge before we see any snaking (and the system may be too small for snaking to occur in the first place).
 
 Numerically continuing limit cycle solutions is slow and can be difficult.  Consequently, we have not been able to track the subsequent snaking of the unstable chimera branch, and we have restricted our analysis to a ring of only $10$ Janus oscillators.
 \begin{figure}[hb]

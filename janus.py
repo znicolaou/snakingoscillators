@@ -76,6 +76,219 @@ def runsim (N, t1, t3, dt, omega, beta, sigma, gamma, phase_init, sigma0=0.35, t
     r=csum*csum+ssum*ssum
 
     return phases,times,r
+
+######################################################################################
+def order(x,y):
+    N=int(len(y)/4)
+    return np.sum(np.diff(x)*np.abs(np.sum(y[:N]+1j*y[N:2*N],axis=0)+np.sum(y[2*N:3*N]+1j*y[3*N:],axis=0))[:-1]/(2*N))
+
+######################################################################################
+#Parameterize the solution and sigma by a pseudo-arclength s and add extend the system with a pseudo-arclength equation, like AUTO
+#Use the Jacobian to find create a solution predictor/direction?
+#Modify solve_bvp to interrupt the LU solve and find Floquet multipliers from eigenvalue of reduced system
+#Use sparse jacobian matrix
+def cont (filebase,omega,beta,gamma,sigma0,x0,y0,p0,sigmamin,sigmamax,dsigma,dsigmamax=1e-3,dsigmamin=1e-6,verbose=True, maxnodes=10000, minnodes=100, tol=1e-3, bctol=1e-3, stol=1e-4, SNum=4, coarsen=5):
+    sols=[]
+    sigmas=[]
+    periods=[]
+    orders=[]
+    start=timeit.default_timer()
+    N=int(len(y0)/4)
+    bc=y0[0,0]
+    sigma=sigma0
+
+    def fun(ts,Xts,p):
+        return p[0]*np.transpose([janus(p[0]*ts[i],Xts[:,i], N, omega, sigma, beta, gamma,sigma,-1) for i in range(len(ts))])
+    def pbc(xa,xb,p):
+        return np.concatenate([xb-xa,[xa[0]-bc]])
+    def funjac(ts,Xts,p):
+        return p[0]*np.transpose([janus_jac(p[0]*ts[i],Xts[:,i], N, omega, sigma, beta, gamma,sigma,-1) for i in range(len(ts))],(1,2,0)),  np.transpose([fun(ts,Xts,p)/p[0]],(1,0,2))
+    def bcjac(xa,xb,p):
+        ret0=np.zeros(4*N)
+        ret1=np.zeros(4*N)
+        ret0[0]=1
+        return np.concatenate([-np.identity(4*N),ret0[np.newaxis,:]],axis=0),np.concatenate([np.identity(4*N),ret1[np.newaxis,:]],axis=0),np.zeros((4*N+1,1))
+
+    start2=timeit.default_timer()
+    sol=solve_bvp(fun, pbc, x0, y0, p=np.array([p0]), fun_jac=funjac, bc_jac=bcjac, max_nodes=maxnodes,tol=tol/(np.max(np.diff(x0))),bc_tol=bctol)
+    stop2=timeit.default_timer()
+    if verbose:
+        print(sol.message,flush=True)
+        print('%f\t%.3e\t%i\t%f\t%i\t%f\t'%(sigma, dsigma,len(sol.x),sol.p[0],sol.niter,stop2-start2),end='\n',flush=True)
+    sols.append(sol)
+    sigmas.append(sigma)
+    periods.append(sol.p[0])
+    orders.append(order(sol.x,sol.y))
+
+    np.save(filebase+'_sigmas.npy',sigmas)
+    np.save(filebase+'_periods.npy',periods)
+    np.save(filebase+'_orders.npy',orders)
+    np.save(filebase+'_times_'+str(len(sigmas)-1)+'.npy',sol.x)
+    np.save(filebase+'_phases_'+str(len(sigmas)-1)+'.npy',sol.y)
+
+    x0=sol.x
+    y0=sol.y
+    p0=sol.p[0]
+    count=1
+    SNcount=1
+
+    while sol.success and sigma<sigmamax and sigma>sigmamin and len(x0)<=maxnodes:
+        sigma=sigma+dsigma
+        maxn=2*len(x0)
+        if(sigma>sigmamax):
+            sigma=sigmamax
+        if(sigma<sigmamin):
+            sigma=sigmamin
+
+        try:
+            start2=timeit.default_timer()
+            sol=solve_bvp(fun, pbc, x0, y0, p=np.array([p0]), fun_jac=funjac, bc_jac=bcjac, max_nodes=maxn,tol=tol/(np.max(np.diff(x0))),bc_tol=bctol)
+            stop2=timeit.default_timer()
+
+            if not sol.success:
+                raise Exception(sol.message)
+            if (np.abs(np.max(y0)-np.max(sol.y))/np.max(y0)>5e-1):
+                raise Exception('solution changed too much')
+            if (len(sol.x)>maxnodes):
+                raise Exception('mesh increased too much')
+            if (np.abs((p0-sol.p[0])/p0)>5e-1):
+                raise Exception('period changed too much '+ str(p0)+' '+str(sol.p[0]))
+
+        except Exception as e:
+            print(str(e),flush=True)
+            if verbose:
+                print('%f\t%.3e\t%i\t%f\t%i\t%f\t'%(sigma, dsigma,len(sol.x),sol.p[0],sol.niter,stop2-start2),end='\n',flush=True)
+            sigma=sigma-dsigma
+            dsigma=dsigma/2
+            sol=sols[-1]
+            count=1
+            if np.abs(dsigma)>dsigmamin:
+                continue
+            else:
+                if verbose:
+                    print('step size too small',flush=True)
+                break
+
+        if verbose:
+            print('%f\t%.3e\t%i\t%f\t%i\t%f\t'%(sigma, dsigma,len(sol.x),sol.p[0],sol.niter,stop2-start2),end='\n',flush=True)
+
+        sols.append(sol)
+        sigmas.append(sigma)
+        periods.append(sol.p[0])
+        orders.append(order(sol.x,sol.y))
+
+        np.save(filebase+'_sigmas.npy',sigmas)
+        np.save(filebase+'_periods.npy',periods)
+        np.save(filebase+'_orders.npy',orders)
+        np.save(filebase+'_times_'+str(len(sigmas)-1)+'.npy',sol.x)
+        np.save(filebase+'_phases_'+str(len(sigmas)-1)+'.npy',sol.y)
+
+        x0=sol.x
+        y0=sol.y #We could use jacobian for y0 predictor here. AUTO does this with the solution direction
+        p0=sol.p[0]
+        SNcount=SNcount+1
+        count=count+1
+
+        #Check for saddle-node
+        bif=0
+        if SNcount>SNum:
+            ys=periods[-SNum:]
+            xs=sigmas[-SNum:]
+            xm=xs[-1]-(xs[-1]-xs[-3])/(ys[-1]-ys[-3])*ys[-1]
+            ym=ys[-1]
+            x,n=leastsq(lambda x: x[0]+x[1]*(ys-x[2])**2-xs,[xm,(xm-xs[0])/(ys[0]-ym)**2,ym])
+            bif=0
+            if np.abs(x[0]-sigmas[-1])<stol and (x[0]-sigmas[-1])/dsigma>0:
+                bif=1
+            bif=0
+        if bif:
+            count=1
+            if verbose:
+                print("Saddle-node expected at %f %f. Looking for second branch"%(x[0],x[2]),flush=True)
+            y1=sols[-1].y
+            x0=sols[-1].x
+            interp=interp1d(sols[-2].x, sols[-2].y,axis=1)
+            y2=np.array([interp(t) for t in x0]).T
+
+            a=(y1*np.abs(sigmas[-2]-x[0])**0.5-y2*np.abs(sigmas[-1]-x[0])**0.5)/(np.abs(sigmas[-2]-x[0])**0.5-np.abs(sigmas[-1]-x[0])**0.5)
+            b=(y2-y1)/(np.abs(sigmas[-2]-x[0])**0.5-np.abs(sigmas[-1]-x[0])**0.5)
+            y0=a-b*np.abs(sigmas[-1]-x[0])**0.5
+            p0=2*x[2]-periods[-1]
+
+            start2=timeit.default_timer()
+            sol2=solve_bvp(fun, pbc, x0, y0, p=np.array([p0]), fun_jac=funjac, bc_jac=bcjac, max_nodes=maxn,tol=tol/(np.max(np.diff(x0))),bc_tol=bctol)
+            stop2=timeit.default_timer()
+
+
+            if (not sol2.success) or (np.abs(sol2.p[0]-p0) > np.abs(sol2.p[0]-periods[-1])):
+                if verbose:
+                    print("Couldn't find second branch.", (sol2.success), np.abs(sol2.p[0]-p0), np.abs(sol2.p[0]-periods[-1]), sol2.message, flush=True)
+                    print('%f\t%.3e\t%i\t%f\t%i\t%f\t'%(sigma, dsigma,len(sol2.x),sol2.p[0],sol2.niter,stop2-start2),end='\n',flush=True)
+                x0=sol.x
+                y0=sol.y
+                p0=sol.p[0]
+                while np.abs((sigma-x[0])/dsigma)<1:
+                    dsigma=dsigma/2
+
+            else:
+                if np.abs(sol2.p[0]-periods[-1])/sol2.p[0] < tol/(np.max(np.diff(x0))):
+                    if verbose:
+                        print("Cannot distinguish branches with current tolerance",periods[-1],sol2.p[0],0,flush=True)
+                    break
+                if verbose:
+                    print("Found second branch. Continuing.", periods[-1],sol2.p[0],flush=True)
+                    print('%f\t%.3e\t%i\t%f\t%i\t%f\t'%(sigma, -dsigma,len(sol2.x),sol2.p[0],sol2.niter,stop2-start2),end='\n',flush=True)
+
+                sols.append(sol2)
+                sigmas.append(sigma)
+                periods.append(sol2.p[0])
+                orders.append(order(sol2.x,sol2.y))
+
+                np.save(filebase+'_sigmas.npy',sigmas)
+                np.save(filebase+'_periods.npy',periods)
+                np.save(filebase+'_orders.npy',orders)
+                np.save(filebase+'_times_'+str(len(sigmas)-1)+'.npy',sol2.x)
+                np.save(filebase+'_phases_'+str(len(sigmas)-1)+'.npy',sol2.y)
+
+                x0=sol2.x
+                y0=sol2.y
+                p0=sol2.p[0]
+                dsigma=-dsigma
+                SNcount=1
+
+        if count>coarsen:
+            if len(x0)>2*minnodes:
+                print("Trying to coarsen.",flush=True)
+                #check sol.rms_residuals to decide whether/where to coarsen?
+                x1=np.concatenate([[x0[0]],x0[1:-1:2],[x0[-1]]])
+                y1=np.concatenate([y0[:,:1],y0[:,1:-1:2],y0[:,-1:]],axis=1)
+                start2=timeit.default_timer()
+                sol2=solve_bvp(fun, pbc, x1, y1, p=np.array([p0]), fun_jac=funjac, bc_jac=bcjac, max_nodes=maxn,tol=tol/(np.max(np.diff(x1))),bc_tol=bctol)
+                stop2=timeit.default_timer()
+                print('%f\t%.3e\t%i\t%f\t%i\t%f\t'%(sigma, dsigma,len(sol2.x),sol2.p[0],sol2.niter,stop2-start2),end='\n',flush=True)
+
+                if (sol2.success and len(sol2.x)<len(x0)):
+                    sols.append(sol2)
+                    sigmas.append(sigma)
+                    periods.append(sol2.p[0])
+                    orders.append(order(sol2.x,sol2.y))
+
+                    np.save(filebase+'_sigmas.npy',sigmas)
+                    np.save(filebase+'_periods.npy',periods)
+                    np.save(filebase+'_orders.npy',orders)
+                    np.save(filebase+'_times_'+str(len(sigmas)-1)+'.npy',sol2.x)
+                    np.save(filebase+'_phases_'+str(len(sigmas)-1)+'.npy',sol2.y)
+
+                    x0=sol2.x
+                    y0=sol2.y
+                    p0=sol2.p[0]
+
+            if np.abs(dsigma)<dsigmamax:
+                print("Trying to increase step.",flush=True)
+                dsigma=np.sign(dsigma)*np.min([dsigmamax,np.abs(dsigma)*2])
+            count=1
+
+    return sigmas,sols,orders,periods
 ######################################################################################
 
 ######################################################################################

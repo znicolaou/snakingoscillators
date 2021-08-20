@@ -60,7 +60,7 @@ if __name__ == "__main__":
 		y0=np.load(args.filebase+"ic.npy")
 	else:
 		if args.verbose==1:
-			print("using random initial contions",flush=True)
+			print("using random initial conditions",flush=True)
 		y0[:N] = args.init*2*np.pi*(np.random.random(N)-0.5)
 	lengths=np.array([1+args.delta*(-1)**i for i in range(N)])
 
