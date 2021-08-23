@@ -1,0 +1,14 @@
+import os.path
+
+for i in range(10,0,-1):
+  if(os.path.exists('chimeras/'+str(i)+'cycle.dat')):
+    print("chimera"+str(i)+"\n\n")
+    forward=run('janus_rel',c='forward',dat='chimeras/'+str(i)+'cycle.dat')
+    forward=rl(forward)
+    sv(forward,str(i)+'fw')
+    forward.writeRawFilename(str(i)+'fw.dat')
+    reverse=run(str(i)+'fw',e='janus_rel',c='reverse',dat='chimeras/'+str(i)+'cycle.dat')
+    reverse=rl(reverse)
+    sv(reverse,str(i)+'rv')
+    reverse.writeRawFilename(str(i)+'rv.dat')
+cl()

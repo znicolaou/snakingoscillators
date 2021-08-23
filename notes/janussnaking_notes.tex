@@ -70,9 +70,8 @@ It is straightforward to continue of the Cartesian form of Eqs.~\eqref{janus_rot
 \section{Numerical continuation}
 We have continued chimera branches in a ring of $16$ Janus oscillators using custom python code and AUTO. Figure \ref{fig1} shows the results of this continuation. OBSERVATIONS: i) The period of each chimera branch increases with the continuation and eventually causes a stop. Is this a sign that they undergo SNIC? Can we find the corresponding saddle and node? ii) Chimera branches have a dual time/parity reversal. Several branches appear become self-dual at a limit point around $0.25<\sigma<0.27$. This is a branch point, since all Floquet multipliers must be neutrally stable by symmetry. AUTO struggles here, and our python BVP may be improved. Can we implement the OK Floquet multipliers in solvebvp??
 
+NOTE: We should continue the unstable steady cluster twisted solutions! They will probably appear in the SNICs, and the chimeras can be understood as a continuation of the heteroclinic connection.
 
-
-Numerically continuing limit cycle solutions is slow and can be difficult.  Consequently, we have not been able to track the subsequent snaking of the unstable chimera branch, and we have restricted our analysis to a ring of only $10$ Janus oscillators.
 \begin{figure}[hb]
 \includegraphics[width=\columnwidth]{diagram.pdf}
 \caption{Bifurcation diagram with the synchronous stable branch (thick red), synchronous unstable branch (thin black), stable limit-cycle chimeras (green dots), and unstable limit-cycle chimeras (blue circles). \label{fig1}}

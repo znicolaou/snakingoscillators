@@ -205,7 +205,7 @@ int pvls (integer ndim, const doublereal *u,
     csum=1.0/(2*N)*(1.0+u[3*(N-1)]);
     ssum=1.0/(2*N)*(0.0+u[3*(N-1)+N]);
     for (int k=0; k<N-1; k++){
-      csum+=1.0/(2*N)*(u[k]+u[2*(N-1)]);
+      csum+=1.0/(2*N)*(u[k]+u[2*(N-1)+k]);
       ssum+=1.0/(2*N)*(u[(N-1)+k]+u[2*(N-1)+N+k]);
     }
     order=csum*csum+ssum*ssum;
