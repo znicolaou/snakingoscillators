@@ -37,9 +37,7 @@ int func (integer ndim, const doublereal *u, const integer *icp,
     return 0;
   }
 
-  //just make loop j=1; j<N-2 and add two cases outside loop...
   //j=0
-  // f[j]=-y[j]*(beta*(x[j]*v[j+1]-w[j+1]*y[j]-v[0])+sigma*(x[j]*v[(j+2)%N]-w[(j+2)%N]*y[j]-v[1]))+gamma*(1-x[j]*x[j]-y[j]*y[j])*x[j];
   ARRAY2D(dfdu,0,0)=-y[0]*(beta*(v[1])+sigma*(v[2]))+gamma*(1-3*x[0]*x[0]-y[0]*y[0]); //Jxx
   ARRAY2D(dfdu,0,N-1+0)=-(beta*(x[0]*v[1]-2*w[1]*y[0]-v[0])+sigma*(x[0]*v[2]-2*w[2]*y[0]-v[1]))+gamma*(-2*y[0])*x[0]; //Jxy
   ARRAY2D(dfdu,0,2*(N-1)+0+1)=-y[0]*(beta*(-y[0])); //Jxw
@@ -48,7 +46,6 @@ int func (integer ndim, const doublereal *u, const integer *icp,
   ARRAY2D(dfdu,0,2*(N-1)+N+1)=-y[0]*(beta*(x[0])-sigma); //Jxv
   ARRAY2D(dfdu,0,2*(N-1)+N+0+2)=-y[0]*(sigma*(x[0])); //Jxv
 
-  // f[N-1+j]=x[j]*(beta*(x[j]*v[j+1]-w[j+1]*y[j]-v[0])+sigma*(x[j]*v[(j+2)%N]-w[(j+2)%N]*y[j]-v[1]))+gamma*(1-x[j]*x[j]-y[j]*y[j])*y[j];
   ARRAY2D(dfdu,N-1+0,0)=(beta*(2*x[0]*v[1]-w[1]*y[0]-v[0])+sigma*(2*x[0]*v[2]-w[2]*y[0]-v[1]))+gamma*(-2*x[0])*y[0]; //Jyx
   ARRAY2D(dfdu,N-1+0,N-1+0)=x[0]*(beta*(-w[1])+sigma*(-w[2]))+gamma*(1-x[0]*x[0]-3*y[0]*y[0]); //Jyy
   ARRAY2D(dfdu,N-1+0,2*(N-1)+0+1)=x[0]*(beta*(-y[0])); //Jyw
@@ -58,7 +55,6 @@ int func (integer ndim, const doublereal *u, const integer *icp,
   ARRAY2D(dfdu,N-1+0,2*(N-1)+N+0+2)=x[0]*(sigma*(x[0])); //Jyv
 
   //j=N-2
-  // f[j]=-y[j]*(beta*(x[j]*v[j+1]-w[j+1]*y[j]-v[0])+sigma*(x[j]*v[(j+2)%N]-w[(j+2)%N]*y[j]-v[1]))+gamma*(1-x[j]*x[j]-y[j]*y[j])*x[j];
   ARRAY2D(dfdu,N-2,N-2)=-y[N-2]*(beta*(v[N-1])+sigma*(v[0]))+gamma*(1-3*x[N-2]*x[N-2]-y[N-2]*y[N-2]); //Jxx
   ARRAY2D(dfdu,N-2,N-1+N-2)=-(beta*(x[N-2]*v[N-1]-2*w[N-1]*y[N-2]-v[0])+sigma*(x[N-2]*v[0]-2*w[0]*y[N-2]-v[1]))+gamma*(-2*y[N-2])*x[N-2]; //Jxy
   ARRAY2D(dfdu,N-2,2*(N-1)+N-2+1)=-y[N-2]*(beta*(-y[N-2])); //Jxw
@@ -67,7 +63,6 @@ int func (integer ndim, const doublereal *u, const integer *icp,
   ARRAY2D(dfdu,N-2,2*(N-1)+N+1)=-y[N-2]*(-sigma); //Jxv
   ARRAY2D(dfdu,N-2,2*(N-1)+N+N-1)=-y[N-2]*(beta*(x[N-2])); //Jxv
 
-  // f[N-1+j]=x[j]*(beta*(x[j]*v[j+1]-w[j+1]*y[j]-v[0])+sigma*(x[j]*v[(j+2)%N]-w[(j+2)%N]*y[j]-v[1]))+gamma*(1-x[j]*x[j]-y[j]*y[j])*y[j];
   ARRAY2D(dfdu,N-1+N-2,N-2)=(beta*(2*x[N-2]*v[N-1]-w[N-1]*y[N-2]-v[0])+sigma*(2*x[N-2]*v[0]-w[0]*y[N-2]-v[1]))+gamma*(-2*x[N-2])*y[N-2]; //Jyx
   ARRAY2D(dfdu,N-1+N-2,N-1+N-2)=x[N-2]*(beta*(-w[N-1])+sigma*(-w[0]))+gamma*(1-x[N-2]*x[N-2]-3*y[N-2]*y[N-2]); //Jyy
   ARRAY2D(dfdu,N-1+N-2,2*(N-1)+N-1)=x[N-2]*(beta*(-y[N-2])); //Jyw
@@ -77,7 +72,6 @@ int func (integer ndim, const doublereal *u, const integer *icp,
   ARRAY2D(dfdu,N-1+N-2,2*(N-1)+N+N-1)=x[N-2]*(beta*(x[N-2])); //Jyv
 
   for(j=1; j<N-2; j++){
-    // f[j]=-y[j]*(beta*(x[j]*v[j+1]-w[j+1]*y[j]-v[0])+sigma*(x[j]*v[(j+2)%N]-w[(j+2)%N]*y[j]-v[1]))+gamma*(1-x[j]*x[j]-y[j]*y[j])*x[j];
     ARRAY2D(dfdu,j,j)=-y[j]*(beta*(v[j+1])+sigma*(v[(j+2)]))+gamma*(1-3*x[j]*x[j]-y[j]*y[j]); //Jxx
     ARRAY2D(dfdu,j,N-1+j)=-(beta*(x[j]*v[j+1]-2*w[j+1]*y[j]-v[0])+sigma*(x[j]*v[(j+2)]-2*w[(j+2)]*y[j]-v[1]))+gamma*(-2*y[j])*x[j]; //Jxy
     ARRAY2D(dfdu,j,2*(N-1)+j+1)=-y[j]*(beta*(-y[j])); //Jxw
@@ -87,7 +81,6 @@ int func (integer ndim, const doublereal *u, const integer *icp,
     ARRAY2D(dfdu,j,2*(N-1)+N+j+1)=-y[j]*(beta*(x[j])); //Jxv
     ARRAY2D(dfdu,j,2*(N-1)+N+(j+2)%N)=-y[j]*(sigma*(x[j])); //Jxv
 
-    // f[N-1+j]=x[j]*(beta*(x[j]*v[j+1]-w[j+1]*y[j]-v[0])+sigma*(x[j]*v[(j+2)%N]-w[(j+2)%N]*y[j]-v[1]))+gamma*(1-x[j]*x[j]-y[j]*y[j])*y[j];
     ARRAY2D(dfdu,N-1+j,j)=(beta*(2*x[j]*v[j+1]-w[j+1]*y[j]-v[0])+sigma*(2*x[j]*v[(j+2)]-w[(j+2)]*y[j]-v[1]))+gamma*(-2*x[j])*y[j]; //Jyx
     ARRAY2D(dfdu,N-1+j,N-1+j)=x[j]*(beta*(-w[j+1])+sigma*(-w[(j+2)]))+gamma*(1-x[j]*x[j]-3*y[j]*y[j]); //Jyy
     ARRAY2D(dfdu,N-1+j,2*(N-1)+j+1)=x[j]*(beta*(-y[j])); //Jyw
@@ -98,13 +91,12 @@ int func (integer ndim, const doublereal *u, const integer *icp,
     ARRAY2D(dfdu,N-1+j,2*(N-1)+N+(j+2))=x[j]*(sigma*(x[j])); //Jyv
   }
   //j=0
-  // f[2*(N-1)+0]=-v[0]*(-omega+beta*(-2*v[0])+sigma*(w[0]*y[N-2]-v[0]*x[N-2]-v[1]))+gamma*(1-w[0]*w[0]-v[0]*v[0])*w[0];
   ARRAY2D(dfdu,2*(N-1)+0,N-2)=-v[0]*(sigma*(-v[0])); //Jwx
   ARRAY2D(dfdu,2*(N-1)+0,N-1+N-2)=-v[0]*(sigma*(w[0])); //Jwy
   ARRAY2D(dfdu,2*(N-1)+0,2*(N-1)+0)=-v[0]*(sigma*(y[N-2]))+gamma*(1-3*w[0]*w[0]-v[0]*v[0]); //Jww
   ARRAY2D(dfdu,2*(N-1)+0,2*(N-1)+N+0)=-(-omega+beta*(-4*v[0])+sigma*(w[0]*y[N-2]-2*v[0]*x[N-2]-v[1]))+gamma*(-2*v[0])*w[0]; //Jwv
   ARRAY2D(dfdu,2*(N-1)+0,2*(N-1)+N+1)=-v[0]*(-sigma); //Jwv
-  // f[2*(N-1)+N+0]=w[0]*(-omega+beta*(-2*v[0])+sigma*(w[0]*y[N-2]-v[0]*x[N-2]-v[1]))+gamma*(1-w[0]*w[0]-v[0]*v[0])*v[0];
+
   ARRAY2D(dfdu,2*(N-1)+N+0,N-2)=w[0]*(sigma*(-v[0])); //Jvx
   ARRAY2D(dfdu,2*(N-1)+N+0,N-1+N-2)=w[0]*(sigma*(w[0])); //Jvy
   ARRAY2D(dfdu,2*(N-1)+N+0,2*(N-1)+0)=(-omega+beta*(-2*v[0])+sigma*(2*w[0]*y[N-2]-v[0]*x[N-2]-v[1]))+gamma*(-2*w[0])*v[0]; //Jvw
@@ -112,13 +104,12 @@ int func (integer ndim, const doublereal *u, const integer *icp,
   ARRAY2D(dfdu,2*(N-1)+N+0,2*(N-1)+N+1)=w[0]*(-sigma); //Jvv
 
   //j=1
-  // f[2*(N-1)+1]=-v[1]*(-omega+beta*(w[1]*y[0]-v[1]*x[0]-v[0])+sigma*(-2*v[1]))+gamma*(1-w[1]*w[1]-v[1]*v[1])*w[1];
   ARRAY2D(dfdu,2*(N-1)+1,0)=-v[1]*(beta*(-v[1])); //Jwx
   ARRAY2D(dfdu,2*(N-1)+1,N-1+0)=-v[1]*(beta*(w[1])); //Jwy
   ARRAY2D(dfdu,2*(N-1)+1,2*(N-1)+1)=-v[1]*(beta*(y[0]))+gamma*(1-3*w[1]*w[1]-v[1]*v[1]); //Jww
   ARRAY2D(dfdu,2*(N-1)+1,2*(N-1)+N+1)=-(-omega+beta*(w[1]*y[0]-2*v[1]*x[0]-v[0])+sigma*(-4*v[1]))+gamma*(-2*v[1])*w[1]; //Jwv
   ARRAY2D(dfdu,2*(N-1)+1,2*(N-1)+N+0)=-v[1]*(-beta); //Jwv
-  // f[2*(N-1)+N+1]=w[1]*(-omega+beta*(w[1]*y[0]-v[1]*x[0]-v[0])+sigma*(-2*v[1]))+gamma*(1-w[1]*w[1]-v[1]*v[1])*v[1];
+
   ARRAY2D(dfdu,2*(N-1)+N+1,0)=w[1]*(beta*(-v[1])); //Jvx
   ARRAY2D(dfdu,2*(N-1)+N+1,N-1+0)=w[1]*(beta*(w[1])); //Jvy
   ARRAY2D(dfdu,2*(N-1)+N+1,2*(N-1)+1)=(-omega+beta*(2*w[1]*y[0]-v[1]*x[0]-v[0])+sigma*(-2*v[1]))+gamma*(-2*w[1])*v[1]; //Jvw
@@ -126,7 +117,6 @@ int func (integer ndim, const doublereal *u, const integer *icp,
   ARRAY2D(dfdu,2*(N-1)+N+1,2*(N-1)+N+0)=w[1]*(-beta); //Jvv
 
   for(j=2; j<N; j++){
-    // f[2*(N-1)+j]=-v[j]*(-omega+beta*(w[j]*y[j-1]-v[j]*x[j-1]-v[0])+sigma*(w[j]*y[j-2]-v[j]*x[j-2]-v[1]))+gamma*(1-w[j]*w[j]-v[j]*v[j])*w[j];
     ARRAY2D(dfdu,2*(N-1)+j,j-1)=-v[j]*(beta*(-v[j])); //Jwx
     ARRAY2D(dfdu,2*(N-1)+j,j-2)=-v[j]*(sigma*(-v[j])); //Jwx
     ARRAY2D(dfdu,2*(N-1)+j,N-1+j-1)=-v[j]*(beta*(w[j])); //Jwy
@@ -135,7 +125,7 @@ int func (integer ndim, const doublereal *u, const integer *icp,
     ARRAY2D(dfdu,2*(N-1)+j,2*(N-1)+N+j)=-(-omega+beta*(w[j]*y[j-1]-2*v[j]*x[j-1]-v[0])+sigma*(w[j]*y[j-2]-2*v[j]*x[j-2]-v[1]))+gamma*(-2*v[j])*w[j]; //Jwv
     ARRAY2D(dfdu,2*(N-1)+j,2*(N-1)+N+0)=-v[j]*(-beta); //Jwv
     ARRAY2D(dfdu,2*(N-1)+j,2*(N-1)+N+1)=-v[j]*(-sigma); //Jwv
-    // f[2*(N-1)+N+j]=w[j]*(-omega+beta*(w[j]*y[j-1]-v[j]*x[j-1]-v[0])+sigma*(w[j]*y[j-2]-v[j]*x[j-2]-v[1]))+gamma*(1-w[j]*w[j]-v[j]*v[j])*v[j];
+
     ARRAY2D(dfdu,2*(N-1)+N+j,j-1)=w[j]*(beta*(-v[j])); //Jvx
     ARRAY2D(dfdu,2*(N-1)+N+j,j-2)=w[j]*(sigma*(-v[j])); //Jvx
     ARRAY2D(dfdu,2*(N-1)+N+j,N-1+j-1)=w[j]*(beta*(w[j])); //Jvy
@@ -197,25 +187,47 @@ int pvls (integer ndim, const doublereal *u,
   int N = (ndim+2)/4;
 
 
-  doublereal order=0,order2=0,order3=0,t=0;
+  doublereal order=0,order2=0,order3=0,t=0,eta=0;
   doublereal dt,weight,csum,ssum;
+  int unstable=0;
   dt = getp("DTM",1,u);
-
-  //Add he other order parameters here...
   if(dt==0.0){
-    csum=1.0/(2*N)*(1.0+u[3*(N-1)]);
-    ssum=1.0/(2*N)*(0.0+u[3*(N-1)+N]);
+    eta=0;
+    csum=1.0/(2*N)*(1.0+cos(eta)*u[3*(N-1)]+sin(eta)*u[3*(N-1)+N]);
+    ssum=1.0/(2*N)*(0.0+cos(eta)*u[3*(N-1)+N]-sin(eta)*u[3*(N-1)]);
     for (int k=0; k<N-1; k++){
-      csum+=1.0/(2*N)*(u[k]+u[2*(N-1)+k]);
-      ssum+=1.0/(2*N)*(u[(N-1)+k]+u[2*(N-1)+N+k]);
+      csum+=1.0/(2*N)*(cos((k+1)*eta)*u[k]+cos(k*eta)*u[2*(N-1)+k]-sin((k+1)*eta)*u[(N-1)+k]-sin(k*eta)*u[2*(N-1)+N+k]);
+      ssum+=1.0/(2*N)*(cos((k+1)*eta)*u[(N-1)+k]+cos(k*eta)*u[2*(N-1)+N+k]+sin((k+1)*eta)*u[k]+sin(k*eta)*u[2*(N-1)+k]);
     }
-    order=csum*csum+ssum*ssum;
+    order=(csum*csum+ssum*ssum);
+
+    eta=2*3.14159265359/N;
+    csum=1.0/(2*N)*(1.0+cos(eta)*u[3*(N-1)]+sin(eta)*u[3*(N-1)+N]);
+    ssum=1.0/(2*N)*(0.0+cos(eta)*u[3*(N-1)+N]-sin(eta)*u[3*(N-1)]);
+    for (int k=0; k<N-1; k++){
+      csum+=1.0/(2*N)*(cos((k+1)*eta)*u[k]+cos(k*eta)*u[2*(N-1)+k]-sin((k+1)*eta)*u[(N-1)+k]-sin(k*eta)*u[2*(N-1)+N+k]);
+      ssum+=1.0/(2*N)*(cos((k+1)*eta)*u[(N-1)+k]+cos(k*eta)*u[2*(N-1)+N+k]+sin((k+1)*eta)*u[k]+sin(k*eta)*u[2*(N-1)+k]);
+    }
+    order2=(csum*csum+ssum*ssum);
+
+    eta=-2*3.14159265359/N;
+    csum=1.0/(2*N)*(1.0+cos(eta)*u[3*(N-1)]+sin(eta)*u[3*(N-1)+N]);
+    ssum=1.0/(2*N)*(0.0+cos(eta)*u[3*(N-1)+N]-sin(eta)*u[3*(N-1)]);
+    for (int k=0; k<N-1; k++){
+      csum+=1.0/(2*N)*(cos((k+1)*eta)*u[k]+cos(k*eta)*u[2*(N-1)+k]-sin((k+1)*eta)*u[(N-1)+k]-sin(k*eta)*u[2*(N-1)+N+k]);
+      ssum+=1.0/(2*N)*(cos((k+1)*eta)*u[(N-1)+k]+cos(k*eta)*u[2*(N-1)+N+k]+sin((k+1)*eta)*u[k]+sin(k*eta)*u[2*(N-1)+k]);
+    }
+    order3=(csum*csum+ssum*ssum);
     par[10]=0;
+    for(int i=1; i<ndim; i++){
+      if(getp("EIG",2*i+1,u)>0){
+        unstable++;
+      }
+    }
   }
 
   else{
     order=0,order2=0,order3=0;
-    double eta=0;
     for (int i=0; i<NTST; i++){
       dt = getp("DTM",i+1,u);
       for (int j=0; j<NCOL+1; j++){
@@ -249,17 +261,15 @@ int pvls (integer ndim, const doublereal *u,
         order3+=dt*weight*(csum*csum+ssum*ssum);
       }
     }
+    for(int i=1; i<ndim; i++){
+      if(getp("EIG",2*i+1,u)*getp("EIG",2*i+1,u)+getp("EIG",2*i+2,u)*getp("EIG",2*i+2,u)>0.97){
+        unstable++;
+      }
+    }
   }
   par[1]=pow(order,0.5);
   par[2]=pow(order2,0.5);
   par[3]=pow(order3,0.5);
-
-  int unstable=0;
-  for(int i=1; i<ndim; i++){
-    if(getp("EIG",2*i+1,u)*getp("EIG",2*i+1,u)+getp("EIG",2*i+2,u)*getp("EIG",2*i+2,u)>0.97){
-      unstable++;
-    }
-  }
   par[4]=ndim-unstable;
   par[5]=getp("STP",0,u);
 
