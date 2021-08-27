@@ -1,6 +1,0 @@
-forward=run('janus_rel',c='steady')
-reverse=run('janus_rel',c='steady',DS='-')
-steady=mb(forward+reverse)
-steady=rl(steady)
-sv(steady,'steady')
-steady.writeRawFilename('steady.dat')

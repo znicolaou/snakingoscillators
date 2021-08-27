@@ -7,7 +7,7 @@ for i in `seq 1 1000`; do
 		sleep 1
 	done
 	echo $i $js
-	./janus.py --num 16 --time 100000 --rtime 90000 --seed $i --sigma 0.33 --filebase data/random/$i --output 0 & 
+	./janus.py --num 10 --time 100000 --rtime 90000 --seed $i --sigma 0.33 --filebase data/random/$i --output 0 & 
 done 
 
 wait 
