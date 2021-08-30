@@ -1,0 +1,10 @@
+NDIM=   98, NPR=1, IPS =   2, IRS =   0
+ICP =  [1, 11, 2, 3, 4], SP = ['LP','TR','PD','HB','BP0']
+NTST=  100, NCOL=   5, IAD =   3, ISW = 1, IPLT= 33, NBC= 0, NINT= 0
+NMX=   100, NPR=  1, MXBF=  10, IID =   2, ITMX= 11, ITNW= 10, NWTN= 5, JAC= 0
+EPSL= 1e-06, EPSU = 1e-06, EPSS = 1e-05
+DS  =  -1e-4, DSMIN=  1e-8, DSMAX=  1e-1, IADS=   1
+NPAR = 5, THL =  {11: 0.0}, THU =  {}
+RL0=0.0, RL1=0.5
+parnames={1:'amp',2:'sigma',3:'stable',4:'ds'}
+PAR={2:0.34}
