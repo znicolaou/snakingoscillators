@@ -1,14 +1,14 @@
-fw=run('pendula',c='forward',dat='flat.dat')
+fw=run('pendula',c='forward',dat='flat.dat',DSMAX=1e-3)
 sv(fw,'fwflat')
 fw.writeRawFilename('fwflat.dat')
-rv=run('pendula',c='reverse',dat='flat.dat')
+rv=run('pendula',c='reverse',dat='flat.dat',DSMAX=1e-3)
 sv(rv,'rvflat')
 rv.writeRawFilename('rvflat.dat')
 
-fw=run('pendula',c='forward',dat='swing.dat')
+fw=run('pendula',c='forward',dat='swing.dat',PAR={1:0.055})
 sv(fw,'fwswing')
 fw.writeRawFilename('fwswing.dat')
-rv=run('pendula',c='reverse',dat='swing.dat')
+rv=run('pendula',c='reverse',dat='swing.dat',PAR={1:0.055})
 sv(rv,'rvswing')
 rv.writeRawFilename('rvswing.dat')
 
