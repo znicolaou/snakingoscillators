@@ -1,22 +1,22 @@
-fw=run('pendula',c='forward',dat='flat.dat',DSMAX=1e-3)
+fw=run('pendula',c='forward',dat='flat.dat')
 sv(fw,'fwflat')
-fw.writeRawFilename('fwflat.dat')
-rv=run('pendula',c='reverse',dat='flat.dat',DSMAX=1e-3)
+rv=run('pendula',c='reverse',dat='flat.dat')
 sv(rv,'rvflat')
-rv.writeRawFilename('rvflat.dat')
 
-fw=run('pendula',c='forward',dat='swing.dat',PAR={1:0.055})
-sv(fw,'fwswing')
-fw.writeRawFilename('fwswing.dat')
-rv=run('pendula',c='reverse',dat='swing.dat',PAR={1:0.055})
-sv(rv,'rvswing')
-rv.writeRawFilename('rvswing.dat')
+fw=run('fwflat',e='pendula',c='cont')
+sv(fw,'fwcont')
 
 for i in range(1,2):
   print(i)
   fw=run('pendula',c='forward',dat='limit'+str(i)+'.dat')
   sv(fw,'fw'+str(i))
-  fw.writeRawFilename('fw'+str(i)+'.dat')
   rv=run('pendula',c='reverse',dat='limit'+str(i)+'.dat')
   sv(rv,'rv'+str(i))
-  rv.writeRawFilename('rv'+str(i)+'.dat')
+
+fw=run('pendula',c='forward',dat='swing.dat',PAR={1:0.055})
+sv(fw,'fwswing')
+rv=run('pendula',c='reverse',dat='swing.dat',PAR={1:0.055})
+sv(rv,'rvswing')
+
+
+cl()
