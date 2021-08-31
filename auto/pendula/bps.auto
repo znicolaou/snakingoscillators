@@ -1,0 +1,36 @@
+import numpy as np
+
+all=bd('flat')+bd('cont')
+sv(all,'all')
+
+num=len(all('BP'))
+i=1
+
+visited=[]
+
+while i<=num:
+  print(i,num)
+
+  bp=load('all',e='pendula',c='cont',ISW=-1,IRS='BP'+str(i))
+
+  completed=False
+  for bp2 in visited:
+    if np.linalg.norm(bp2-np.array([bp['a'],bp['norm1'],bp['norm2']]))<1e-4:
+      print("Previously visited " + str(i), np.linalg.norm(bp2-np.array([bp['a'],bp['norm1'],bp['norm2']])))
+      completed=True
+
+  if not completed:
+    fw=run(bp)
+    sv(all+fw,'all')
+    rv=run(bp,DS='-')
+    both=fw+rv
+    merged=mb(both)
+    all=all+merged
+    relabeled=rl(all)
+    sv(relabeled,'all')
+    visited.append(np.array([bp['a'],bp['norm1'],bp['norm2']]))
+
+  num=len(bd('all')('BP'))
+  i=i+1
+
+cl()

@@ -121,7 +121,8 @@ int pvls (integer ndim, const doublereal *u,
 
   // par[2]=ndim-unstable;
   par[2]=getp("STA",0,u);
-  par[3]=getp("STP",0,u);
+  par[3]=0;
+  // par[3]=getp("STP",0,u);
   par[4]=norm1;
   par[5]=norm2;
   return 0;
