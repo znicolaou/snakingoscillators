@@ -23,14 +23,14 @@ while i<=num:
 
   completed=False
   for bp2 in visited:
-    if np.linalg.norm(bp2-np.array([bp['a'],bp['norm1'],bp['norm2']]))<1e-4:
+    if np.linalg.norm(bp2-np.array([bp['a'],bp['norm1'],bp['norm2']]))<1e-2:
       print("Previously visited " + str(i), np.linalg.norm(bp2-np.array([bp['a'],bp['norm1'],bp['norm2']])))
       completed=True
 
   if not completed:
     fw=run(bp)
     rv=run(bp,DS='-')
-    sv(rl(all+mb(fw+rv)),'all')
+    sv(rl(bd('all')+mb(fw+rv)),'all')
     cl()
     visited=np.concatenate([visited,np.array([[bp['a'],bp['norm1'],bp['norm2']]])])
     np.savetxt('visited.txt',visited)
