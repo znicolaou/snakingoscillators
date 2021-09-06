@@ -73,10 +73,10 @@ if __name__ == "__main__":
 	file=open(args.filebase+'out.dat','w')
 	print(*sys.argv,file=file)
 	print("%i %f %f %f %f %f"%(args.num, args.cycles, args.outcycle, args.dt, args.amp, args.freq), file=file)
-	print(args.seed, *norms, file=file)
+	print(args.seed, np.linalg.norm(norms), file=file)
 	print('runtime: %f' % (stop - start), file=file)
 	if args.verbose==1:
-		print('runtime: %f' % (stop - start))
+		print('runtime: %f %i %f' % (stop - start, args.seed, np.linalg.norm(norms)))
 
 	if args.verbose==1:
 		np.save(args.filebase+"dat",ys)
