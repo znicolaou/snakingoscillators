@@ -117,7 +117,7 @@ int pvls (integer ndim, const doublereal *u,
       if(getp("EIG",2*i+1,u)*getp("EIG",2*i+1,u)+getp("EIG",2*i+2,u)*getp("EIG",2*i+2,u)>0.99){
         unstable++;
       }
-
+      //Compute the product of the log of the eigenvalues, excluding the two smallest. We expect this to vanish when neutral=2
       if(getp("EIG",2*i+1,u)*getp("EIG",2*i+1,u)+getp("EIG",2*i+2,u)*getp("EIG",2*i+2,u)>0.99 && getp("EIG",2*i+1,u)*getp("EIG",2*i+1,u)+getp("EIG",2*i+2,u)*getp("EIG",2*i+2,u)<1.01) {
         neutral++;
       }

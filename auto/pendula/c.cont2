@@ -1,8 +1,9 @@
 NDIM=   98, NPR=1, IPS =   2, IRS =   0
-ICP =  [1, 11, 2, 3, 4, 5, 6, 7], SP = ['LP','TR','HB','PD','BP1']
-NTST=  100, NCOL=   4, IAD =   3, ISW = -1, IPLT= 81, NBC= 0, NINT= 0
+ICP =  [1, 11, 2, 3, 4, 5, 6, 7], SP = ['LP','TR','HB','PD','BP0']
+NTST=  100, NCOL=   4, IAD =   3, ISW = -1, IPLT=81, NBC= 0, NINT= 0
 NMX=   10000, NPR=  1000, MXBF=  10, IID =   2, ITMX= 11, ITNW= 10, NWTN= 5, JAC= 0
 EPSL= 1e-07, EPSU = 1e-07, EPSS = 1e-06
 DS  =  1e-3, DSMIN=  1e-8, DSMAX=  1e-2, IADS=   1
 NPAR = 7, THL =  {11: 0.0}, THU =  {}
 UZSTOP={1:0,1:0.1}
+UZR={7:2}
