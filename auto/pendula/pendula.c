@@ -10,7 +10,7 @@ int func (integer ndim, const doublereal *w, const integer *icp,
 
   double amp = par[0];
   double omega = par[1];
-  double delta=0.35;
+  double delta= par[2];
   double eta=0.1;
   double gamma=1;
   int N = ((ndim-2)/6);
@@ -59,6 +59,7 @@ int stpnt (integer ndim, doublereal t,
 {
   par[0] = 0.06;
   par[1] = 3.4;
+  par[2]=0.25;
   int j, N = (ndim-2)/6;
   for (j=0; j<N; j++){
       u[0*N+j]=1.0;
@@ -88,7 +89,7 @@ int pvls (integer ndim, const doublereal *u,
 
   doublereal t=0;
   doublereal dt,weight,norm1=0,norm2=0;
-  int unstable=0;
+  int unstable=0, neutral=0;
   dt = getp("DTM",1,u);
 
   if(dt==0.0){
@@ -116,15 +117,18 @@ int pvls (integer ndim, const doublereal *u,
       if(getp("EIG",2*i+1,u)*getp("EIG",2*i+1,u)+getp("EIG",2*i+2,u)*getp("EIG",2*i+2,u)>0.99){
         unstable++;
       }
+
+      if(getp("EIG",2*i+1,u)*getp("EIG",2*i+1,u)+getp("EIG",2*i+2,u)*getp("EIG",2*i+2,u)>0.99 && getp("EIG",2*i+1,u)*getp("EIG",2*i+1,u)+getp("EIG",2*i+2,u)*getp("EIG",2*i+2,u)<1.01) {
+        neutral++;
+      }
     }
   }
 
   // par[2]=ndim-unstable;
-  par[2]=getp("STA",0,u);
-  par[3]=0;
-  // par[3]=getp("STP",0,u);
+  par[3]=getp("STA",0,u);
   par[4]=norm1;
   par[5]=norm2;
+  par[6]=neutral;
   return 0;
 }
 /* ---------------------------------------------------------------------- */

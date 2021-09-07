@@ -1,14 +1,11 @@
-import numpy as np
 import os
-
+os.environ["OMP_NUM_THREADS"]="8"
+import numpy as np
 
 visited=np.zeros((0,3))
+all=bd('all')
 
-if not os.path.exists('visited.txt'):
-  all=bd('flat')+bd('cont')
-  sv(all,'all')
-else:
-  all=bd('all')
+if os.path.exists('visited.txt'):
   visited=np.loadtxt('visited.txt')
   if(len(visited.shape)<2):
     visited=visited.reshape((1,3))
@@ -17,22 +14,23 @@ num=len(all('BP'))
 i=1
 
 while i<=num:
-  print(i,num)
+  print("%i %i"%(i,num))
 
   bp=load('all',e='pendula',c='cont',ISW=-1,IRS='BP'+str(i))
 
   completed=False
   for bp2 in visited:
-    if np.linalg.norm(bp2-np.array([bp['a'],bp['norm1'],bp['norm2']]))<1e-4:
-      print("Previously visited " + str(i), np.linalg.norm(bp2-np.array([bp['a'],bp['norm1'],bp['norm2']])))
+    if np.linalg.norm(bp2-np.array([bp['amp'],bp['norm1'],bp['norm2']]))<1e-2:
+      print("Previously visited %i %f" %(i, np.linalg.norm(bp2-np.array([bp['amp'],bp['norm1'],bp['norm2']]))))
       completed=True
 
   if not completed:
     fw=run(bp)
     rv=run(bp,DS='-')
-    sv(rl(all+mb(fw+rv)),'all')
+    cn=run(bp,ISW=1)
+    sv(bd('all')+rl(mb(fw+rv))+rl(cn),'all')
     cl()
-    visited=np.concatenate([visited,np.array([[bp['a'],bp['norm1'],bp['norm2']]])])
+    visited=np.concatenate([visited,np.array([[bp['amp'],bp['norm1'],bp['norm2']]])])
     np.savetxt('visited.txt',visited)
 
   num=len(bd('all')('BP'))
