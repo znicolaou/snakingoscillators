@@ -44,6 +44,16 @@ int func (integer ndim, const doublereal *w, const integer *icp,
 
   //TODO: add jacobian
   //ARRAY2D(dfdu,i,j)=
+  // for(j=0; j<N; j++){
+  //   f[0*N+j]=-p[j]*y[j]/(1+delta)/omega+gamma*(1-x[j]*x[j]-y[j]*y[j])*x[j];
+  //   f[1*N+j]= p[j]*x[j]/(1+delta)/omega+gamma*(1-x[j]*x[j]-y[j]*y[j])*y[j];
+  //   f[2*N+j]=(-eta*p[j]-(1+omega*omega*amp*X+4*delta)*y[j]+(1-delta)*(x[j]*v[j]-u[j]*y[j]+x[j]*v[(j-1+N)%N]-y[j]*u[(j-1+N)%N]))/omega;
+  //   f[3*N+j]=-q[j]*v[j]/(1-delta)/omega+gamma*(1-u[j]*u[j]-v[j]*v[j])*u[j];
+  //   f[4*N+j]= q[j]*u[j]/(1-delta)/omega+gamma*(1-u[j]*u[j]-v[j]*v[j])*v[j];
+  //   f[5*N+j]=(-eta*q[j]-(1+omega*omega*amp*X-4*delta)*v[j]+(1+delta)*(u[j]*y[j]-x[j]*v[j]+u[j]*y[(j+1)%N]-v[j]*x[(j+1)%N]))/omega;
+  // }
+  // f[6*N+0]=-Y+gamma*(1-X*X-Y*Y)*X;
+  // f[6*N+1]= X+gamma*(1-X*X-Y*Y)*Y;
 
   if (ijac == 1) {
     return 0;
@@ -92,7 +102,7 @@ int pvls (integer ndim, const doublereal *u,
   doublereal t=0;
   doublereal dt,weight,norm1=0,norm2=0;
   double *vec=malloc(ndim*sizeof(double));
-  doublereal det=1.0;
+  doublereal det1=1.0,det2=1.0;
 
 
   dt = getp("DTM",1,u);
@@ -119,26 +129,24 @@ int pvls (integer ndim, const doublereal *u,
     }
     quicksort(vec,1,ndim-1);
 
-    //regularize the determinant setting the multiple to +-1 as vec[i]->+-infinity
-    // det=1;
-    // if(vec[1]<0)
-    //   det=-1;
-    det=vec[1];
-    for(int i=3; i<ndim; i++){
-      // det=det*fabs(vec[i]);
-      if(vec[i]<0){
-        det=det*-1;
+    det1=vec[1];
+    det2=vec[2];
+    for(int i=1; i<ndim; i++){
+      if(vec[i]<0&&i!=1){
+        det1=-det1;
+      }
+      if(vec[i]<0&&i!=2){
+        det2=-det2; //Fine unless vec[i] changes sign for i!=2...
       }
     }
-    // det=det/vec[2];
   }
 
   // par[3]=det*(1+vec[2]);
   par[3]=getp("STA",0,u);
   par[4]=norm1;
   par[5]=norm2;
-  par[6]=vec[1];
-  par[7]=det*vec[2];
+  par[6]=det1;
+  par[7]=det2;
 
   free(vec);
   return 0;
