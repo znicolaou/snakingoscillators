@@ -125,7 +125,10 @@ int pvls (integer ndim, const doublereal *u,
     //   det=-1;
     det=vec[1];
     for(int i=3; i<ndim; i++){
-      det=det*vec[i];
+      // det=det*fabs(vec[i]);
+      if(vec[i]<0){
+        det=det*-1;
+      }
     }
     // det=det/vec[2];
   }
@@ -135,7 +138,7 @@ int pvls (integer ndim, const doublereal *u,
   par[4]=norm1;
   par[5]=norm2;
   par[6]=vec[1];
-  par[7]=vec[2];
+  par[7]=det*vec[2];
 
   free(vec);
   return 0;
