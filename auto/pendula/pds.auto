@@ -1,0 +1,20 @@
+import timeit
+import os
+os.environ["OMP_NUM_THREADS"]="8"
+
+start=timeit.default_timer()
+flat=run('pendula',c='forward',dat='flat.dat')
+sv(flat,'flat')
+all=bd('flat')
+for i in range(1,3):
+	pd=rl(run(flat("PD"+str(i)),c='cont'))
+	sv(pd,'pd'+str(i))
+	all=all+pd
+for i in range(3,1+len(flat("PD"))):
+	pd=rl(run(flat("PD"+str(i)),c='cont2'))
+	sv(pd,'pd'+str(i))
+	all=all+pd
+sv(all,'all')
+cl()
+stop=timeit.default_timer()
+print("Runtime %f"%(stop-start))
