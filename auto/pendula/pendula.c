@@ -1,5 +1,7 @@
 #include "auto_f2c.h"
 
+void quicksort(double *vec,int first,int last);
+
 int func (integer ndim, const doublereal *w, const integer *icp,
           const doublereal *par, integer ijac,
           doublereal *f, doublereal *dfdu, doublereal *dfdp)
@@ -88,17 +90,15 @@ int pvls (integer ndim, const doublereal *u,
 
 
   doublereal t=0;
-  doublereal dt,weight,norm1=0,norm2=0,det=1;
-  int unstable=0, neutral=0;
+  doublereal dt,weight,norm1=0,norm2=0;
+  double *vec=malloc(ndim*sizeof(double));
+  doublereal det=1.0;
+
+
   dt = getp("DTM",1,u);
 
   if(dt==0.0){
     par[10]=0;
-    for(int i=1; i<ndim; i++){
-      if(getp("EIG",2*i+1,u)>0){
-        unstable++;
-      }
-    }
   }
 
   else{
@@ -113,31 +113,66 @@ int pvls (integer ndim, const doublereal *u,
         }
       }
     }
-    //Sort the eigenvalues....
-    for(int i=1; i<ndim; i++){
-      if(getp("EIG",2*i+1,u)*getp("EIG",2*i+1,u)+getp("EIG",2*i+2,u)*getp("EIG",2*i+2,u)>0.99){
-        unstable++;
-      }
-      //Compute the product of the log of the eigenvalues, excluding the two smallest. We expect this to vanish when neutral=2
-      if(getp("EIG",2*i+1,u)*getp("EIG",2*i+1,u)+getp("EIG",2*i+2,u)*getp("EIG",2*i+2,u)>0.99 && getp("EIG",2*i+1,u)*getp("EIG",2*i+1,u)+getp("EIG",2*i+2,u)*getp("EIG",2*i+2,u)<1.01) {
-        neutral++;
-      }
-
-      if(i>2){
-        det=det*log(getp("EIG",2*i+1,u)*getp("EIG",2*i+1,u)+getp("EIG",2*i+2,u)*getp("EIG",2*i+2,u));
-      }
+    for(int i=0; i<ndim; i++){
+      // vec[i]=log(sqrt(getp("EIG",2*i+1,u)*getp("EIG",2*i+1,u)+getp("EIG",2*i+2,u)*getp("EIG",2*i+2,u)));
+      vec[i]=(getp("EIG",2*i+1,u)*getp("EIG",2*i+1,u)+getp("EIG",2*i+2,u)*getp("EIG",2*i+2,u)-1)/(getp("EIG",2*i+1,u)*getp("EIG",2*i+1,u)+getp("EIG",2*i+2,u)*getp("EIG",2*i+2,u)+1);
     }
+    quicksort(vec,1,ndim-1);
+
+    //regularize the determinant setting the multiple to +-1 as vec[i]->+-infinity
+    // det=1;
+    // if(vec[1]<0)
+    //   det=-1;
+    det=vec[1];
+    for(int i=3; i<ndim; i++){
+      det=det*vec[i];
+    }
+    // det=det/vec[2];
   }
 
-  // par[2]=ndim-unstable;
+  // par[3]=det*(1+vec[2]);
   par[3]=getp("STA",0,u);
   par[4]=norm1;
   par[5]=norm2;
-  par[6]=neutral;
-  par[7]=det;
+  par[6]=vec[1];
+  par[7]=vec[2];
 
+  free(vec);
   return 0;
 }
+void quicksort(doublereal *vec, int first, int last){
+  int i, j, pivot;
+  doublereal temp;
+
+  if(first<last){
+    pivot=first;
+    i=first;
+    j=last;
+
+    while(i<j){
+      // while(vec[i]<=vec[pivot]&&i<last){
+      while(fabs(vec[i])<=fabs(vec[pivot])&&i<last){
+        i++;
+      }
+      // while(vec[j]>vec[pivot]){
+      while(fabs(vec[j])>fabs(vec[pivot])){
+        j--;
+      }
+      if(i<j){
+        temp=vec[i];
+        vec[i]=vec[j];
+        vec[j]=temp;
+      }
+    }
+
+    temp=vec[pivot];
+    vec[pivot]=vec[j];
+    vec[j]=temp;
+    quicksort(vec,first,j-1);
+    quicksort(vec,j+1,last);
+  }
+}
+
 /* ---------------------------------------------------------------------- */
 /* ---------------------------------------------------------------------- */
 int bcnd (integer ndim, const doublereal *par, const integer *icp,
