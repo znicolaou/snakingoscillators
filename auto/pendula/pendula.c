@@ -88,7 +88,7 @@ int pvls (integer ndim, const doublereal *u,
 
 
   doublereal t=0;
-  doublereal dt,weight,norm1=0,norm2=0;
+  doublereal dt,weight,norm1=0,norm2=0,det=1;
   int unstable=0, neutral=0;
   dt = getp("DTM",1,u);
 
@@ -113,6 +113,7 @@ int pvls (integer ndim, const doublereal *u,
         }
       }
     }
+    //Sort the eigenvalues....
     for(int i=1; i<ndim; i++){
       if(getp("EIG",2*i+1,u)*getp("EIG",2*i+1,u)+getp("EIG",2*i+2,u)*getp("EIG",2*i+2,u)>0.99){
         unstable++;
@@ -120,6 +121,10 @@ int pvls (integer ndim, const doublereal *u,
       //Compute the product of the log of the eigenvalues, excluding the two smallest. We expect this to vanish when neutral=2
       if(getp("EIG",2*i+1,u)*getp("EIG",2*i+1,u)+getp("EIG",2*i+2,u)*getp("EIG",2*i+2,u)>0.99 && getp("EIG",2*i+1,u)*getp("EIG",2*i+1,u)+getp("EIG",2*i+2,u)*getp("EIG",2*i+2,u)<1.01) {
         neutral++;
+      }
+
+      if(i>2){
+        det=det*log(getp("EIG",2*i+1,u)*getp("EIG",2*i+1,u)+getp("EIG",2*i+2,u)*getp("EIG",2*i+2,u));
       }
     }
   }
@@ -129,6 +134,8 @@ int pvls (integer ndim, const doublereal *u,
   par[4]=norm1;
   par[5]=norm2;
   par[6]=neutral;
+  par[7]=det;
+
   return 0;
 }
 /* ---------------------------------------------------------------------- */
