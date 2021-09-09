@@ -6,4 +6,4 @@ EPSL= 1e-07, EPSU = 1e-07, EPSS = 1e-06
 DS  =  1e-3, DSMIN=  1e-8, DSMAX=  1e-2, IADS=   1
 NPAR = 9, THL =  {11: 0.0}, THU =  {}
 parnames={1:'amp',2:'omega',3:'delta',4:'stable',5:'norm1',6:'norm2',7:'lambda1',8:'lambda2'}
-UZSTOP={1:0,1:0.2}
+UZSTOP={1:0,1:0.1}
