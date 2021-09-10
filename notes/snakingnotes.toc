@@ -1,0 +1,18 @@
+\contentsline {title}{Continuation of oscillatory localized states}{1}{section*.1}%
+\tocdepth@munge 
+\contentsline {section}{\numberline {}Contents}{1}{section*.2}%
+\tocdepth@restore 
+\contentsline {section}{\numberline {I}Introduction}{1}{section*.3}%
+\contentsline {section}{\numberline {II}Gap solitons in parametrically-driven pendula}{1}{section*.4}%
+\contentsline {subsection}{\numberline {A}Numerical observations}{1}{section*.5}%
+\contentsline {subsection}{\numberline {B}Continuation equations}{1}{section*.6}%
+\contentsline {subsection}{\numberline {C}Discrete symmetries}{2}{section*.7}%
+\contentsline {subsection}{\numberline {D}Numerical continuation}{3}{section*.8}%
+\contentsline {section}{\numberline {III}Traveling chimeras in ring networks of Janus oscillators}{3}{section*.9}%
+\contentsline {subsection}{\numberline {A}Numerical observations}{3}{section*.10}%
+\contentsline {subsection}{\numberline {B}Continuation equations}{3}{section*.11}%
+\contentsline {subsection}{\numberline {C}Time-shift reductions for chimera states}{4}{section*.12}%
+\contentsline {subsection}{\numberline {D}Discrete symmetries in the ring}{4}{section*.13}%
+\contentsline {subsection}{\numberline {E}Accommodating continuous symmetries in AUTO}{4}{section*.14}%
+\contentsline {subsection}{\numberline {F}Numerical continuation}{5}{section*.15}%
+\contentsline {section}{\numberline {}References}{5}{section*.16}%

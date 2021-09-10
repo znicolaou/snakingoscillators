@@ -191,6 +191,7 @@ int pvls (integer ndim, const doublereal *u,
       // vec[i]=log(sqrt(getp("EIG",2*i+1,u)*getp("EIG",2*i+1,u)+getp("EIG",2*i+2,u)*getp("EIG",2*i+2,u)));
       vec[i]=(getp("EIG",2*i+1,u)*getp("EIG",2*i+1,u)+getp("EIG",2*i+2,u)*getp("EIG",2*i+2,u)-1)/(getp("EIG",2*i+1,u)*getp("EIG",2*i+1,u)+getp("EIG",2*i+2,u)*getp("EIG",2*i+2,u)+1);
     }
+    //Do an argsort so we can get real and imaginary parts of each sorted exponent
     quicksort(vec,1,ndim-1);
 
     det1=vec[1];
@@ -215,6 +216,30 @@ int pvls (integer ndim, const doublereal *u,
   free(vec);
   return 0;
 }
+
+void argsort(doublereal *vec, int *order, int ndim){
+  double min=vec[0];
+  //find the smallest element
+  for (int i=1; i<ndim; i++){
+    if(vec[i]<min){
+      min=vec[i];
+      order[0]=i;
+    }
+  }
+
+  //find the next smallest value
+  for (int i=1; i<ndim; i++){
+    //find the smallest element of vector larger than the current min
+      int ind=0;
+      for(int j=0; j<ndim, j++){
+        if(vec[j]<min && vec[j]>vec[order[i-1]]){
+          min=vec[j];
+          order[i]=j;
+        }
+      }
+  }
+}
+
 void quicksort(doublereal *vec, int first, int last){
   int i, j, pivot;
   doublereal temp;
