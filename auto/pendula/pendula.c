@@ -182,8 +182,8 @@ int pvls (integer ndim, const doublereal *u,
       for (int j=0; j<NCOL+1; j++){
         weight = getp("WINT",j,u);
         for(int k=0; k<N; k++){
-          norm1+=dt*weight*sqrt(ARRAY2D(u,N+k,NCOL*i+j)*ARRAY2D(u,N+k,NCOL*i+j)+ARRAY2D(u,4*N+k,NCOL*i+j)*ARRAY2D(u,4*N+k,NCOL*i+j));
-          norm2+=dt*weight*sqrt(ARRAY2D(u,2*N+k,NCOL*i+j)*ARRAY2D(u,2*N+k,NCOL*i+j)+ARRAY2D(u,5*N+k,NCOL*i+j)*ARRAY2D(u,5*N+k,NCOL*i+j));
+          norm1+=dt*weight*(ARRAY2D(u,N+k,NCOL*i+j)*ARRAY2D(u,N+k,NCOL*i+j)+ARRAY2D(u,4*N+k,NCOL*i+j)*ARRAY2D(u,4*N+k,NCOL*i+j));
+          norm2+=dt*weight*(ARRAY2D(u,2*N+k,NCOL*i+j)*ARRAY2D(u,2*N+k,NCOL*i+j)+ARRAY2D(u,5*N+k,NCOL*i+j)*ARRAY2D(u,5*N+k,NCOL*i+j));
         }
       }
     }
@@ -198,18 +198,18 @@ int pvls (integer ndim, const doublereal *u,
     det2=vec[2];
     for(int i=1; i<ndim; i++){
       if(vec[i]<0&&i!=1){
-        det1=-det1;
+        det1=det1;
       }
-      if(vec[i]<0&&i!=2){
-        det2=-det2; //Fine unless vec[i] changes sign for i!=2...
+      if(vec[i]<0&&i>2){
+        det2=det2; //Fine unless vec[i] changes sign for i!=2...
       }
     }
   }
 
   // par[3]=det*(1+vec[2]);
   par[3]=getp("STA",0,u);
-  par[4]=norm1;
-  par[5]=norm2;
+  par[4]=sqrt(norm1);
+  par[5]=sqrt(norm2);
   par[6]=det1;
   par[7]=det2;
 
@@ -231,7 +231,7 @@ void argsort(doublereal *vec, int *order, int ndim){
   for (int i=1; i<ndim; i++){
     //find the smallest element of vector larger than the current min
       int ind=0;
-      for(int j=0; j<ndim, j++){
+      for(int j=0; j<ndim; j++){
         if(vec[j]<min && vec[j]>vec[order[i-1]]){
           min=vec[j];
           order[i]=j;

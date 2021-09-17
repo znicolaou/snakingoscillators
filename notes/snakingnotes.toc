@@ -13,7 +13,7 @@
 \contentsline {subsection}{\numberline {B}Continuation equations}{5}{section*.11}%
 \contentsline {subsection}{\numberline {C}Discrete symmetries}{5}{section*.12}%
 \contentsline {subsection}{\numberline {D}An additional continuous symmetry}{5}{section*.13}%
-\contentsline {subsection}{\numberline {E}Time-shift reductions for chimera states}{5}{section*.14}%
+\contentsline {subsection}{\numberline {E}Time-shift reductions for chimera states}{6}{section*.14}%
 \contentsline {subsection}{\numberline {F}Numerical continuation}{6}{section*.15}%
 \contentsline {section}{\numberline {IV}Discussion}{7}{section*.16}%
 \contentsline {section}{\numberline {}References}{7}{section*.17}%
