@@ -198,10 +198,10 @@ int pvls (integer ndim, const doublereal *u,
     det2=vec[2];
     for(int i=1; i<ndim; i++){
       if(vec[i]<0&&i!=1){
-        det1=det1;
+        det1=-det1;
       }
       if(vec[i]<0&&i>2){
-        det2=det2; //Fine unless vec[i] changes sign for i!=2...
+        det2=-det2;
       }
     }
   }
