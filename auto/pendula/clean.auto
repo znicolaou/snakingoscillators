@@ -1,0 +1,8 @@
+import os
+
+rm b.*
+rm s.*
+rm d.*
+cl()
+rm visited.txt
+rm -r branches
