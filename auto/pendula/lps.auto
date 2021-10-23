@@ -99,7 +99,7 @@ while j<=numbp:
   bp=load(all,e='pendula',c='cont',ISW=1,IRS='BP'+str(j))
   for lp2 in visited:
     if np.linalg.norm(lp2-np.array([bp['amp'],bp['norm1'],bp['norm2']]))<1e-4:
-      print("Previously visited bp %i %f" %(j, np.linalg.norm(lp2-np.array([bp['amp'],bp['norm1'],bp['norm2']]))))
+      print("Previously visited bp %i %f %f" %(j, bp['amp'], np.linalg.norm(lp2-np.array([bp['amp'],bp['norm1'],bp['norm2']]))))
       completed=True
 
   if not completed:
@@ -179,7 +179,7 @@ while j<=numbp:
       num=len(bd('bp'+str(k)+'cfw')('LP'))
       i=i+1
 
-    if(bp["switch"]>1):
+    if(bp["switch"]>0):
       all=all+bd('bp'+str(k)+'fw')+bd('bp'+str(k)+'rv')+bd('bp'+str(k)+'cfw')
     else:
       all=all+bd('bp'+str(k)+'cfw')

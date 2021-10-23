@@ -13,8 +13,8 @@ int func (integer ndim, const doublereal *w, const integer *icp,
   double amp = par[0];
   double omega = par[1];
   double delta= par[2];
-  double dk=0.0;
-  double dl=0.0;
+  double dk=par[9];
+  double dl=par[9];
   double eta=0.1;
   double gamma=1;
   int N = ((ndim-2)/6);
