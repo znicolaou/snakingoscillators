@@ -20,7 +20,7 @@ while os.path.exists(str(j)+'.dat'):
     i=1
     while i<=num:
         print("rv %i %i %i"%(j,i,num))
-        lp=load(bd(str(j)+'rv'),IRS='LP'+str(i))
+        lp=load(bd(str(j)+'rv'),IRS='LP'+str(i),ISW=1)
         completed=False
         for lp2 in visited:
             if np.linalg.norm(lp2-np.array([lp['amp'],lp['norm1'],lp['norm2']]))<1e-4:
@@ -42,7 +42,7 @@ while os.path.exists(str(j)+'.dat'):
     i=1
     while i<=num:
         print("fw %i %i %i"%(j,i,num))
-        lp=load(bd(str(j)+'fw'),IRS='LP'+str(i))
+        lp=load(bd(str(j)+'fw'),IRS='LP'+str(i),ISW=1)
         completed=False
         for lp2 in visited:
             if np.linalg.norm(lp2-np.array([lp['amp'],lp['norm1'],lp['norm2']]))<1e-4:
@@ -70,7 +70,7 @@ while os.path.exists('s.pd'+str(j)):
     i=1
     while i<=num:
         print("pd %i %i %i"%(j,i,num))
-        lp=load(bd('pd'+str(j)),IRS='LP'+str(i))
+        lp=load(bd('pd'+str(j)),IRS='LP'+str(i),ISW=1)
         completed=False
         for lp2 in visited:
             if np.linalg.norm(lp2-np.array([lp['amp'],lp['norm1'],lp['norm2']]))<1e-4:
@@ -140,7 +140,7 @@ while j<=numbp:
     i=1
     while i<=num:
         print("bp rv %i %i %i"%(j,i,num))
-        lp=load(bd('bp'+str(k)+'rv'),IRS='LP'+str(i))
+        lp=load(bd('bp'+str(k)+'rv'),IRS='LP'+str(i),ISW=1)
         completed=False
         for lp2 in visited:
             if np.linalg.norm(lp2-np.array([lp['amp'],lp['norm1'],lp['norm2']]))<1e-4:
@@ -161,7 +161,7 @@ while j<=numbp:
     i=1
     while i<=num:
         print("bp fw %i %i %i"%(j,i,num))
-        lp=load(bd('bp'+str(k)+'fw'),IRS='LP'+str(i))
+        lp=load(bd('bp'+str(k)+'fw'),IRS='LP'+str(i),ISW=1)
         completed=False
         for lp2 in visited:
             if np.linalg.norm(lp2-np.array([lp['amp'],lp['norm1'],lp['norm2']]))<1e-4:
@@ -180,7 +180,7 @@ while j<=numbp:
     i=1
     while i<=num:
         print("bp cfw %i %i %i"%(j,i,num))
-        lp=load(bd('bp'+str(k)+'cfw'),IRS='LP'+str(i))
+        lp=load(bd('bp'+str(k)+'cfw'),IRS='LP'+str(i),ISW=1)
         completed=False
         for lp2 in visited:
             if np.linalg.norm(lp2-np.array([lp['amp'],lp['norm1'],lp['norm2']]))<1e-4:
@@ -201,7 +201,7 @@ while j<=numbp:
     i=1
     while i<=num:
         print("bp cfw %i %i %i"%(j,i,num))
-        lp=load(bd('bp'+str(k)+'crv'),IRS='LP'+str(i))
+        lp=load(bd('bp'+str(k)+'crv'),IRS='LP'+str(i),ISW=1)
         completed=False
         for lp2 in visited:
             if np.linalg.norm(lp2-np.array([lp['amp'],lp['norm1'],lp['norm2']]))<1e-4:
