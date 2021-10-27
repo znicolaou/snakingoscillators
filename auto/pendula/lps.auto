@@ -119,109 +119,108 @@ while j<=numbp:
         visited=np.concatenate([visited,np.array([[bp['amp'],bp['norm1'],bp['norm2']]])])
         np.savetxt('visited.txt',visited)
 
-
-    if(bp["switch"]<1):
-        cl()
-        fw=bd([])
-        rv=bd([])
-    else:
-        fw=run(bp,ISW=-1)
-        rv=run(bp,DS='-',ISW=-1)
-
-    sv(fw,'bp'+str(k)+'fw')
-    sv(rv,'bp'+str(k)+'rv')
-
-    cfw=run(bp,ISW=1)
-    crv=run(bp,DS='-',ISW=1)
-    sv(cfw,'bp'+str(k)+'cfw')
-    sv(crv,'bp'+str(k)+'crv')
-
-    num=len(rv('LP'))
-    i=1
-    while i<=num:
-        print("bp rv %i %i %i"%(j,i,num))
-        lp=load(bd('bp'+str(k)+'rv'),IRS='LP'+str(i),ISW=1)
-        completed=False
-        for lp2 in visited:
-            if np.linalg.norm(lp2-np.array([lp['amp'],lp['norm1'],lp['norm2']]))<1e-4:
-                print("Previously visited %i %f" %(i, np.linalg.norm(lp2-np.array([lp['amp'],lp['norm1'],lp['norm2']]))))
-                completed=True
-
-        if not completed:
-            visited=np.concatenate([visited,np.array([[lp['amp'],lp['norm1'],lp['norm2']]])])
-            np.savetxt('visited.txt',visited)
-            rv=run(lp,DS='-')
-            sv(mb(bd('bp'+str(k)+'rv')+rv),'bp'+str(k)+'rv')
+        if(bp["switch"]<1):
             cl()
+            fw=bd([])
+            rv=bd([])
+        else:
+            fw=run(bp,ISW=-1)
+            rv=run(bp,DS='-',ISW=-1)
 
-        num=len(bd('bp'+str(k)+'rv')('LP'))
-        i=i+1
+        sv(fw,'bp'+str(k)+'fw')
+        sv(rv,'bp'+str(k)+'rv')
 
-    num=len(fw('LP'))
-    i=1
-    while i<=num:
-        print("bp fw %i %i %i"%(j,i,num))
-        lp=load(bd('bp'+str(k)+'fw'),IRS='LP'+str(i),ISW=1)
-        completed=False
-        for lp2 in visited:
-            if np.linalg.norm(lp2-np.array([lp['amp'],lp['norm1'],lp['norm2']]))<1e-4:
-                print("Previously visited %i %f" %(i, np.linalg.norm(lp2-np.array([lp['amp'],lp['norm1'],lp['norm2']]))))
-                completed=True
+        cfw=run(bp,ISW=1)
+        crv=run(bp,DS='-',ISW=1)
+        sv(cfw,'bp'+str(k)+'cfw')
+        sv(crv,'bp'+str(k)+'crv')
 
-        if not completed:
-            fw=run(lp)
-            sv(mb(bd('bp'+str(k)+'fw')+fw),'bp'+str(k)+'fw')
-            cl()
+        num=len(rv('LP'))
+        i=1
+        while i<=num:
+            print("bp rv %i %i %i"%(j,i,num))
+            lp=load(bd('bp'+str(k)+'rv'),IRS='LP'+str(i),ISW=1)
+            completed=False
+            for lp2 in visited:
+                if np.linalg.norm(lp2-np.array([lp['amp'],lp['norm1'],lp['norm2']]))<1e-4:
+                    print("Previously visited %i %f" %(i, np.linalg.norm(lp2-np.array([lp['amp'],lp['norm1'],lp['norm2']]))))
+                    completed=True
 
-        num=len(bd('bp'+str(k)+'fw')('LP'))
-        i=i+1
+            if not completed:
+                visited=np.concatenate([visited,np.array([[lp['amp'],lp['norm1'],lp['norm2']]])])
+                np.savetxt('visited.txt',visited)
+                rv=run(lp,DS='-')
+                sv(mb(bd('bp'+str(k)+'rv')+rv),'bp'+str(k)+'rv')
+                cl()
 
-    num=len(cfw('LP'))
-    i=1
-    while i<=num:
-        print("bp cfw %i %i %i"%(j,i,num))
-        lp=load(bd('bp'+str(k)+'cfw'),IRS='LP'+str(i),ISW=1)
-        completed=False
-        for lp2 in visited:
-            if np.linalg.norm(lp2-np.array([lp['amp'],lp['norm1'],lp['norm2']]))<1e-4:
-                print("Previously visited %i %f" %(i, np.linalg.norm(lp2-np.array([lp['amp'],lp['norm1'],lp['norm2']]))))
-                completed=True
+            num=len(bd('bp'+str(k)+'rv')('LP'))
+            i=i+1
 
-        if not completed:
-            visited=np.concatenate([visited,np.array([[lp['amp'],lp['norm1'],lp['norm2']]])])
-            np.savetxt('visited.txt',visited)
-            fw=run(lp)
-            sv(mb(bd('bp'+str(k)+'cfw')+fw),'bp'+str(k)+'cfw')
-            cl()
+        num=len(fw('LP'))
+        i=1
+        while i<=num:
+            print("bp fw %i %i %i"%(j,i,num))
+            lp=load(bd('bp'+str(k)+'fw'),IRS='LP'+str(i),ISW=1)
+            completed=False
+            for lp2 in visited:
+                if np.linalg.norm(lp2-np.array([lp['amp'],lp['norm1'],lp['norm2']]))<1e-4:
+                    print("Previously visited %i %f" %(i, np.linalg.norm(lp2-np.array([lp['amp'],lp['norm1'],lp['norm2']]))))
+                    completed=True
 
-        num=len(bd('bp'+str(k)+'cfw')('LP'))
-        i=i+1
+            if not completed:
+                fw=run(lp)
+                sv(mb(bd('bp'+str(k)+'fw')+fw),'bp'+str(k)+'fw')
+                cl()
 
-    num=len(crv('LP'))
-    i=1
-    while i<=num:
-        print("bp cfw %i %i %i"%(j,i,num))
-        lp=load(bd('bp'+str(k)+'crv'),IRS='LP'+str(i),ISW=1)
-        completed=False
-        for lp2 in visited:
-            if np.linalg.norm(lp2-np.array([lp['amp'],lp['norm1'],lp['norm2']]))<1e-4:
-                print("Previously visited %i %f" %(i, np.linalg.norm(lp2-np.array([lp['amp'],lp['norm1'],lp['norm2']]))))
-                completed=True
+            num=len(bd('bp'+str(k)+'fw')('LP'))
+            i=i+1
 
-        if not completed:
-            visited=np.concatenate([visited,np.array([[lp['amp'],lp['norm1'],lp['norm2']]])])
-            np.savetxt('visited.txt',visited)
-            fw=run(lp)
-            sv(mb(bd('bp'+str(k)+'crv')+fw),'bp'+str(k)+'crv')
-            cl()
+        num=len(cfw('LP'))
+        i=1
+        while i<=num:
+            print("bp cfw %i %i %i"%(j,i,num))
+            lp=load(bd('bp'+str(k)+'cfw'),IRS='LP'+str(i),ISW=1)
+            completed=False
+            for lp2 in visited:
+                if np.linalg.norm(lp2-np.array([lp['amp'],lp['norm1'],lp['norm2']]))<1e-4:
+                    print("Previously visited %i %f" %(i, np.linalg.norm(lp2-np.array([lp['amp'],lp['norm1'],lp['norm2']]))))
+                    completed=True
 
-        num=len(bd('bp'+str(k)+'crv')('LP'))
-        i=i+1
+            if not completed:
+                visited=np.concatenate([visited,np.array([[lp['amp'],lp['norm1'],lp['norm2']]])])
+                np.savetxt('visited.txt',visited)
+                fw=run(lp)
+                sv(mb(bd('bp'+str(k)+'cfw')+fw),'bp'+str(k)+'cfw')
+                cl()
 
-    if(bp["switch"]>0):
-        all=all+bd('bp'+str(k)+'fw')+bd('bp'+str(k)+'rv')+bd('bp'+str(k)+'cfw')+bd('bp'+str(k)+'crv')
-    else:
-        all=all+bd('bp'+str(k)+'cfw')+bd('bp'+str(k)+'crv')
+            num=len(bd('bp'+str(k)+'cfw')('LP'))
+            i=i+1
+
+        num=len(crv('LP'))
+        i=1
+        while i<=num:
+            print("bp cfw %i %i %i"%(j,i,num))
+            lp=load(bd('bp'+str(k)+'crv'),IRS='LP'+str(i),ISW=1)
+            completed=False
+            for lp2 in visited:
+                if np.linalg.norm(lp2-np.array([lp['amp'],lp['norm1'],lp['norm2']]))<1e-4:
+                    print("Previously visited %i %f" %(i, np.linalg.norm(lp2-np.array([lp['amp'],lp['norm1'],lp['norm2']]))))
+                    completed=True
+
+            if not completed:
+                visited=np.concatenate([visited,np.array([[lp['amp'],lp['norm1'],lp['norm2']]])])
+                np.savetxt('visited.txt',visited)
+                fw=run(lp)
+                sv(mb(bd('bp'+str(k)+'crv')+fw),'bp'+str(k)+'crv')
+                cl()
+
+            num=len(bd('bp'+str(k)+'crv')('LP'))
+            i=i+1
+
+        if(bp["switch"]>0):
+            all=all+bd('bp'+str(k)+'fw')+bd('bp'+str(k)+'rv')+bd('bp'+str(k)+'cfw')+bd('bp'+str(k)+'crv')
+        else:
+            all=all+bd('bp'+str(k)+'cfw')+bd('bp'+str(k)+'crv')
         k=k+1
 
     numbp=len(all('BP'))
