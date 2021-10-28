@@ -35,8 +35,13 @@ while os.path.exists('s.bp'+str(i)+'cfw'):
 		os.remove('branches/bp'+str(i)+'fw.dat')
 		os.remove('branches/bp'+str(i)+'rv.dat')
 
-	bd('bp'+str(i)+'cfw').writeRawFilename('branches/bpc'+str(i)+'.dat')
-	all=all+bd('bp'+str(i)+'cfw')
+	bd('bp'+str(i)+'cfw').writeRawFilename('branches/bpc'+str(i)+'fw.dat')
+	bd('bp'+str(i)+'crv').writeRawFilename('branches/bpc'+str(i)+'rv.dat')
+	np.savetxt('branches/bpc'+str(i)+'.dat', np.concatenate([np.flip(np.loadtxt('branches/bpc'+str(i)+'fw.dat'),axis=0),np.loadtxt('branches/bpc'+str(i)+'rv.dat')]))
+	os.remove('branches/bpc'+str(i)+'fw.dat')
+	os.remove('branches/bpc'+str(i)+'rv.dat')
+
+	all=all+bd('bp'+str(i)+'cfw')+bd('bp'+str(i)+'crv')
 
 	i=i+1
 sv(all,'all')
