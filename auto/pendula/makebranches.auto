@@ -44,4 +44,4 @@ while os.path.exists('s.bp'+str(i)+'cfw'):
 	all=all+bd('bp'+str(i)+'cfw')+bd('bp'+str(i)+'crv')
 
 	i=i+1
-sv(all,'all')
+#sv(all,'all')
