@@ -12,7 +12,7 @@ from scipy.interpolate import interp1d
 import argparse
 
 ###########################################################################
-def janus(t, phases, N, omega, sigma, beta, gamma, sigma0, t0):
+def janus(t, phases, N, omega, sigma, beta, gamma, sigma0, t0, sym):
     sigmat=sigma
     if (t < t0):
         sigmat = sigma0 + (sigma - sigma0) * t / t0
@@ -21,21 +21,22 @@ def janus(t, phases, N, omega, sigma, beta, gamma, sigma0, t0):
     y=phases[N:2*N]
     u=phases[2*N:3*N]
     v=phases[3*N:4*N]
-    dxdt=-y*(omega/2-beta*(-x*v+y*u)-sigmat*(-x*np.roll(v,-1)+y*np.roll(u,-1)-x*np.roll(v,1)+y*np.roll(u,1)))+gamma*(1-x**2-y**2)*x
-    dydt= x*(omega/2-beta*(-x*v+y*u)-sigmat*(-x*np.roll(v,-1)+y*np.roll(u,-1)-x*np.roll(v,1)+y*np.roll(u,1)))+gamma*(1-x**2-y**2)*y
-    dudt=-v*(-omega/2-beta*(x*v-y*u)-sigmat*(np.roll(x,1)*v-np.roll(y,1)*u+np.roll(x,-1)*v-np.roll(y,-1)*u))+gamma*(1-u**2-v**2)*u
-    dvdt= u*(-omega/2-beta*(x*v-y*u)-sigmat*(np.roll(x,1)*v-np.roll(y,1)*u+np.roll(x,-1)*v-np.roll(y,-1)*u))+gamma*(1-u**2-v**2)*v
+    dxdt=-y*(omega/2-beta*(-x*v+y*u)-sigmat*(-x*np.roll(v,-1)+y*np.roll(u,-1))-sym*sigmat*(-x*np.roll(v,1)+y*np.roll(u,1)))+gamma*(1-x**2-y**2)*x
+    dydt= x*(omega/2-beta*(-x*v+y*u)-sigmat*(-x*np.roll(v,-1)+y*np.roll(u,-1))-sym*sigmat*(-x*np.roll(v,1)+y*np.roll(u,1)))+gamma*(1-x**2-y**2)*y
+    dudt=-v*(-omega/2-beta*(x*v-y*u)-sigmat*(np.roll(x,1)*v-np.roll(y,1)*u)-sym*sigmat*(np.roll(x,-1)*v-np.roll(y,-1)*u))+gamma*(1-u**2-v**2)*u
+    dvdt= u*(-omega/2-beta*(x*v-y*u)-sigmat*(np.roll(x,1)*v-np.roll(y,1)*u)-sym*sigmat*(np.roll(x,-1)*v-np.roll(y,-1)*u))+gamma*(1-u**2-v**2)*v
     return np.concatenate([dxdt,dydt,dudt,dvdt])
 ###########################################################################
 
 ###########################################################################
-def runsim (N, t1, t3, dt, omega, beta, sigma, gamma, phase_init, sigma0=0.35, t0=-1):
-    sol=solve_ivp(janus, [0,t1], phase_init, method='RK45', args=(N,omega, sigma, beta, gamma, sigma0, t0), rtol=1e-6, atol=1e-6, t_eval=dt*np.arange(t1/dt))
+def runsim (N, t1, t3, dt, omega, beta, sigma, gamma, sym, phase_init, sigma0=0.35, t0=-1):
+    sol=solve_ivp(janus, [0,t1], phase_init, method='RK45', args=(N,omega, sigma, beta, gamma, sigma0, t0, sym), rtol=1e-6, atol=1e-6, t_eval=dt*np.arange(t1/dt))
     phases=sol.y.T.copy()
     times=sol.t
     csum=1/(2*N)*np.sum(phases[:,:N]+phases[:,2*N:3*N],axis=1)
     ssum=1/(2*N)*np.sum(phases[:,N:2*N]+phases[:,3*N:4*N],axis=1)
-    r=csum*csum+ssum*ssum
+    # r=csum*csum+ssum*ssum
+    r=csum*csum+ssum*ssum #add the twisted orders.
 
     return phases,times,r
 
@@ -55,6 +56,7 @@ if __name__ == "__main__":
     parser.add_argument("--rtime", type=float, required=False, dest='rtime', default=0., help='Time to start averaging order parameter. Default 1000.')
     parser.add_argument("--dt", type=float, required=False, dest='dt', default=0.1, help='Time step for averaging and output. Default 0.1.')
     parser.add_argument("--seed", type=int, required=False, dest='seed', default=1, help='Initial condition random seed. Default 1.')
+    parser.add_argument("--symmetrize", type=int, required=False, dest='sym', default=1, help='Symmetrize the coupling. 1 for symmetric, 0 for chiral. Default 1.')
 
     args = parser.parse_args()
 
@@ -69,6 +71,7 @@ if __name__ == "__main__":
     seed = args.seed
     filebase = args.filebase
     output = args.output
+    sym = args.sym
 
     if t3>t1:
         t3=t1-dt
@@ -99,7 +102,7 @@ if __name__ == "__main__":
             print('using random initial conditions',flush=True)
 
     start = timeit.default_timer()
-    phases,times,r=runsim(N, t1, t3, dt, omega, beta, sigma, gamma, phase_init)
+    phases,times,r=runsim(N, t1, t3, dt, omega, beta, sigma, gamma, sym, phase_init)
     stop = timeit.default_timer()
 
     # Output
@@ -119,7 +122,7 @@ if __name__ == "__main__":
     angles=np.concatenate([np.mod(thetas-phis[:,-1][:,np.newaxis]+np.pi,2*np.pi)-np.pi,np.mod(phis-phis[:,-1][:,np.newaxis]+np.pi,2*np.pi)-np.pi],axis=1)
     norms=np.linalg.norm(np.mod(angles-angles[-1]+np.pi,2*np.pi)-np.pi,axis=1)
     mins=np.array(argrelmin(norms))[0]
-    mins=mins[np.where(norms[mins]<1)[0]]
+    mins=mins[np.where(norms[mins]<1)[0]] #if dt is too large, we may miss minima here.
 
     p0=0
     order=np.mean(r[int(t3 / dt):])**0.5
@@ -132,6 +135,8 @@ if __name__ == "__main__":
             n0=0
         # norm=np.linalg.norm(np.diff(angles[-n0:],axis=0),ord=2)/10**0.5
         order=np.mean(r[-n0:])**0.5
+        #for bouncing states, these seem to depend on the order of phases
+        #instead, let's use the twisting Kuramoto orders.
         wind1=np.mean(np.mod(np.diff(thetas[-n0:],axis=1)+np.pi,2*np.pi)-np.pi)
         wind2=np.mean(np.mod(np.diff(phis[-n0:],axis=1)+np.pi,2*np.pi)-np.pi)
         norm=(wind1**2+wind2**2)**0.5
