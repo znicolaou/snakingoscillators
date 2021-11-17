@@ -33,12 +33,14 @@ def runsim (N, t1, t3, dt, omega, beta, sigma, gamma, sym, phase_init, sigma0=0.
     sol=solve_ivp(janus, [0,t1], phase_init, method='RK45', args=(N,omega, sigma, beta, gamma, sigma0, t0, sym), rtol=1e-6, atol=1e-6, t_eval=dt*np.arange(t1/dt))
     phases=sol.y.T.copy()
     times=sol.t
-    csum=1/(2*N)*np.sum(phases[:,:N]+phases[:,2*N:3*N],axis=1)
-    ssum=1/(2*N)*np.sum(phases[:,N:2*N]+phases[:,3*N:4*N],axis=1)
-    # r=csum*csum+ssum*ssum
-    r=csum*csum+ssum*ssum #add the twisted orders.
 
-    return phases,times,r
+    theta=np.arctan2(phases[:,N:2*N],phases[:,:N])
+    phi=np.arctan2(phases[:,3*N:],phases[:,2*N:3*N])
+    r=np.abs((np.sum(np.exp(1j*theta),axis=1)+np.sum(np.exp(1j*phi),axis=1))/(2*N))**2
+    rp=np.abs((np.sum(np.exp(1j*(theta+np.arange(N)[np.newaxis,:]/N*2*np.pi)),axis=1)+np.sum(np.exp(1j*(phi+np.arange(N)[np.newaxis,:]/N*2*np.pi)),axis=1))/(2*N))**2
+    rn=np.abs((np.sum(np.exp(1j*(theta-np.arange(N)[np.newaxis,:]/N*2*np.pi)),axis=1)+np.sum(np.exp(1j*(phi-np.arange(N)[np.newaxis,:]/N*2*np.pi)),axis=1))/(2*N))**2
+
+    return phases,times,r,rp,rn
 
 ######################################################################################
 if __name__ == "__main__":
@@ -46,7 +48,8 @@ if __name__ == "__main__":
     #Command line arguments
     parser = argparse.ArgumentParser(description='Numerical integration of networks of phase oscillators.')
     parser.add_argument("--filebase", type=str, required=True, dest='filebase', help='Base string for file output.')
-    parser.add_argument("--output", type=int, required=False, dest='output', default=1, help='Output style, 0 for no stdout and sparse output, 1 for stdout and sparse output, 2 for stdout and dense output. Default 1.')
+    parser.add_argument("--output", type=        # orderp=np.mean(rp[-n0:])**0.5
+int, required=False, dest='output', default=1, help='Output style, 0 for no stdout and sparse output, 1 for stdout and sparse output, 2 for stdout and dense output. Default 1.')
     parser.add_argument("--num", type=int, required=False, dest='num', default=16, help='Number of Janus oscillators. Default 16.')
     parser.add_argument("--time", type=float, required=False, dest='time', default=1000., help='Total integration time. Detault 2000.')
     parser.add_argument("--beta", type=float, required=False, dest='beta', default=0.25, help='Internal coupling strength. Default 0.25.')
@@ -102,7 +105,8 @@ if __name__ == "__main__":
             print('using random initial conditions',flush=True)
 
     start = timeit.default_timer()
-    phases,times,r=runsim(N, t1, t3, dt, omega, beta, sigma, gamma, sym, phase_init)
+    # phases,times,r=runsim(N, t1, t3, dt, omega, beta, sigma, gamma, sym, phase_init)
+    phases,times,r,rp,rn=runsim(N, t1, t3, dt, omega, beta, sigma, gamma, sym, phase_init)
     stop = timeit.default_timer()
 
     # Output
@@ -135,15 +139,11 @@ if __name__ == "__main__":
             n0=0
         # norm=np.linalg.norm(np.diff(angles[-n0:],axis=0),ord=2)/10**0.5
         order=np.mean(r[-n0:])**0.5
-        #for bouncing states, these seem to depend on the order of phases
-        #instead, let's use the twisting Kuramoto orders.
-        wind1=np.mean(np.mod(np.diff(thetas[-n0:],axis=1)+np.pi,2*np.pi)-np.pi)
-        wind2=np.mean(np.mod(np.diff(phis[-n0:],axis=1)+np.pi,2*np.pi)-np.pi)
-        norm=(wind1**2+wind2**2)**0.5
-
+        orderp=np.mean(rp[-n0:])**0.5
+        ordern=np.mean(rn[-n0:])**0.5
 
     if(output>0):
-        print(seed, order, p0, norm)
+        print(seed, order, p0, orderp-ordern)
 
     if(output>1):
         if p0>0:
@@ -152,5 +152,5 @@ if __name__ == "__main__":
     print(*(sys.argv), sep=' ', file=f)
     print(stop - start, file=f)
     print("%i %i %f %f %f"%(N, seed, args.time, args.rtime, args.dt), sep=' ', file=f)
-    print(seed,order,p0,norm, file=f)
+    print(seed,order,p0,orderp-ordern, file=f)
     f.close()
