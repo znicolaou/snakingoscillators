@@ -105,7 +105,6 @@ int, required=False, dest='output', default=1, help='Output style, 0 for no stdo
             print('using random initial conditions',flush=True)
 
     start = timeit.default_timer()
-    # phases,times,r=runsim(N, t1, t3, dt, omega, beta, sigma, gamma, sym, phase_init)
     phases,times,r,rp,rn,meanphase=runsim(N, t1, t3, dt, omega, beta, sigma, gamma, sym, phase_init)
     stop = timeit.default_timer()
 
@@ -121,6 +120,7 @@ int, required=False, dest='output', default=1, help='Output style, 0 for no stdo
     f = open(filebase + 'out.dat', 'w')
     phases=phases[int(t3/dt):]
     times=times[int(t3/dt):]
+
     thetas=np.arctan2(phases[:,N:2*N],phases[:,:N])
     phis=np.arctan2(phases[:,3*N:],phases[:,2*N:3*N])
     angles=np.concatenate([np.mod(thetas-phis[:,-1][:,np.newaxis]+np.pi,2*np.pi)-np.pi,np.mod(phis-phis[:,-1][:,np.newaxis]+np.pi,2*np.pi)-np.pi],axis=1)
@@ -140,15 +140,12 @@ int, required=False, dest='output', default=1, help='Output style, 0 for no stdo
         n0=10*int(p0/dt)
         if n0>int((t1-t3)/dt):
             n0=0
-        # norm=np.linalg.norm(np.diff(angles[-n0:],axis=0),ord=2)/10**0.5
         order=np.mean(r[-n0:])**0.5
         orderp=np.mean(rp[-n0:])**0.5
         ordern=np.mean(rn[-n0:])**0.5
-        wind=(meanphase[-1]-meanphase[-n0])/(2*np.pi)
-
+        wind=(meanphase[-1]-meanphase[-int(p0/dt)])/(2*np.pi) #phase winding over one period. 0.5 and -0.5 are equivalent....
 
     if(output>0):
-        # print(seed, order, p0, orderp-ordern)
         print(seed, order, p0, orderp-ordern, wind)
 
     if(output>1):
@@ -158,6 +155,5 @@ int, required=False, dest='output', default=1, help='Output style, 0 for no stdo
     print(*(sys.argv), sep=' ', file=f)
     print(stop - start, file=f)
     print("%i %i %f %f %f"%(N, seed, args.time, args.rtime, args.dt), sep=' ', file=f)
-    # print(seed,order,p0,orderp-ordern, file=f)
     print(seed,order,p0,orderp-ordern,wind, file=f)
     f.close()
