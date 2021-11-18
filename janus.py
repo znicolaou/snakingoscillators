@@ -39,8 +39,8 @@ def runsim (N, t1, t3, dt, omega, beta, sigma, gamma, sym, phase_init, sigma0=0.
     r=np.abs((np.sum(np.exp(1j*theta),axis=1)+np.sum(np.exp(1j*phi),axis=1))/(2*N))**2
     rp=np.abs((np.sum(np.exp(1j*(theta+np.arange(N)[np.newaxis,:]/N*2*np.pi)),axis=1)+np.sum(np.exp(1j*(phi+np.arange(N)[np.newaxis,:]/N*2*np.pi)),axis=1))/(2*N))**2
     rn=np.abs((np.sum(np.exp(1j*(theta-np.arange(N)[np.newaxis,:]/N*2*np.pi)),axis=1)+np.sum(np.exp(1j*(phi-np.arange(N)[np.newaxis,:]/N*2*np.pi)),axis=1))/(2*N))**2
-
-    return phases,times,r,rp,rn
+    meanphase=np.unwrap(np.angle((np.sum(np.exp(1j*(theta)),axis=1)+np.sum(np.exp(1j*phi),axis=1))/(2*N)))
+    return phases,times,r,rp,rn,meanphase
 
 ######################################################################################
 if __name__ == "__main__":
@@ -106,7 +106,7 @@ int, required=False, dest='output', default=1, help='Output style, 0 for no stdo
 
     start = timeit.default_timer()
     # phases,times,r=runsim(N, t1, t3, dt, omega, beta, sigma, gamma, sym, phase_init)
-    phases,times,r,rp,rn=runsim(N, t1, t3, dt, omega, beta, sigma, gamma, sym, phase_init)
+    phases,times,r,rp,rn,meanphase=runsim(N, t1, t3, dt, omega, beta, sigma, gamma, sym, phase_init)
     stop = timeit.default_timer()
 
     # Output
@@ -130,6 +130,9 @@ int, required=False, dest='output', default=1, help='Output style, 0 for no stdo
 
     p0=0
     order=np.mean(r[int(t3 / dt):])**0.5
+    orderp=np.mean(rp[int(t3 / dt):])**0.5
+    ordern=np.mean(rn[int(t3 / dt):])**0.5
+    wind=(meanphase[-1]-meanphase[int(t3 / dt)])/(2*np.pi)
     norm=0
 
     if(len(mins)>2):
@@ -141,9 +144,12 @@ int, required=False, dest='output', default=1, help='Output style, 0 for no stdo
         order=np.mean(r[-n0:])**0.5
         orderp=np.mean(rp[-n0:])**0.5
         ordern=np.mean(rn[-n0:])**0.5
+        wind=(meanphase[-1]-meanphase[-n0])/(2*np.pi)
+
 
     if(output>0):
-        print(seed, order, p0, orderp-ordern)
+        # print(seed, order, p0, orderp-ordern)
+        print(seed, order, p0, orderp-ordern, wind)
 
     if(output>1):
         if p0>0:
@@ -152,5 +158,6 @@ int, required=False, dest='output', default=1, help='Output style, 0 for no stdo
     print(*(sys.argv), sep=' ', file=f)
     print(stop - start, file=f)
     print("%i %i %f %f %f"%(N, seed, args.time, args.rtime, args.dt), sep=' ', file=f)
-    print(seed,order,p0,orderp-ordern, file=f)
+    # print(seed,order,p0,orderp-ordern, file=f)
+    print(seed,order,p0,orderp-ordern,wind, file=f)
     f.close()
