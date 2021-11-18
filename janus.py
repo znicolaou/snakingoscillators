@@ -144,6 +144,9 @@ int, required=False, dest='output', default=1, help='Output style, 0 for no stdo
         orderp=np.mean(rp[-n0:])**0.5
         ordern=np.mean(rn[-n0:])**0.5
         wind=(meanphase[-1]-meanphase[-int(p0/dt)])/(2*np.pi) #phase winding over one period. 0.5 and -0.5 are equivalent....
+        winds=np.diff(np.unwrap(np.concatenate([thetas,thetas[:,:1]],axis=1),axis=1)[:,[0,-1]],axis=1)[:,0]/(2*np.pi)
+        wind=np.mean(winds[-int(p0/dt):])
+
 
     if(output>0):
         print(seed, order, p0, orderp-ordern, wind)
