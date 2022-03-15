@@ -10,7 +10,6 @@ all=bd('flat')
 i=1
 while os.path.exists('s.pd'+str(i)):
 	bd('pd'+str(i)).writeRawFilename('branches/pd'+str(i)+'.dat')
-	all=all+bd('pd'+str(i))
 	np.savetxt('branches/pd'+str(i)+'.dat',np.loadtxt('branches/pd'+str(i)+'.dat'))
 	i=i+1
 
@@ -18,7 +17,6 @@ i=1
 while os.path.exists('s.'+str(i)+'fw') and os.path.exists('s.'+str(i)+'rv'):
 	bd(str(i)+'fw').writeRawFilename('branches/'+str(i)+'fw.dat')
 	bd(str(i)+'rv').writeRawFilename('branches/'+str(i)+'rv.dat')
-	all=all+bd(str(i)+'fw')+bd(str(i)+'rv')
 	np.savetxt('branches/'+str(i)+'.dat', np.concatenate([np.flip(np.loadtxt('branches/'+str(i)+'rv.dat'),axis=0),np.loadtxt('branches/'+str(i)+'fw.dat')]))
 	os.remove('branches/'+str(i)+'fw.dat')
 	os.remove('branches/'+str(i)+'rv.dat')
@@ -30,7 +28,6 @@ while os.path.exists('s.bp'+str(i)+'cfw'):
 	if(os.path.exists('s.bp'+str(i)+'fw') and os.path.exists('s.bp'+str(i)+'rv')):
 		bd('bp'+str(i)+'fw').writeRawFilename('branches/bp'+str(i)+'fw.dat')
 		bd('bp'+str(i)+'rv').writeRawFilename('branches/bp'+str(i)+'rv.dat')
-		all=all+bd('bp'+str(i)+'fw')+bd('bp'+str(i)+'rv')
 		np.savetxt('branches/bp'+str(i)+'.dat', np.concatenate([np.flip(np.loadtxt('branches/bp'+str(i)+'fw.dat'),axis=0),np.loadtxt('branches/bp'+str(i)+'rv.dat')]))
 		os.remove('branches/bp'+str(i)+'fw.dat')
 		os.remove('branches/bp'+str(i)+'rv.dat')
@@ -40,8 +37,4 @@ while os.path.exists('s.bp'+str(i)+'cfw'):
 	np.savetxt('branches/bpc'+str(i)+'.dat', np.concatenate([np.flip(np.loadtxt('branches/bpc'+str(i)+'fw.dat'),axis=0),np.loadtxt('branches/bpc'+str(i)+'rv.dat')]))
 	os.remove('branches/bpc'+str(i)+'fw.dat')
 	os.remove('branches/bpc'+str(i)+'rv.dat')
-
-	all=all+bd('bp'+str(i)+'cfw')+bd('bp'+str(i)+'crv')
-
 	i=i+1
-#sv(all,'all')
