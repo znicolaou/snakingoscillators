@@ -1,9 +1,0 @@
-import os
-
-rm b.*
-rm s.*
-rm d.*
-rm *.out
-cl()
-rm visited.txt
-rm -r branches

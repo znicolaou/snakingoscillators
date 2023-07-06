@@ -1,0 +1,10 @@
+total=bd([])
+for i in range(1,21):
+	for j in range(1,21):
+		try:
+			total=total+bd('fw'+str(i)+'_'+str(j))
+		except:
+			pass
+		try:
+			total=total+bd('rv'+str(i)+'_'+str(j))
+sv(total,'total')

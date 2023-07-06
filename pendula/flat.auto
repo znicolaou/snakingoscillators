@@ -1,0 +1,21 @@
+import numpy as np
+import os 
+
+br=19
+flat=run('pendula',c='flat',DSMAX=1E-3)
+if not os.path.exists('%i'%(br)):
+  os.mkdir('%i'%(br))
+sv(flat,'fw')
+flat.writeRawFilename('total1.dat')
+os.system('mv {s.fw,b.fw,d.fw,total1.dat} %i/'%(br))
+br=br+1
+for pd in flat('PD'):
+  print("Branch: %i"%(br))
+  branch=run(pd,ISW=-1,UZSTOP={'norm1':5.0,1:0.15},SP=['LP0','BP0'],DSMAX=2E-2)
+  if not os.path.exists('%i'%(br)):
+    os.mkdir('%i'%(br))
+  sv(branch,'fw')
+  branch.writeRawFilename('total1.dat')
+  os.system('mv {s.fw,b.fw,d.fw,total1.dat} %i/'%(br))
+  br=br+1
+cl()
