@@ -1,4 +1,5 @@
 #include "auto_f2c.h"
+void argsort(double *vec,int *order,int ndim);
 
 int func (integer ndim, const doublereal *u, const integer *icp,
           const doublereal *par, integer ijac,
@@ -261,20 +262,77 @@ int pvls (integer ndim, const doublereal *u,
         order3+=dt*weight*(csum*csum+ssum*ssum);
       }
     }
-    for(int i=1; i<ndim; i++){
-      if(getp("EIG",2*i+1,u)*getp("EIG",2*i+1,u)+getp("EIG",2*i+2,u)*getp("EIG",2*i+2,u)>0.97){
-        unstable++;
-      }
+  }
+
+  double *vec=malloc(ndim*sizeof(double));
+  int *vorder=malloc(ndim*sizeof(int));
+
+  for(int i=0; i<ndim; i++){
+    vec[i]=fabs(getp("EIG",2*i+1,u)*getp("EIG",2*i+1,u)+getp("EIG",2*i+2,u)*getp("EIG",2*i+2,u)-1);
+  }
+  int nreal=0;
+  double *rvec=malloc(ndim*sizeof(double));
+  int *rorder=malloc(ndim*sizeof(int));
+  for(int i=0; i<ndim; i++){
+    if(getp("EIG",2*i+2,u)==0.){
+      rvec[nreal++]=fabs(fabs(getp("EIG",2*i+1,u))-1);
     }
   }
+  argsort(rvec,rorder,nreal);
+  argsort(vec,vorder,ndim);
+
   par[1]=pow(order,0.5);
   par[2]=pow(order2,0.5);
   par[3]=pow(order3,0.5);
-  par[4]=ndim-unstable;
-  par[5]=getp("STP",0,u);
+  par[4]=getp("EIG",2*vorder[1]+1,u)*getp("EIG",2*vorder[1]+1,u)+getp("EIG",2*vorder[1]+2,u)*getp("EIG",2*vorder[1]+2,u);
+  par[5]=getp("EIG",2*vorder[2]+1,u)*getp("EIG",2*vorder[2]+1,u)+getp("EIG",2*vorder[2]+2,u)*getp("EIG",2*vorder[2]+2,u);
+  par[6]=getp("EIG",2*rorder[2]+1,u);
+  par[7]=getp("STP",0,u);
+  par[8]=getp("STA",0,u);
 
   return 0;
 }
+
+
+void argsort(doublereal *vec, int *order, int ndim){
+  double min=vec[0];
+  order[0]=0;
+  //find the smallest element
+  for (int i=1; i<ndim; i++){
+    if(vec[i]<min){
+      min=vec[i];
+      order[0]=i;
+    }
+  }
+  //find the next smallest value
+  for (int i=1; i<ndim; i++){
+    //find the smallest element of vector larger than the current min
+      for(int j=0; j<ndim; j++){
+	int include=1;
+	for(int k=0; k<i; k++){
+	  if(j==order[k]){
+            include=0;
+	  }
+	}
+	if(vec[j]>=vec[order[i-1]] && include){
+	  min=vec[j];
+	}
+      }
+      for(int j=0; j<ndim; j++){
+	int include=1;
+	for(int k=0; k<i; k++){
+	  if(j==order[k]){
+            include=0;
+	  }
+	}
+        if(vec[j]<=min && vec[j]>=vec[order[i-1]] && include){
+          min=vec[j];
+          order[i]=j;
+        }
+      }
+  }
+}
+
 /* ---------------------------------------------------------------------- */
 /* ---------------------------------------------------------------------- */
 int bcnd (integer ndim, const doublereal *par, const integer *icp,

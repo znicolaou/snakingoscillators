@@ -1,7 +1,6 @@
 #include "auto_f2c.h"
 #define PI 3.14159265359
 
-void quicksort(double *vec,int first,int last);
 void argsort(double *vec,int *order,int ndim);
 
 int func (integer ndim, const doublereal *w, const integer *icp,
@@ -166,9 +165,6 @@ int pvls (integer ndim, const doublereal *u,
 
   doublereal t=0;
   doublereal dt,weight,norm1=0,norm2=0;
-  double *vec=malloc(ndim*sizeof(double));
-  int *order=malloc(ndim*sizeof(int));
-
   dt = getp("DTM",1,u);
 
   for (int i=0; i<NTST; i++){
@@ -181,11 +177,14 @@ int pvls (integer ndim, const doublereal *u,
       }
     }
   }
+
+  double *vec=malloc(ndim*sizeof(double));
+  int *order=malloc(ndim*sizeof(int));
+
   for(int i=0; i<ndim; i++){
     vec[i]=fabs(getp("EIG",2*i+1,u)*getp("EIG",2*i+1,u)+getp("EIG",2*i+2,u)*getp("EIG",2*i+2,u)-1);
   }
   argsort(vec,order,ndim);
-  quicksort(vec,1,ndim-1);
 
 
   par[3]=getp("STA",0,u);
@@ -196,6 +195,7 @@ int pvls (integer ndim, const doublereal *u,
   par[8]=getp("EIG",2*order[2]+2,u);
   par[9]=getp("STP",0,u);
   free(vec);
+  free(order)
   return 0;
 }
 
@@ -235,39 +235,6 @@ void argsort(doublereal *vec, int *order, int ndim){
           order[i]=j;
         }
       }
-  }
-}
-
-void quicksort(doublereal *vec, int first, int last){
-  int i, j, pivot;
-  doublereal temp;
-
-  if(first<last){
-    pivot=first;
-    i=first;
-    j=last;
-
-    while(i<j){
-      // while(vec[i]<=vec[pivot]&&i<last){
-      while(fabs(vec[i])<=fabs(vec[pivot])&&i<last){
-        i++;
-      }
-      // while(vec[j]>vec[pivot]){
-      while(fabs(vec[j])>fabs(vec[pivot])){
-        j--;
-      }
-      if(i<j){
-        temp=vec[i];
-        vec[i]=vec[j];
-        vec[j]=temp;
-      }
-    }
-
-    temp=vec[pivot];
-    vec[pivot]=vec[j];
-    vec[j]=temp;
-    quicksort(vec,first,j-1);
-    quicksort(vec,j+1,last);
   }
 }
 
