@@ -8,4 +8,4 @@ NPAR = 9, THL =  {11: 0.0}, THU =  {}
 RL0=-0.1, RL1=0.7
 parnames={1:'sigma',2:'r',3:'r1',4:'r2',5:'lambda1',6:'lambda2',7:'lambda3',8:'ds',9:'stable'}
 UZSTOP={1:[0.01,0.6], 11:1500}
-PAR={1:0.325}
+PAR={1:0.3}

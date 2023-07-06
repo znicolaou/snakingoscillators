@@ -20,11 +20,10 @@ for seed in $seeds; do
 		sleep 1;
 		jobs=`jobs | wc -l`;
 	done
-	#if [ ! -f data/random/${seed}out.dat ]; then
+	if [ ! -f data/randomjanus/${seed}phases.npy ]; then
 		echo $seed
-		./janus.py --filebase data/random2/$seed --seed $seed --sigma 0.325 --beta 0.25 --dt 0.01 --sym 0 --num 16 --time 10000 --rtime 5000 --output 3 &
-		#./janus.py --filebase data/random/$seed --seed $seed --sigma 0.17 --dt 0.01 --sym 1 --num 16 --time 10000 --rtime 5000 --output 0 &
-	#fi
+		./janus.py --filebase data/randomjanus/$seed --seed $seed --sigma 0.3 --beta 0.3 --dt 0.01 --sym 0 --num 16 --time 10000 --rtime 5000 --output 3 &
+	fi
 done
 wait
 

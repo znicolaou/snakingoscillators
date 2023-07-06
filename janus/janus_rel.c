@@ -11,7 +11,8 @@ int func (integer ndim, const doublereal *u, const integer *icp,
 
   double sigma = par[0];
   double omega=1.0;
-  double beta=0.25;
+  //double beta=0.25;
+  double beta = par[0];
   double gamma=1.0;
   int N = ((ndim+2)/4);
   int j=0;
