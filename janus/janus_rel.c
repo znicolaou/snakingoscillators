@@ -143,17 +143,19 @@ int func (integer ndim, const doublereal *u, const integer *icp,
   }
 
   for(j=0; j<N-1; j++){
-    ARRAY2D(dfdp,j,0)=-y[j]*((x[j]*v[(j+2)%N]-w[(j+2)%N]*y[j]-v[1]));
-    ARRAY2D(dfdp,N-1+j,0)=x[j]*((x[j]*v[(j+2)%N]-w[(j+2)%N]*y[j]-v[1]));
+    ARRAY2D(dfdp,j,0)=-y[j]*((x[j]*v[j+1]-w[j+1]*y[j]-v[0])+(x[j]*v[(j+2)%N]-w[(j+2)%N]*y[j]-v[1]));
+    ARRAY2D(dfdp,N-1+j,0)=x[j]*((x[j]*v[j+1]-w[j+1]*y[j]-v[0])+(x[j]*v[(j+2)%N]-w[(j+2)%N]*y[j]-v[1]));
   }
-  ARRAY2D(dfdp,2*(N-1)+0,0)=-v[0]*((w[0]*y[N-2]-v[0]*x[N-2]-v[1]));
-  ARRAY2D(dfdp,2*(N-1)+N+0,0)=w[0]*((w[0]*y[N-2]-v[0]*x[N-2]-v[1]));
-  ARRAY2D(dfdp,2*(N-1)+1,0)=-v[1]*((w[1]*0-v[1]*1-v[1]));
-  ARRAY2D(dfdp,2*(N-1)+N+1,0)=w[1]*((w[1]*0-v[1]*1-v[1]));
+  ARRAY2D(dfdp,2*(N-1)+0,0)= -v[0]*((-2*v[0])+(w[0]*y[N-2]-v[0]*x[N-2]-v[1]));
+  ARRAY2D(dfdp,2*(N-1)+N+0,0)=w[0]*((-2*v[0])+(w[0]*y[N-2]-v[0]*x[N-2]-v[1]));
+  ARRAY2D(dfdp,2*(N-1)+1,0)= -v[1]*((w[1]*y[0]-v[1]*x[0]-v[0])+(-2*v[1]));
+  ARRAY2D(dfdp,2*(N-1)+N+1,0)=w[1]*((w[1]*y[0]-v[1]*x[0]-v[0])+(-2*v[1]));
   for(j=2; j<N; j++){
-    ARRAY2D(dfdp,2*(N-1)+j,0)=-v[j]*((w[j]*y[j-2]-v[j]*x[j-2]-v[1]));
-    ARRAY2D(dfdp,2*(N-1)+N+j,0)=w[j]*((w[j]*y[j-2]-v[j]*x[j-2]-v[1]));
+    ARRAY2D(dfdp,2*(N-1)+j,0)= -v[j]*((w[j]*y[j-1]-v[j]*x[j-1]-v[0])+(w[j]*y[j-2]-v[j]*x[j-2]-v[1]));
+    ARRAY2D(dfdp,2*(N-1)+N+j,0)=w[j]*((w[j]*y[j-1]-v[j]*x[j-1]-v[0])+(w[j]*y[j-2]-v[j]*x[j-2]-v[1]));
   }
+
+
 
   return 0;
 }
@@ -162,7 +164,7 @@ int func (integer ndim, const doublereal *u, const integer *icp,
 int stpnt (integer ndim, doublereal t,
            doublereal *u, doublereal *par)
 {
-  par[0] = 0.325;
+  par[0] = 0.3;
   int N = (ndim+2)/4;
   double phi0=-asin(1.0/(2*(par[0]+0.25)));
   for (int k=0; k<N-1; k++){
