@@ -288,11 +288,18 @@ int pvls (integer ndim, const doublereal *u,
   par[1]=pow(order,0.5);
   par[2]=pow(order2,0.5);
   par[3]=pow(order3,0.5);
-  par[4]=getp("EIG",2*vorder[2]+1,u)*getp("EIG",2*vorder[2]+1,u)+getp("EIG",2*vorder[2]+2,u)*getp("EIG",2*vorder[2]+2,u);
-  par[5]=getp("EIG",2*rinds[rorder[1]]+1,u);
-  par[6]=getp("EIG",2*rinds[rorder[2]]+1,u);
-  par[7]=getp("STP",0,u);
-  par[8]=getp("STA",0,u);
+  par[4]=getp("EIG",2*vorder[1]+1,u)*getp("EIG",2*vorder[1]+1,u)+getp("EIG",2*vorder[1]+2,u)*getp("EIG",2*vorder[1]+2,u);
+  par[5]=getp("EIG",2*vorder[2]+1,u)*getp("EIG",2*vorder[2]+1,u)+getp("EIG",2*vorder[2]+2,u)*getp("EIG",2*vorder[2]+2,u);
+  if(nreal>2){
+    par[6]=getp("EIG",2*rinds[rorder[1]]+1,u);
+    par[7]=getp("EIG",2*rinds[rorder[2]]+1,u);
+  }
+  else{
+    par[6]=0;
+    par[7]=0;
+  }
+  par[8]=getp("STP",0,u);
+  par[9]=getp("STA",0,u);
   free(rvec);
   free(vec);
   free(vorder);
