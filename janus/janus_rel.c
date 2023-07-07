@@ -222,7 +222,6 @@ int pvls (integer ndim, const doublereal *u,
       ssum+=1.0/(2*N)*(cos((k+1)*eta)*u[(N-1)+k]+cos(k*eta)*u[2*(N-1)+N+k]+sin((k+1)*eta)*u[k]+sin(k*eta)*u[2*(N-1)+k]);
     }
     order3=(csum*csum+ssum*ssum);
-    par[10]=0;
     for(int i=1; i<ndim; i++){
       if(getp("EIG",2*i+1,u)>0){
         unstable++;
@@ -276,8 +275,10 @@ int pvls (integer ndim, const doublereal *u,
   int nreal=0;
   double *rvec=malloc(ndim*sizeof(double));
   int *rorder=malloc(ndim*sizeof(int));
+  int *rinds=malloc(ndim*sizeof(int));
   for(int i=0; i<ndim; i++){
     if(getp("EIG",2*i+2,u)==0.){
+      rinds[nreal] = i;
       rvec[nreal++]=fabs(fabs(getp("EIG",2*i+1,u))-1);
     }
   }
@@ -287,11 +288,16 @@ int pvls (integer ndim, const doublereal *u,
   par[1]=pow(order,0.5);
   par[2]=pow(order2,0.5);
   par[3]=pow(order3,0.5);
-  par[4]=getp("EIG",2*vorder[1]+1,u)*getp("EIG",2*vorder[1]+1,u)+getp("EIG",2*vorder[1]+2,u)*getp("EIG",2*vorder[1]+2,u);
-  par[5]=getp("EIG",2*vorder[2]+1,u)*getp("EIG",2*vorder[2]+1,u)+getp("EIG",2*vorder[2]+2,u)*getp("EIG",2*vorder[2]+2,u);
-  par[6]=getp("EIG",2*rorder[2]+1,u);
+  par[4]=getp("EIG",2*vorder[2]+1,u)*getp("EIG",2*vorder[2]+1,u)+getp("EIG",2*vorder[2]+2,u)*getp("EIG",2*vorder[2]+2,u);
+  par[5]=getp("EIG",2*rinds[rorder[1]]+1,u);
+  par[6]=getp("EIG",2*rinds[rorder[2]]+1,u);
   par[7]=getp("STP",0,u);
   par[8]=getp("STA",0,u);
+  free(rvec);
+  free(vec);
+  free(vorder);
+  free(rorder);
+  free(rinds);
 
   return 0;
 }

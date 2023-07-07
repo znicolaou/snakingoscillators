@@ -1,5 +1,5 @@
 NDIM=   62, IPS =   2, IRS =   0
-ICP =  [1, 11, 2, 5, 6, 7, 8, 9, 3, 4], SP = ['LP1','TR','PD','HB','BP0']
+ICP =  [1, 11, 2, 5, 6, 7, 8, 9, 3, 4], SP = ['LP0','TR0','PD0','HB0','BP0']
 NTST=  1000, NCOL=   4, IAD =   1, ISW = 1, NBC= 0, NINT= 0
 NMX=   100, NPR=  100, MXBF=  10, IID =   2, ITMX= 11, ITNW= 10, NWTN= 5, JAC= 1
 EPSL= 1e-08, EPSU = 1e-08, EPSS = 1e-06
