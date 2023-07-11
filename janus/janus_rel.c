@@ -284,15 +284,14 @@ int pvls (integer ndim, const doublereal *u,
   }
   argsort(rvec,rorder,nreal);
   argsort(vec,vorder,ndim);
-
   par[1]=pow(order,0.5);
   par[2]=pow(order2,0.5);
   par[3]=pow(order3,0.5);
-  par[4]=getp("EIG",2*vorder[1]+1,u)*getp("EIG",2*vorder[1]+1,u)+getp("EIG",2*vorder[1]+2,u)*getp("EIG",2*vorder[1]+2,u);
-  par[5]=getp("EIG",2*vorder[2]+1,u)*getp("EIG",2*vorder[2]+1,u)+getp("EIG",2*vorder[2]+2,u)*getp("EIG",2*vorder[2]+2,u);
+  par[4]=getp("EIG",2*vorder[1]+1,u)*getp("EIG",2*vorder[1]+1,u)+getp("EIG",2*vorder[1]+2,u)*getp("EIG",2*vorder[1]+2,u)-1;
+  par[5]=getp("EIG",2*vorder[2]+1,u)*getp("EIG",2*vorder[2]+1,u)+getp("EIG",2*vorder[2]+2,u)*getp("EIG",2*vorder[2]+2,u)-1;
   if(nreal>2){
-    par[6]=getp("EIG",2*rinds[rorder[1]]+1,u);
-    par[7]=getp("EIG",2*rinds[rorder[2]]+1,u);
+    par[6]=fabs(getp("EIG",2*rinds[rorder[1]]+1,u))-1;
+    par[7]=fabs(getp("EIG",2*rinds[rorder[2]]+1,u))-1;
   }
   else{
     par[6]=0;

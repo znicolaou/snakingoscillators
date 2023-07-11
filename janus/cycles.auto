@@ -39,7 +39,7 @@ while nlps<lpmax and not forward(forward.getLabels()[-1])['TY'] in ['UZ','MX'] a
     period=forward(forward.getLabels()[-1])['PERIOD']
     NTST=np.max([1000,int(period/140*500)])
     print(i,'continue:', forward(forward.getLabels()[-1])['TY'], 'lps:', nlps, 'ntst:', NTST)
-    forward=run(forward(forward.getLabels()[-1]),NTST=NTST)
+    forward=run(forward(forward.getLabels()[-1]),NTST=NTST,DS=forward(forward.getLabels()[-1])['ds'])
     for n in forward('LP').getLabels():
         for prev in previously_enumerated:
             if not forward(n)['TY'] in ['EP']:
@@ -99,7 +99,7 @@ while nlps<lpmax and not reverse(reverse.getLabels()[-1])['TY'] in ['UZ','MX'] a
     period=reverse(reverse.getLabels()[-1])['PERIOD']
     NTST=np.max([1000,int(period/140*500)])
     print(i,'continue:', reverse(reverse.getLabels()[-1])['TY'], 'lps:', nlps, 'ntst:', NTST)
-    reverse=run(reverse(reverse.getLabels()[-1]),NTST=NTST)
+    reverse=run(reverse(reverse.getLabels()[-1]),NTST=NTST,DS=reverse(reverse.getLabels()[-1])['ds'])
     for n in reverse('LP').getLabels():
         for prev in previously_enumerated:
             if not reverse(n)['TY'] in ['EP']:
@@ -125,10 +125,15 @@ for j in range(2,nrv+1,1):
     total=total+bd('rv'+str(j))
 total.writeRawFilename('rv.dat')
 
-total=bd('fw2')
-for j in range(3,nfw+1,1):
-    total=total+bd('fw'+str(j))
-total.writeRawFilename('fw.dat')
-
-total=np.concatenate([np.flip(np.loadtxt('rv.dat'),axis=0),np.loadtxt('fw.dat')],axis=0)
+try:
+    total=bd('fw2')
+    for j in range(3,nfw+1,1):
+        total=total+bd('fw'+str(j))
+    total.writeRawFilename('fw.dat')
+except:
+    shell touch fw.dat
+try:
+    total=np.concatenate([np.flip(np.loadtxt('rv.dat'),axis=0),np.loadtxt('fw.dat')],axis=0)
+except:
+    total=np.flip(np.loadtxt('rv.dat'),axis=0)
 np.savetxt('total.dat',total)
