@@ -1,0 +1,25 @@
+import numpy as np
+i=2
+fw=bd([])
+while True:
+	try:
+		fw=fw+bd('fw'+str(i))
+		i=i+1
+	except:
+		break
+i=1
+rv=bd([])
+while True:
+	try:
+		rv=rv+bd('rv'+str(i))
+		i=i+1
+	except:
+		break
+sv(rl(fw+rv),'total')
+fw.writeRawFilename('fw.dat')
+rv.writeRawFilename('rv.dat')
+try:
+	total=np.concatenate([np.flip(np.loadtxt('rv.dat'),axis=0),np.loadtxt('fw.dat')],axis=0)
+except:
+	total=np.loadtxt('fw.dat')
+np.savetxt('total.dat',total)

@@ -1,0 +1,140 @@
+import os.path
+import numpy as np
+
+lpmax=20
+i=1
+nlps=0
+previously_enumerated=[]
+stop=False
+
+if os.path.exists('d.swfw'+str(i)):
+    print(i)
+    forward=bd('swfw'+str(i))
+    print(forward)
+    for n in forward('LP').getLabels():
+        previously_enumerated=previously_enumerated+[[forward(n)['sigma'],forward(n)['r'],forward(n)['PERIOD']]]
+    nlps=nlps+len(forward('LP'))
+    while os.path.exists('d.swfw'+str(i+1)):
+        i=i+1
+        print(i)
+        forward=bd('swfw'+str(i))
+        print(forward)
+        for n in forward('LP').getLabels():
+            previously_enumerated=previously_enumerated+[[forward(n)['sigma'],forward(n)['r'],forward(n)['PERIOD']]]
+
+        nlps=nlps+len(forward('LP'))
+else:
+    sw=bd('sw')
+    forward=run(sw,NPR=0,NMX=100,UZSTOP={11:[1500,1505],1:[0.01,0.5]},SP=['LP1','BP0','TR0'],ISW=1)
+    for n in forward('LP').getLabels():
+        previously_enumerated=previously_enumerated+[[forward(n)['sigma'],forward(n)['r'],forward(n)['PERIOD']]]
+    nlps=nlps+len(forward('LP'))
+    sv(forward,'swfw'+str(i))
+    initial=forward(forward.getLabels()[0])
+    dat=[initial['t']]
+    dat=dat+[initial['U(%i)'%(i)] for i in range(1,initial['NDIM']+1)]
+    np.save('swfwinitial.dat',dat)
+
+while nlps<lpmax and not forward(forward.getLabels()[-1])['TY'] in ['UZ','MX'] and not stop:
+    i=i+1
+    period=forward(forward.getLabels()[-1])['PERIOD']
+    NTST=np.max([1000,int(period/140*500)])
+    print(i,'continue:', forward(forward.getLabels()[-1])['TY'], 'lps:', nlps, 'ntst:', NTST)
+    forward=run(forward(forward.getLabels()[-1]),NTST=NTST,DS=forward(forward.getLabels()[-1])['ds'])
+    for n in forward('LP').getLabels():
+        for prev in previously_enumerated:
+            if not forward(n)['TY'] in ['EP']:
+                diff=[[forward(n)['sigma']-prev[0],forward(n)['r']-prev[1],forward(n)['PERIOD']-prev[2]]]
+                if np.linalg.norm(diff)<1e-4:
+                    print('previously enumerated')
+                    stop=True
+        previously_enumerated=previously_enumerated+[[forward(n)['sigma'],forward(n)['r'],forward(n)['PERIOD']]]
+
+
+    nlps=nlps+len(forward('LP'))
+    sv(forward,'swfw'+str(i))
+
+nfw=i
+final=forward(forward.getLabels()[-1])
+dat=[final['t']]
+dat=dat+[final['U(%i)'%(i)] for i in range(1,final['NDIM']+1)]
+np.save('swfwfinal.dat',dat)
+cl()
+
+i=1
+nlps=0
+stop=False
+
+if os.path.exists('d.swrv'+str(i)):
+    print(i)
+    reverse=bd('swrv'+str(i))
+    print(reverse)
+    for n in reverse('LP').getLabels():
+        previously_enumerated=previously_enumerated+[[reverse(n)['sigma'],reverse(n)['r'],reverse(n)['PERIOD']]]
+
+    nlps=nlps+len(reverse('LP'))
+    while os.path.exists('d.swrv'+str(i+1)):
+        i=i+1
+        print(i)
+        reverse=bd('swrv'+str(i))
+        print(reverse)
+        for n in reverse('LP').getLabels():
+            previously_enumerated=previously_enumerated+[[reverse(n)['sigma'],reverse(n)['r'],reverse(n)['PERIOD']]]
+
+        nlps=nlps+len(reverse('LP'))
+else:
+    forward=bd('swfw'+str(1))
+    reverse=run(forward(forward.getLabels()[-1]),DS='-')
+    for n in reverse('LP').getLabels():
+        previously_enumerated=previously_enumerated+[[reverse(n)['sigma'],reverse(n)['r'],reverse(n)['PERIOD']]]
+
+    nlps=nlps+len(reverse('LP'))
+    sv(reverse,'swrv'+str(i))
+    initial=reverse(reverse.getLabels()[0])
+    dat=[initial['t']]
+    dat=dat+[initial['U(%i)'%(i)] for i in range(1,initial['NDIM']+1)]
+    np.save('swrvinitial.dat',dat)
+
+while nlps<lpmax and not reverse(reverse.getLabels()[-1])['TY'] in ['UZ','MX'] and not stop:
+    i=i+1
+    period=reverse(reverse.getLabels()[-1])['PERIOD']
+    NTST=np.max([1000,int(period/140*500)])
+    print(i,'continue:', reverse(reverse.getLabels()[-1])['TY'], 'lps:', nlps, 'ntst:', NTST)
+    reverse=run(reverse(reverse.getLabels()[-1]),NTST=NTST,DS=reverse(reverse.getLabels()[-1])['ds'])
+    for n in reverse('LP').getLabels():
+        for prev in previously_enumerated:
+            if not reverse(n)['TY'] in ['EP']:
+                diff=[[reverse(n)['sigma']-prev[0],reverse(n)['r']-prev[1],reverse(n)['PERIOD']-prev[2]]]
+                if np.linalg.norm(diff)<1e-4:
+                    print('previously enumerated')
+                    stop=True
+        previously_enumerated=previously_enumerated+[[reverse(n)['sigma'],reverse(n)['r'],reverse(n)['PERIOD']]]
+
+    nlps=nlps+len(reverse('LP'))
+    sv(reverse,'swrv'+str(i))
+
+nrv=i
+final=reverse(reverse.getLabels()[-1])
+dat=[final['t']]
+dat=dat+[final['U(%i)'%(i)] for i in range(1,final['NDIM']+1)]
+np.save('swrvfinal.dat',dat)
+
+cl()
+
+total=bd('swrv1')
+for j in range(2,nrv+1,1):
+    total=total+bd('swrv'+str(j))
+total.writeRawFilename('swrv.dat')
+
+try:
+    total=bd('swfw2')
+    for j in range(3,nfw+1,1):
+        total=total+bd('swfw'+str(j))
+    total.writeRawFilename('swfw.dat')
+except:
+    shell touch swfw.dat
+try:
+    total=np.concatenate([np.flip(np.loadtxt('swrv.dat'),axis=0),np.loadtxt('swfw.dat')],axis=0)
+except:
+    total=np.flip(np.loadtxt('swrv.dat'),axis=0)
+np.savetxt('swtotal.dat',total)
