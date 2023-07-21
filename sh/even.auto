@@ -72,6 +72,7 @@ for i in range(len(sols)):
     evals = evals + [vals]
     evecs = evecs + [vecs]
 
+np.save('even_evals',evals)
 inds = np.argsort(np.real(evals))[:, -4:]
 stableinds = np.where(np.count_nonzero(np.real(np.array(evals)[tuple([np.arange(len(evals))[:, np.newaxis], inds])])>-1E-2,axis=1)<2)[0]
 
