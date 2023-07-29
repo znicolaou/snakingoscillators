@@ -1,23 +1,32 @@
 import numpy as np
-i=2
-fw=bd([])
-while True:
-	try:
-		fw=fw+bd('fw'+str(i))
-		i=i+1
-	except:
-		break
-i=1
-rv=bd([])
-while True:
-	try:
-		rv=rv+bd('rv'+str(i))
-		i=i+1
-	except:
-		break
-total=fw+rv
+import os
+br=1
+total=bd([])
+while(os.path.exists('b.fw'+str(br)+'_1')):
+	i=1
+	print(br)
+	fw=bd([])
+	while True:
+		try:
+			fw=fw+bd('fw'+str(br)+'_'+str(i))
+			rint(i)
+			i=i+1
+		except:
+			break
+	i=1
+	rv=bd([])
+	while True:
+		try:
+			rv=rv+bd('rv'+str(br)+'_'+str(i))
+			print(i)
+			i=i+1
+		except:
+			break
+	total=total+fw+rv
+	br=br+1
 total=rl(total)
 sv(total,'total')
+quit()
 fw.writeRawFilename('fw.dat')
 rv.writeRawFilename('rv.dat')
 try:
@@ -26,7 +35,7 @@ except:
 	total=np.loadtxt('fw.dat')
 np.savetxt('total.dat',total)
 
-i=2
+i=1
 fw=bd([])
 while True:
 	try:

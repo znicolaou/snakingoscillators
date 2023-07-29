@@ -83,7 +83,7 @@ while br<=len(branches):
     NTST=np.max([1000,int(period/140*500)])
     while nlps<lpmax and not forward(forward.getLabels()[-1])['TY'] in ['MX'] and not stop:
         i=i+1
-        print(i,'continue:', forward(forward.getLabels()[-1])['TY'], 'lps:', nlps, 'ntst:' NTST)
+        print(i,'continue:', forward(forward.getLabels()[-1])['TY'], 'lps:', nlps, 'ntst:', NTST)
         forward=run(forward(forward.getLabels()[-1]),SP=['LP1','UZ1',checkbp],NTST=NTST)
         if np.max(np.abs(forward['lambda2'])) < 1e-4:
             print('Turning off BP for branch')
@@ -121,7 +121,7 @@ while br<=len(branches):
                 previously_branched=previously_branched+[[forward(n)['sigma'],forward(n)['r'],forward(n)['PERIOD']]]
                 newstart=run(forward(n),ISW=-1,NMX=10,SP=['LP0','UZ0','BP0'])
                 sv(newstart,'start_%i'%(len(branches)+1))
-                branches=branches+[run(forward(n),ISW=-1,NMX=10,SP=['LP0','UZ0','BP0'])]
+                branches=branches+[newstart]
 
 
         nlps=nlps+len(forward('LP'))
@@ -168,7 +168,9 @@ while br<=len(branches):
         if reverse(n)['TY'] == 'UZ' and len(branches)<bpmax and addbr:
             print('adding bp to branches')
             previously_branched=previously_branched+[[reverse(n)['sigma'],reverse(n)['r'],reverse(n)['PERIOD']]]
-            branches=branches+[run(reverse(n),ISW=-1,NMX=10,SP=['LP0','UZ0','BP0'])]
+            newstart=run(reverse(n),ISW=-1,NMX=10,SP=['LP0','UZ0','BP0'])
+            sv(newstart,'start_%i'%(len(branches)+1))
+            branches=branches+[newstart]
 
 
     nlps=nlps+len(reverse('LP'))
@@ -217,7 +219,9 @@ while br<=len(branches):
             if reverse(n)['TY'] == 'BP' and len(branches)<bpmax and addbr:
                 print('adding bp to branches')
                 previously_branched=previously_branched+[[reverse(n)['sigma'],reverse(n)['r'],reverse(n)['PERIOD']]]
-                branches=branches+[run(reverse(n),ISW=-1,NMX=10,SP=['LP0','UZ0','BP0'])]
+                newstart=run(reverse(n),ISW=-1,NMX=10,SP=['LP0','UZ0','BP0'])
+                sv(newstart,'start_%i'%(len(branches)+1))
+                branches=branches+[newstart]
 
 
         nlps=nlps+len(reverse('LP'))
