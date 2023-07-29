@@ -22,9 +22,10 @@ for i in `seq 1 $seeds`; do
 		sleep 1;
 		jobs=`jobs | wc -l`;
 	done
-	if [ ! -f data/randomjanus/${seed}out.dat ]; then
+	if [ ! -f data/randomjanus_int/${seed}out.dat ]; then
 		echo $seed
-		./janus.py --filebase data/randomjanus/$seed --seed $seed --sigma 0.3 --beta 0.3 --dt 0.01 --sym 0 --num 16 --time 25000 --rtime 20000 --output 0 &
+		#./janus.py --filebase data/randomjanus/$seed --seed $seed --sigma 0.3 --beta 0.3 --dt 0.01 --sym 0 --num 16 --time 25000 --rtime 20000 --output 0 &
+		./janus.py --filebase data/randomjanus_int/$seed --seed $seed --sigma 0.33 --beta 0.25 --dt 0.01 --sym 0 --num 16 --time 25000 --rtime 20000 --output 0 &
 	fi
 done
 wait

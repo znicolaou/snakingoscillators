@@ -15,7 +15,9 @@ while True:
 		i=i+1
 	except:
 		break
-sv(rl(fw+rv),'total')
+total=fw+rv
+total=rl(total)
+sv(total,'total')
 fw.writeRawFilename('fw.dat')
 rv.writeRawFilename('rv.dat')
 try:
@@ -23,3 +25,30 @@ try:
 except:
 	total=np.loadtxt('fw.dat')
 np.savetxt('total.dat',total)
+
+i=2
+fw=bd([])
+while True:
+	try:
+		fw=fw+bd('swfw'+str(i))
+		i=i+1
+	except:
+		break
+i=1
+rv=bd([])
+while True:
+	try:
+		rv=rv+bd('swrv'+str(i))
+		i=i+1
+	except:
+		break
+total=fw+rv
+total=rl(total)
+sv(total,'swtotal')
+fw.writeRawFilename('swfw.dat')
+rv.writeRawFilename('swrv.dat')
+try:
+	total=np.concatenate([np.flip(np.loadtxt('swrv.dat'),axis=0),np.loadtxt('swfw.dat')],axis=0)
+except:
+	total=np.loadtxt('swfw.dat')
+np.savetxt('sw.dat',total)
