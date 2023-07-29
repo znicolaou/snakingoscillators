@@ -2,7 +2,7 @@ NDIM=   4, IPS =   4, IRS =   0, ILP =   0, dat='periodic.dat'
 PAR={1:0.5,2:2,3:1}
 ICP =  [1,2,3,4]
 NTST=  256, NCOL=   5, IAD =   0, ISP =   0, ISW = 1, IPLT= 0
-NMX=   10000, NPR=   10, MXBF=   0, IID =   2, ITMX=  10, ITNW= 10, NWTN= 5, JAC= 0
+NMX=   10000, NPR=   1, MXBF=   0, IID =   2, ITMX=  10, ITNW= 10, NWTN= 5, JAC= 0
 EPSL= 1e-06, EPSU = 1e-06, EPSS = 1e-06
 DS  =  -1E-3, DSMIN=1e-10, DSMAX=  1e-3, IADS=   1
 NPAR = 11, THL =  {11:0}, THU =  {2:0,3:0,4:0}

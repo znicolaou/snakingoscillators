@@ -3,7 +3,7 @@ PAR={1:-0.65,2:2,3:1}
 ICP =  [1,11,2,3]
 SP = ['LP0','BP0']
 NTST=  256, NCOL=   5, IAD =   1, ISP =   2, ISW = 1, IPLT= 0, NBC= 0, NINT= 0
-NMX=   10000, NPR=   10, MXBF=   0, IID =   2, ITMX=  10, ITNW= 10, NWTN= 5, JAC= 1
+NMX=   10000, NPR=   1, MXBF=   0, IID =   2, ITMX=  10, ITNW= 10, NWTN= 5, JAC= 1
 EPSL= 1e-06, EPSU = 1e-06, EPSS = 1e-06
 DS  =  1E-3, DSMIN=1e-10, DSMAX=  1e-3, IADS=   1
 NPAR = 4, THL =  {}, THU =  {2:0,3:0,4:0}
