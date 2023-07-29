@@ -164,8 +164,8 @@ while br<=len(branches):
     if os.path.exists('d.rv'+str(br)+'_'+str(i)):
         print(i)
         reverse=bd('rv'+str(br)+'_'+str(i))
-        print(reverse)
-        for n in reverse('LP').getLabels():
+        print(forward)
+        for n in forward('LP').getLabels():
             previously_enumerated=previously_enumerated+[[reverse(n)['sigma'],reverse(n)['r'],reverse(n)['PERIOD']]]
         nlps=nlps+len(reverse('LP'))
         while os.path.exists('d.rv'+str(br)+'_'+str(i+1)):
@@ -173,10 +173,10 @@ while br<=len(branches):
             print(i)
             reverse=bd('rv'+str(br)+'_'+str(i))
             print(reverse)
-            for n in reverse('LP').getLabels():
+            for n in forward('LP').getLabels():
                 previously_enumerated=previously_enumerated+[[reverse(n)['sigma'],reverse(n)['r'],reverse(n)['PERIOD']]]
 
-            nlps=nlps+len(reverse('LP'))
+            nlps=nlps+len(forward('LP'))
     else:
         checkbp='BP0'
         reverse=run(start,ISW=1,NMX=10,DS='-',SP=['LP0','UZ0','BP0'])
