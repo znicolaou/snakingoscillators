@@ -79,15 +79,22 @@ while br<=len(branches):
     dat=dat+[initial['U(%i)'%(i)] for i in range(1,initial['NDIM']+1)]
     np.save('fwinitial%i.dat'%(br),dat)
 
+    period=forward(forward.getLabels()[-1])['PERIOD']
+    NTST=np.max([1000,int(period/140*500)])
     while nlps<lpmax and not forward(forward.getLabels()[-1])['TY'] in ['MX'] and not stop:
         i=i+1
-        print(i,'continue:', forward(forward.getLabels()[-1])['TY'], 'lps:', nlps)
-        forward=run(forward(forward.getLabels()[-1]),SP=['LP1','UZ1',checkbp])
+        print(i,'continue:', forward(forward.getLabels()[-1])['TY'], 'lps:', nlps, 'ntst:' NTST)
+        forward=run(forward(forward.getLabels()[-1]),SP=['LP1','UZ1',checkbp],NTST=NTST)
         if np.max(np.abs(forward['lambda2'])) < 1e-4:
             print('Turning off BP for branch')
             checkbp='BP0'
         else:
             checkbp='BP0'
+
+        period=forward(forward.getLabels()[-1])['PERIOD']
+        NTST=np.max([1000,int(period/140*500)])
+        if period>1499:
+            stop=True
         for n in forward().getLabels():
             for prev in previously_enumerated:
                 # if not forward(n)['TY'] in ['EP']:
@@ -171,15 +178,22 @@ while br<=len(branches):
     dat=dat+[initial['U(%i)'%(i)] for i in range(1,initial['NDIM']+1)]
     np.save('rvinitial%i.dat'%(br),dat)
 
+    period=reverse(reverse.getLabels()[-1])['PERIOD']
+    NTST=np.max([1000,int(period/140*500)])
     while nlps<lpmax and not reverse(reverse.getLabels()[-1])['TY'] in ['MX'] and not stop:
         i=i+1
-        print(i,'continue:', reverse(reverse.getLabels()[-1])['TY'], 'lps:', nlps)
-        reverse=run(reverse(reverse.getLabels()[-1]),NMX=0,SP=['LP1','UZ1',checkbp])
+        print(i,'continue:', reverse(reverse.getLabels()[-1])['TY'], 'lps:', nlps, 'ntst:', NTST)
+        reverse=run(reverse(reverse.getLabels()[-1]),NMX=0,SP=['LP1','UZ1',checkbp], NTST=NTST)
         if np.max(np.abs(reverse['lambda2'])) < 1e-4:
             print('Turning off BP for branch')
             checkbp='BP0'
         else:
             checkbp='BP0'
+
+        period=reverse(reverse.getLabels()[-1])['PERIOD']
+        NTST=np.max([1000,int(period/140*500)])
+        if period>=1499:
+            stop=True
 
         for n in reverse().getLabels():
             for prev in previously_enumerated:
