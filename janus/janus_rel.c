@@ -270,7 +270,7 @@ int pvls (integer ndim, const doublereal *u,
   int *vorder=malloc(ndim*sizeof(int));
 
   for(int i=0; i<ndim; i++){
-    vec[i]=fabs(getp("EIG",2*i+1,u)*getp("EIG",2*i+1,u)+getp("EIG",2*i+2,u)*getp("EIG",2*i+2,u)-1);
+    vec[i]=fabs(log(getp("EIG",2*i+1,u)*getp("EIG",2*i+1,u)+getp("EIG",2*i+2,u)*getp("EIG",2*i+2,u)));
   }
   int nreal=0;
   double *rvec=malloc(ndim*sizeof(double));
@@ -279,19 +279,20 @@ int pvls (integer ndim, const doublereal *u,
   for(int i=0; i<ndim; i++){
     if(getp("EIG",2*i+2,u)==0.){
       rinds[nreal] = i;
-      rvec[nreal++]=fabs(fabs(getp("EIG",2*i+1,u))-1);
+      rvec[nreal++]=fabs(log(getp("EIG",2*i+1,u)*getp("EIG",2*i+1,u)));
     }
   }
   argsort(rvec,rorder,nreal);
   argsort(vec,vorder,ndim);
+
   par[1]=pow(order,0.5);
   par[2]=pow(order2,0.5);
   par[3]=pow(order3,0.5);
-  par[4]=getp("EIG",2*vorder[1]+1,u)*getp("EIG",2*vorder[1]+1,u)+getp("EIG",2*vorder[1]+2,u)*getp("EIG",2*vorder[1]+2,u)-1;
-  par[5]=getp("EIG",2*vorder[2]+1,u)*getp("EIG",2*vorder[2]+1,u)+getp("EIG",2*vorder[2]+2,u)*getp("EIG",2*vorder[2]+2,u)-1;
+  par[4]=log(getp("EIG",2*vorder[1]+1,u)*getp("EIG",2*vorder[1]+1,u)+getp("EIG",2*vorder[1]+2,u)*getp("EIG",2*vorder[1]+2,u));
+  par[5]=log(getp("EIG",2*vorder[2]+1,u)*getp("EIG",2*vorder[2]+1,u)+getp("EIG",2*vorder[2]+2,u)*getp("EIG",2*vorder[2]+2,u));
   if(nreal>2){
-    par[6]=fabs(getp("EIG",2*rinds[rorder[1]]+1,u))-1;
-    par[7]=fabs(getp("EIG",2*rinds[rorder[2]]+1,u))-1;
+    par[6]=log(getp("EIG",2*rinds[rorder[1]]+1,u)*getp("EIG",2*rinds[rorder[1]]+1,u));
+    par[7]=log(getp("EIG",2*rinds[rorder[2]]+1,u)*getp("EIG",2*rinds[rorder[2]]+1,u));
   }
   else{
     par[6]=0;
