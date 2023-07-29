@@ -1,29 +1,15 @@
 import os.path
 import numpy as np
 
-lpmax=1
-bpmax=1
+lpmax=10
+bpmax=10
 
-if os.path.exists('s.rv1_1'):
-    previously_enumerated=np.load('previously_enumerated.npy').tolist()
-    previously_branched=np.load('previously_branched.npy').tolist()
-    br=1
-    while os.path.exists('s.fw%i_1'%br):
-        br=br+1
-    br=br-1 #redo last branch
-    startbr=1
-    branches=[]
-    while os.path.exists('s.start_%i'%(startbr)):
-        branches=branches+[bd('start_%i'%(startbr))]
-        startbr=startbr+1
-else:
-    previously_enumerated=[]
-    previously_branched=[]
-    br=1
-    start=run('janus_rel',c='forward',dat='cycle.dat',NMX=1)
-
-    sv(start,'start_%i'%br)
-    branches=[start]
+previously_enumerated=[]
+previously_branched=[]
+br=1
+start=run('janus_rel',c='forward',dat='cycle.dat',NMX=1)
+sv(start,'start_%i'%br)
+branches=[start]
 
 while br<=len(branches):
     print('Branch: '+str(br))
@@ -35,21 +21,9 @@ while br<=len(branches):
     stop=False
 
     if os.path.exists('d.fw'+str(br)+'_'+str(i)):
-        print(i)
+        print('fw', br, i)
         forward=bd('fw'+str(br)+'_'+str(i))
         print(forward)
-        for n in forward('LP').getLabels():
-            previously_enumerated=previously_enumerated+[[forward(n)['sigma'],forward(n)['r'],forward(n)['PERIOD']]]
-        nlps=nlps+len(forward('LP'))
-        while os.path.exists('d.fw'+str(br)+'_'+str(i+1)):
-            i=i+1
-            print(i)
-            forward=bd('fw'+str(br)+'_'+str(i))
-            print(forward)
-            for n in forward('LP').getLabels():
-                previously_enumerated=previously_enumerated+[[forward(n)['sigma'],forward(n)['r'],forward(n)['PERIOD']]]
-
-            nlps=nlps+len(forward('LP'))
     else:
         checkbp='BP0'
         forward=run(start,ISW=1,NMX=10,SP=['LP1','UZ1',checkbp])
@@ -64,7 +38,6 @@ while br<=len(branches):
         checkbp='BP0'
     for n in forward().getLabels():
         for prev in previously_enumerated:
-            # if not forward(n)['TY'] in ['EP']:
             if forward(n)['TY'] in ['LP']:
                 diff=[[forward(n)['sigma']-prev[0],forward(n)['r']-prev[1],forward(n)['PERIOD']-prev[2]]]
                 if np.linalg.norm(diff)<1e-4:
@@ -76,13 +49,12 @@ while br<=len(branches):
 
         addbr=True
         for prev in previously_branched:
-            # if not forward(n)['TY'] in ['EP']:
-            if forward(n)['TY'] in ['BP']:
+            if forward(n)['TY'] in ['UZ']:
                 diff=[[forward(n)['sigma']-prev[0],forward(n)['r']-prev[1],forward(n)['PERIOD']-prev[2]]]
                 if np.linalg.norm(diff)<1e-4:
                     print('previously branched')
                     addbr=False
-        if forward(n)['TY'] == 'UZ' and len(branches)<bpmax and addbr:
+        if forward(n)['TY'] == 'UZ' and len(branches)<bpmax and np.abs(forward(n)['lambda3'])<1E-3 and addbr:
             print('adding bp to branches')
             previously_branched=previously_branched+[[forward(n)['sigma'],forward(n)['r'],forward(n)['PERIOD']]]
             newstart=run(forward(n),ISW=-1,NMX=2,SP=['LP0','UZ0','BP0'])
@@ -106,7 +78,12 @@ while br<=len(branches):
     while nlps<lpmax and not forward(forward.getLabels()[-1])['TY'] in ['MX'] and not stop:
         i=i+1
         print(i,'continue:', forward(forward.getLabels()[-1])['TY'], 'lps:', nlps, 'ntst:', NTST, 'period:', period)
-        forward=run(forward(forward.getLabels()[-1]),SP=['LP1','UZ1',checkbp],NTST=NTST)
+        if os.path.exists('d.fw'+str(br)+'_'+str(i)):
+            print('fw', br, i)
+            forward=bd('fw'+str(br)+'_'+str(i))
+            print(forward)
+        else:
+            forward=run(forward(forward.getLabels()[-1]),SP=['LP1','UZ1',checkbp],NTST=NTST)
         if np.max(np.abs(forward['lambda2'])) < 1e-4:
             print('Turning off BP for branch')
             checkbp='BP0'
@@ -120,7 +97,6 @@ while br<=len(branches):
             stop=True
         for n in forward().getLabels():
             for prev in previously_enumerated:
-                # if not forward(n)['TY'] in ['EP']:
                 if forward(n)['TY'] in ['LP']:
                     diff=[[forward(n)['sigma']-prev[0],forward(n)['r']-prev[1],forward(n)['PERIOD']-prev[2]]]
 
@@ -133,13 +109,12 @@ while br<=len(branches):
 
             addbr=True
             for prev in previously_branched:
-                # if not forward(n)['TY'] in ['EP']:
-                if forward(n)['TY'] in ['BP']:
+                if forward(n)['TY'] in ['UZ']:
                     diff=[[forward(n)['sigma']-prev[0],forward(n)['r']-prev[1],forward(n)['PERIOD']-prev[2]]]
                     if np.linalg.norm(diff)<1e-4:
                         print('previously branched')
                         addbr=False
-            if forward(n)['TY'] == 'UZ' and len(branches)<bpmax and addbr:
+            if forward(n)['TY'] == 'UZ' and len(branches)<bpmax and np.abs(forward(n)['lambda3'])<1E-3 and addbr:
                 print('adding bp to branches')
                 previously_branched=previously_branched+[[forward(n)['sigma'],forward(n)['r'],forward(n)['PERIOD']]]
                 newstart=run(forward(n),ISW=-1,NMX=2,SP=['LP0','UZ0','BP0'])
@@ -164,19 +139,7 @@ while br<=len(branches):
     if os.path.exists('d.rv'+str(br)+'_'+str(i)):
         print(i)
         reverse=bd('rv'+str(br)+'_'+str(i))
-        print(forward)
-        for n in forward('LP').getLabels():
-            previously_enumerated=previously_enumerated+[[reverse(n)['sigma'],reverse(n)['r'],reverse(n)['PERIOD']]]
-        nlps=nlps+len(reverse('LP'))
-        while os.path.exists('d.rv'+str(br)+'_'+str(i+1)):
-            i=i+1
-            print(i)
-            reverse=bd('rv'+str(br)+'_'+str(i))
-            print(reverse)
-            for n in forward('LP').getLabels():
-                previously_enumerated=previously_enumerated+[[reverse(n)['sigma'],reverse(n)['r'],reverse(n)['PERIOD']]]
-
-            nlps=nlps+len(forward('LP'))
+        print(reverse)
     else:
         checkbp='BP0'
         reverse=run(start,ISW=1,NMX=10,DS='-',SP=['LP0','UZ0','BP0'])
@@ -189,7 +152,6 @@ while br<=len(branches):
 
     for n in reverse().getLabels():
         for prev in previously_enumerated:
-            # if not reverse(n)['TY'] in ['EP']:
             if reverse(n)['TY'] in ['LP']:
                 diff=[[reverse(n)['sigma']-prev[0],reverse(n)['r']-prev[1],reverse(n)['PERIOD']-prev[2]]]
                 if np.linalg.norm(diff)<1e-4:
@@ -200,13 +162,12 @@ while br<=len(branches):
 
         addbr=True
         for prev in previously_branched:
-            # if not reverse(n)['TY'] in ['EP']:
-            if reverse(n)['TY'] in ['BP']:
+            if reverse(n)['TY'] in ['UZ']:
                 diff=[[reverse(n)['sigma']-prev[0],reverse(n)['r']-prev[1],reverse(n)['PERIOD']-prev[2]]]
                 if np.linalg.norm(diff)<1e-4:
                     print('previously branched')
                     addbr=False
-        if reverse(n)['TY'] == 'UZ' and len(branches)<bpmax and addbr:
+        if reverse(n)['TY'] == 'UZ' and len(branches)<bpmax and np.abs(reverse(n)['lambda3'])<1E-3 and addbr:
             print('adding bp to branches')
             previously_branched=previously_branched+[[reverse(n)['sigma'],reverse(n)['r'],reverse(n)['PERIOD']]]
             newstart=run(reverse(n),ISW=-1,NMX=2,SP=['LP0','UZ0','BP0'])
@@ -230,7 +191,12 @@ while br<=len(branches):
     while nlps<lpmax and not reverse(reverse.getLabels()[-1])['TY'] in ['MX'] and not stop:
         i=i+1
         print(i,'continue:', reverse(reverse.getLabels()[-1])['TY'], 'lps:', nlps, 'ntst:', NTST, 'period:', period)
-        reverse=run(reverse(reverse.getLabels()[-1]),NMX=10,SP=['LP1','UZ1',checkbp], NTST=NTST)
+        if os.path.exists('d.rv'+str(br)+'_'+str(i)):
+            print(i)
+            reverse=bd('rv'+str(br)+'_'+str(i))
+            print(reverse)
+        else:
+            reverse=run(reverse(reverse.getLabels()[-1]),NMX=10,SP=['LP1','UZ1',checkbp], NTST=NTST)
         if np.max(np.abs(reverse['lambda2'])) < 1e-4:
             print('Turning off BP for branch')
             checkbp='BP0'
@@ -245,7 +211,6 @@ while br<=len(branches):
 
         for n in reverse().getLabels():
             for prev in previously_enumerated:
-                # if not reverse(n)['TY'] in ['EP']:
                 if reverse(n)['TY'] in ['LP']:
                     diff=[[reverse(n)['sigma']-prev[0],reverse(n)['r']-prev[1],reverse(n)['PERIOD']-prev[2]]]
                     if np.linalg.norm(diff)<1e-4:
@@ -256,13 +221,12 @@ while br<=len(branches):
 
             addbr=True
             for prev in previously_branched:
-                # if not reverse(n)['TY'] in ['EP']:
-                if not reverse(n)['TY'] in ['BP']:
+                if not reverse(n)['TY'] in ['UZ']:
                     diff=[[reverse(n)['sigma']-prev[0],reverse(n)['r']-prev[1],reverse(n)['PERIOD']-prev[2]]]
                     if np.linalg.norm(diff)<1e-4:
                         print('previously branched')
                         addbr=False
-            if reverse(n)['TY'] == 'BP' and len(branches)<bpmax and addbr:
+            if reverse(n)['TY'] == 'UZ' and len(branches)<bpmax and np.abs(reverse(n)['lambda3'])<1E-3 and addbr:
                 print('adding bp to branches')
                 previously_branched=previously_branched+[[reverse(n)['sigma'],reverse(n)['r'],reverse(n)['PERIOD']]]
                 newstart=run(reverse(n),ISW=-1,NMX=2,SP=['LP0','UZ0','BP0'])
