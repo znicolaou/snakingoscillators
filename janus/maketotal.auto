@@ -23,27 +23,6 @@ while(os.path.exists('b.fw'+str(br)+'_1')):
 		except:
 			break
 
-	fw.writeRawFilename('fw'+str(br)+'.dat')
-	rv.writeRawFilename('rv'+str(br)+'.dat')
-	try:
-		tot=np.concatenate([np.flip(np.loadtxt('rv'+str(br)+'.dat'),axis=0),np.loadtxt('fw'+str(br)+'.dat')],axis=0)
-	except:
-		tot=np.loadtxt('fw'+str(br)+'.dat')
-	np.savetxt('total'+str(br)+'.dat',tot)
-
-	final=fw(fw.getLabels()[0])
-	dat=[final['t']]
-	dat=dat+[final['U(%i)'%(i)] for i in range(1,final['NDIM']+1)]
-	np.save('start'+str(br)+'final.dat',dat)
-	final=fw(fw.getLabels()[-1])
-	dat=[final['t']]
-	dat=dat+[final['U(%i)'%(i)] for i in range(1,final['NDIM']+1)]
-	np.save('fw'+str(br)+'final.dat',dat)
-	final=rv(rv.getLabels()[-1])
-	dat=[final['t']]
-	dat=dat+[final['U(%i)'%(i)] for i in range(1,final['NDIM']+1)]
-	np.save('rv'+str(br)+'final.dat',dat)
-
 	total=total+fw+rv
 	br=br+1
 

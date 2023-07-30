@@ -53,12 +53,17 @@ while br<=len(branches):
                 if np.linalg.norm(diff)<1e-4:
                     print('previously branched')
                     addbr=False
-        if forward(n)['TY'] == 'UZ' and len(branches)<bpmax and np.abs(forward(n)['lambda3'])<1E-3 and addbr:
-            print('adding bp to branches')
-            previously_branched=previously_branched+[[forward(n)['sigma'],forward(n)['r'],forward(n)['PERIOD']]]
-            newstart=run(forward(n),ISW=-1,DS=1E-4,NMX=10,SP=['LP0','UZ0','BP0'])
-            sv(newstart,'start_%i'%(len(branches)+1))
-            branches=branches+[newstart]
+        if forward(n)['TY'] == 'UZ':
+            if np.abs(forward(n)['lambda3'])<1E-3:
+                if len(branches)<bpmax and addbr:
+                    print('adding bp to branches')
+                    previously_branched=previously_branched+[[forward(n)['sigma'],forward(n)['r'],forward(n)['PERIOD']]]
+                    newstart=run(forward(n),ISW=-1,DS=1E-4,NMX=10,SP=['LP0','UZ0','BP0'])
+                    sv(newstart,'start_%i'%(len(branches)+1))
+                    branches=branches+[newstart]
+            else:
+                print('Bad UZ; turning off BP for branch')
+                checkbp='UZ0'
 
 
     nlps=nlps+len(forward('LP'))
@@ -113,13 +118,17 @@ while br<=len(branches):
                     if np.linalg.norm(diff)<1e-4:
                         print('previously branched')
                         addbr=False
-            if forward(n)['TY'] == 'UZ' and len(branches)<bpmax and np.abs(forward(n)['lambda3'])<1E-3 and addbr:
-                print('adding bp to branches')
-                previously_branched=previously_branched+[[forward(n)['sigma'],forward(n)['r'],forward(n)['PERIOD']]]
-                newstart=run(forward(n),ISW=-1,NMX=10,DS=1E-4,SP=['LP0','UZ0','BP0'])
-                sv(newstart,'start_%i'%(len(branches)+1))
-                branches=branches+[newstart]
-
+            if forward(n)['TY'] == 'UZ':
+                if np.abs(forward(n)['lambda3'])<1E-3:
+                    if len(branches)<bpmax and addbr:
+                        print('adding bp to branches')
+                        previously_branched=previously_branched+[[forward(n)['sigma'],forward(n)['r'],forward(n)['PERIOD']]]
+                        newstart=run(forward(n),ISW=-1,NMX=10,DS=1E-4,SP=['LP0','UZ0','BP0'])
+                        sv(newstart,'start_%i'%(len(branches)+1))
+                        branches=branches+[newstart]
+                else:
+                    print('Bad UZ; turning off BP for branch')
+                    checkbp='UZ0'
 
         nlps=nlps+len(forward('LP'))
         sv(forward,'fw'+str(br)+'_'+str(i))
@@ -128,7 +137,7 @@ while br<=len(branches):
     final=forward(forward.getLabels()[-1])
     dat=[final['t']]
     dat=dat+[final['U(%i)'%(i)] for i in range(1,final['NDIM']+1)]
-    np.save('fwfinal%i.dat'%(br),dat)
+    np.save('fw%ifinal.dat'%(br),dat)
     cl()
 
     i=1
@@ -164,12 +173,17 @@ while br<=len(branches):
                 if np.linalg.norm(diff)<1e-4:
                     print('previously branched')
                     addbr=False
-        if reverse(n)['TY'] == 'UZ' and len(branches)<bpmax and np.abs(reverse(n)['lambda3'])<1E-3 and addbr:
-            print('adding bp to branches')
-            previously_branched=previously_branched+[[reverse(n)['sigma'],reverse(n)['r'],reverse(n)['PERIOD']]]
-            newstart=run(reverse(n),ISW=-1,NMX=10,DS=1E-4,SP=['LP0','UZ0','BP0'])
-            sv(newstart,'start_%i'%(len(branches)+1))
-            branches=branches+[newstart]
+        if reverse(n)['TY'] == 'UZ':
+            if  np.abs(reverse(n)['lambda3'])<1E-3:
+                if len(branches)<bpmax and addbr:
+                    print('adding bp to branches')
+                    previously_branched=previously_branched+[[reverse(n)['sigma'],reverse(n)['r'],reverse(n)['PERIOD']]]
+                    newstart=run(reverse(n),ISW=-1,NMX=10,DS=1E-4,SP=['LP0','UZ0','BP0'])
+                    sv(newstart,'start_%i'%(len(branches)+1))
+                    branches=branches+[newstart]
+            else:
+                print('Bad UZ; turning off BP for branch')
+                checkbp='UZ0'
 
 
     nlps=nlps+len(reverse('LP'))
@@ -224,12 +238,17 @@ while br<=len(branches):
                     if np.linalg.norm(diff)<1e-4:
                         print('previously branched')
                         addbr=False
-            if reverse(n)['TY'] == 'UZ' and len(branches)<bpmax and np.abs(reverse(n)['lambda3'])<1E-3 and addbr:
-                print('adding bp to branches')
-                previously_branched=previously_branched+[[reverse(n)['sigma'],reverse(n)['r'],reverse(n)['PERIOD']]]
-                newstart=run(reverse(n),ISW=-1,NMX=10,DS=1E-4,SP=['LP0','UZ0','BP0'])
-                sv(newstart,'start_%i'%(len(branches)+1))
-                branches=branches+[newstart]
+            if reverse(n)['TY'] == 'UZ':
+                if np.abs(reverse(n)['lambda3'])<1E-3:
+                    if len(branches)<bpmax and addbr:
+                        print('adding bp to branches')
+                        previously_branched=previously_branched+[[reverse(n)['sigma'],reverse(n)['r'],reverse(n)['PERIOD']]]
+                        newstart=run(reverse(n),ISW=-1,NMX=10,DS=1E-4,SP=['LP0','UZ0','BP0'])
+                        sv(newstart,'start_%i'%(len(branches)+1))
+                        branches=branches+[newstart]
+                else:
+                    print('Bad UZ; turning off BP for branch')
+                    checkbp='UZ0'
 
 
         nlps=nlps+len(reverse('LP'))
@@ -255,4 +274,5 @@ while br<=len(branches):
 
     total=np.concatenate([np.flip(np.loadtxt('rv%i.dat'%(br)),axis=0),np.loadtxt('fw%i.dat'%(br))],axis=0)
     np.savetxt('total%i.dat'%(br),total)
+
     br=br+1
