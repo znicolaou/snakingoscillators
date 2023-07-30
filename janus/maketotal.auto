@@ -9,7 +9,7 @@ while(os.path.exists('b.fw'+str(br)+'_1')):
 	while True:
 		try:
 			fw=fw+bd('fw'+str(br)+'_'+str(i))
-			rint(i)
+			print(i)
 			i=i+1
 		except:
 			break

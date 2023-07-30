@@ -82,7 +82,7 @@ while br<=len(branches):
             forward=bd('fw'+str(br)+'_'+str(i))
             print(forward)
         else:
-            forward=run(forward(forward.getLabels()[-1]),SP=['LP1','BP0',checkbp],NTST=NTST)
+            forward=run(forward(forward.getLabels()[-1]),SP=['LP1','BP0',checkbp],NTST=NTST,NMX=10)
 
         checkbp='UZ1'
         if np.max(np.abs(forward['lambda1'])) < 1e-4:
@@ -140,7 +140,7 @@ while br<=len(branches):
         reverse=bd('rv'+str(br)+'_'+str(i))
         print(reverse)
     else:
-        reverse=run(start,ISW=1,NMX=10,DS='-',SP=['LP0','BP0','UZ0'])
+        reverse=run(start,ISW=1,NMX=2,DS='-',SP=['LP0','BP0','UZ0'])
 
     checkbp='UZ1'
     if np.max(np.abs(reverse['lambda1'])) < 1e-4:
