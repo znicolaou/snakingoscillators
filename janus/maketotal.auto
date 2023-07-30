@@ -26,11 +26,11 @@ while(os.path.exists('b.fw'+str(br)+'_1')):
 	fw.writeRawFilename('fw'+str(br)+'.dat')
 	rv.writeRawFilename('rv'+str(br)+'.dat')
 	try:
-		total=np.concatenate([np.flip(np.loadtxt('rv'+str(br)+'.dat'),axis=0),np.loadtxt('fw'+str(br)+'.dat')],axis=0)
+		tot=np.concatenate([np.flip(np.loadtxt('rv'+str(br)+'.dat'),axis=0),np.loadtxt('fw'+str(br)+'.dat')],axis=0)
 	except:
-		total=np.loadtxt('fw'+str(br)+'.dat')
-	np.savetxt('total'+str(br)+'.dat',total)
-	
+		tot=np.loadtxt('fw'+str(br)+'.dat')
+	np.savetxt('total'+str(br)+'.dat',tot)
+
 	final=fw(fw.getLabels()[0])
 	dat=[final['t']]
 	dat=dat+[final['U(%i)'%(i)] for i in range(1,final['NDIM']+1)]
