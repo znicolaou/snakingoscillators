@@ -7,7 +7,7 @@ bpmax=10
 previously_enumerated=[]
 previously_branched=[]
 br=1
-start=run('janus_rel',c='forward',dat='cycle.dat',NMX=1)
+start=run('janus_rel',c='forward',dat='cycle.dat',DS=1E-4,SP=['LP0','BP0','UZ0'],NMX=10)
 sv(start,'start_%i'%br)
 branches=[start]
 
@@ -26,7 +26,7 @@ while br<=len(branches):
         print(forward)
     else:
 
-        forward=run(start,ISW=1,NMX=2,SP=['LP0','BP0','UZ0'])
+        forward=run(start,ISW=1,NMX=10,DS=1E-4,SP=['LP0','BP0','UZ0'])
 
     np.save('previously_enumerated',previously_enumerated)
     np.save('previously_branched',previously_branched)
@@ -56,7 +56,7 @@ while br<=len(branches):
         if forward(n)['TY'] == 'UZ' and len(branches)<bpmax and np.abs(forward(n)['lambda3'])<1E-3 and addbr:
             print('adding bp to branches')
             previously_branched=previously_branched+[[forward(n)['sigma'],forward(n)['r'],forward(n)['PERIOD']]]
-            newstart=run(forward(n),ISW=-1,NMX=2,SP=['LP0','UZ0','BP0'])
+            newstart=run(forward(n),ISW=-1,DS=1E-4,NMX=10,SP=['LP0','UZ0','BP0'])
             sv(newstart,'start_%i'%(len(branches)+1))
             branches=branches+[newstart]
 
@@ -82,7 +82,7 @@ while br<=len(branches):
             forward=bd('fw'+str(br)+'_'+str(i))
             print(forward)
         else:
-            forward=run(forward(forward.getLabels()[-1]),SP=['LP1','BP0',checkbp],NTST=NTST,NMX=10)
+            forward=run(forward(forward.getLabels()[-1]),DS=1E-3,SP=['LP1','BP0',checkbp],NTST=NTST,NMX=50)
 
         checkbp='UZ1'
         if np.max(np.abs(forward['lambda1'])) < 1e-4:
@@ -116,7 +116,7 @@ while br<=len(branches):
             if forward(n)['TY'] == 'UZ' and len(branches)<bpmax and np.abs(forward(n)['lambda3'])<1E-3 and addbr:
                 print('adding bp to branches')
                 previously_branched=previously_branched+[[forward(n)['sigma'],forward(n)['r'],forward(n)['PERIOD']]]
-                newstart=run(forward(n),ISW=-1,NMX=2,SP=['LP0','UZ0','BP0'])
+                newstart=run(forward(n),ISW=-1,NMX=10,DS=1E-4,SP=['LP0','UZ0','BP0'])
                 sv(newstart,'start_%i'%(len(branches)+1))
                 branches=branches+[newstart]
 
@@ -140,7 +140,7 @@ while br<=len(branches):
         reverse=bd('rv'+str(br)+'_'+str(i))
         print(reverse)
     else:
-        reverse=run(start,ISW=1,NMX=2,DS='-',SP=['LP0','BP0','UZ0'])
+        reverse=run(start,ISW=1,NMX=10,DS=-1E-4,SP=['LP0','BP0','UZ0'])
 
     checkbp='UZ1'
     if np.max(np.abs(reverse['lambda1'])) < 1e-4:
@@ -167,7 +167,7 @@ while br<=len(branches):
         if reverse(n)['TY'] == 'UZ' and len(branches)<bpmax and np.abs(reverse(n)['lambda3'])<1E-3 and addbr:
             print('adding bp to branches')
             previously_branched=previously_branched+[[reverse(n)['sigma'],reverse(n)['r'],reverse(n)['PERIOD']]]
-            newstart=run(reverse(n),ISW=-1,NMX=2,SP=['LP0','UZ0','BP0'])
+            newstart=run(reverse(n),ISW=-1,NMX=10,DS=1E-4,SP=['LP0','UZ0','BP0'])
             sv(newstart,'start_%i'%(len(branches)+1))
             branches=branches+[newstart]
 
@@ -193,7 +193,7 @@ while br<=len(branches):
             reverse=bd('rv'+str(br)+'_'+str(i))
             print(reverse)
         else:
-            reverse=run(reverse(reverse.getLabels()[-1]),NMX=10,SP=['LP1','BP0',checkbp], NTST=NTST)
+            reverse=run(reverse(reverse.getLabels()[-1]),NMX=50,DS=-1E-3,SP=['LP1','BP0',checkbp], NTST=NTST)
 
         checkbp='UZ1'
         if np.max(np.abs(reverse['lambda1'])) < 1e-4:
@@ -227,7 +227,7 @@ while br<=len(branches):
             if reverse(n)['TY'] == 'UZ' and len(branches)<bpmax and np.abs(reverse(n)['lambda3'])<1E-3 and addbr:
                 print('adding bp to branches')
                 previously_branched=previously_branched+[[reverse(n)['sigma'],reverse(n)['r'],reverse(n)['PERIOD']]]
-                newstart=run(reverse(n),ISW=-1,NMX=2,SP=['LP0','UZ0','BP0'])
+                newstart=run(reverse(n),ISW=-1,NMX=10,DS=1E-4,SP=['LP0','UZ0','BP0'])
                 sv(newstart,'start_%i'%(len(branches)+1))
                 branches=branches+[newstart]
 

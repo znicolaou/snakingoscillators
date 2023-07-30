@@ -22,42 +22,29 @@ while(os.path.exists('b.fw'+str(br)+'_1')):
 			i=i+1
 		except:
 			break
+
+	fw.writeRawFilename('fw'+str(br)+'.dat')
+	rv.writeRawFilename('rv'+str(br)+'.dat')
+	try:
+		total=np.concatenate([np.flip(np.loadtxt('rv'+str(br)+'.dat'),axis=0),np.loadtxt('fw'+str(br)+'.dat')],axis=0)
+	except:
+		total=np.loadtxt('fw'+str(br)+'.dat')
+	np.savetxt('total'+str(br)+'.dat',total)
+	
+	final=fw(fw.getLabels()[0])
+	dat=[final['t']]
+	dat=dat+[final['U(%i)'%(i)] for i in range(1,final['NDIM']+1)]
+	np.save('start'+str(br)+'final.dat',dat)
+	final=fw(fw.getLabels()[-1])
+	dat=[final['t']]
+	dat=dat+[final['U(%i)'%(i)] for i in range(1,final['NDIM']+1)]
+	np.save('fw'+str(br)+'final.dat',dat)
+	final=rv(rv.getLabels()[-1])
+	dat=[final['t']]
+	dat=dat+[final['U(%i)'%(i)] for i in range(1,final['NDIM']+1)]
+	np.save('rv'+str(br)+'final.dat',dat)
+
 	total=total+fw+rv
 	br=br+1
-total=rl(total)
-sv(total,'total')
-quit()
-fw.writeRawFilename('fw.dat')
-rv.writeRawFilename('rv.dat')
-try:
-	total=np.concatenate([np.flip(np.loadtxt('rv.dat'),axis=0),np.loadtxt('fw.dat')],axis=0)
-except:
-	total=np.loadtxt('fw.dat')
-np.savetxt('total.dat',total)
 
-i=1
-fw=bd([])
-while True:
-	try:
-		fw=fw+bd('swfw'+str(i))
-		i=i+1
-	except:
-		break
-i=1
-rv=bd([])
-while True:
-	try:
-		rv=rv+bd('swrv'+str(i))
-		i=i+1
-	except:
-		break
-total=fw+rv
-total=rl(total)
-sv(total,'swtotal')
-fw.writeRawFilename('swfw.dat')
-rv.writeRawFilename('swrv.dat')
-try:
-	total=np.concatenate([np.flip(np.loadtxt('swrv.dat'),axis=0),np.loadtxt('swfw.dat')],axis=0)
-except:
-	total=np.loadtxt('swfw.dat')
-np.savetxt('sw.dat',total)
+sv(total,'total')
