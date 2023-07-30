@@ -25,17 +25,17 @@ while br<=len(branches):
         forward=bd('fw'+str(br)+'_'+str(i))
         print(forward)
     else:
-        checkbp='UZ1'
-        forward=run(start,ISW=1,NMX=10,SP=['LP1','BP0',checkbp])
+
+        forward=run(start,ISW=1,NMX=2,SP=['LP0','BP0','UZ0'])
 
     np.save('previously_enumerated',previously_enumerated)
     np.save('previously_branched',previously_branched)
 
-    if np.max(np.abs(forward['lambda3'])) < 1e-4:
+    checkbp='UZ1'
+    if np.max(np.abs(forward['lambda1'])) < 1e-4:
         print('Turning off BP for branch')
         checkbp='UZ0'
-    else:
-        checkbp='UZ1'
+
     for n in forward().getLabels():
         for prev in previously_enumerated:
             if forward(n)['TY'] in ['LP']:
@@ -45,7 +45,6 @@ while br<=len(branches):
                     stop=True
         if forward(n)['TY'] in ['LP']:
             previously_enumerated=previously_enumerated+[[forward(n)['sigma'],forward(n)['r'],forward(n)['PERIOD']]]
-
 
         addbr=True
         for prev in previously_branched:
@@ -84,11 +83,11 @@ while br<=len(branches):
             print(forward)
         else:
             forward=run(forward(forward.getLabels()[-1]),SP=['LP1','BP0',checkbp],NTST=NTST)
-        if np.max(np.abs(forward['lambda3'])) < 1e-4:
+
+        checkbp='UZ1'
+        if np.max(np.abs(forward['lambda1'])) < 1e-4:
             print('Turning off BP for branch')
             checkbp='UZ0'
-        else:
-            checkbp='UZ1'
 
         period=forward(forward.getLabels()[-1])['PERIOD']
         NTST=np.max([1000,int(period/140*500)])
@@ -141,14 +140,12 @@ while br<=len(branches):
         reverse=bd('rv'+str(br)+'_'+str(i))
         print(reverse)
     else:
-        checkbp='UZ0'
-        reverse=run(start,ISW=1,NMX=10,DS='-',SP=['LP0','BP0',checkbp])
+        reverse=run(start,ISW=1,NMX=10,DS='-',SP=['LP0','BP0','UZ0'])
 
-    if np.max(np.abs(reverse['lambda3'])) < 1e-4:
+    checkbp='UZ1'
+    if np.max(np.abs(reverse['lambda1'])) < 1e-4:
         print('Turning off BP for branch')
         checkbp='UZ0'
-    else:
-        checkbp='UZ1'
 
     for n in reverse().getLabels():
         for prev in previously_enumerated:
@@ -197,11 +194,12 @@ while br<=len(branches):
             print(reverse)
         else:
             reverse=run(reverse(reverse.getLabels()[-1]),NMX=10,SP=['LP1','BP0',checkbp], NTST=NTST)
-        if np.max(np.abs(reverse['lambda3'])) < 1e-4:
+
+        checkbp='UZ1'
+        if np.max(np.abs(reverse['lambda1'])) < 1e-4:
             print('Turning off BP for branch')
             checkbp='UZ0'
-        else:
-            checkbp='UZ1'
+
 
         period=reverse(reverse.getLabels()[-1])['PERIOD']
         NTST=np.max([1000,int(period/140*500)])
