@@ -3,10 +3,12 @@ import numpy as np
 
 lpmax=10
 bpmax=10
+imx=500
 
 previously_enumerated=[]
 previously_branched=[]
 br=1
+
 checkbp=['LP0','UZ0','TR0','BP0']
 start=run('janus_rel',c='forward',dat='cycle.dat',DS=1E-3,SP=checkbp,NMX=5)
 sv(start,'start_%i'%br)
@@ -81,11 +83,11 @@ while br<=len(branches):
 
     period=forward(forward.getLabels()[-1])['PERIOD']
     NTST=np.max([1000,int(period/140*500)])
-    if period>1499:
+    if period>999:
         print('Period large')
         stop=True
 
-    while nlps<lpmax and not forward(forward.getLabels()[-1])['TY'] in ['MX'] and not stop:
+    while nlps<lpmax and i<imx and not forward(forward.getLabels()[-1])['TY'] in ['MX'] and not stop:
         i=i+1
         print(i,'continue:', forward(forward.getLabels()[-1])['TY'], 'lps:', nlps, 'ntst:', NTST, 'period:', period, 'checkbp:', checkbp)
         if os.path.exists('d.fw'+str(br)+'_'+str(i)):
@@ -102,7 +104,7 @@ while br<=len(branches):
 
         period=forward(forward.getLabels()[-1])['PERIOD']
         NTST=np.max([1000,int(period/140*500)])
-        if period>1499:
+        if period>999:
             print('Period large')
             stop=True
         for n in forward().getLabels():
@@ -212,11 +214,11 @@ while br<=len(branches):
 
     period=reverse(reverse.getLabels()[-1])['PERIOD']
     NTST=np.max([1000,int(period/140*500)])
-    if period>1499:
+    if period>999:
         print('Period large')
         stop=True
 
-    while nlps<lpmax and not reverse(reverse.getLabels()[-1])['TY'] in ['MX'] and not stop:
+    while nlps<lpmax and i<imx and not reverse(reverse.getLabels()[-1])['TY'] in ['MX'] and not stop:
         i=i+1
         print(i,'continue:', reverse(reverse.getLabels()[-1])['TY'], 'lps:', nlps, 'ntst:', NTST, 'period:', period, 'checkbp:', checkbp)
         if os.path.exists('d.rv'+str(br)+'_'+str(i)):
@@ -234,7 +236,7 @@ while br<=len(branches):
 
         period=reverse(reverse.getLabels()[-1])['PERIOD']
         NTST=np.max([1000,int(period/140*500)])
-        if period>=1499:
+        if period>=999:
             print('Period large')
             stop=True
 
