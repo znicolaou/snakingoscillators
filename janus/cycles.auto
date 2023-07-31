@@ -39,12 +39,14 @@ while br<=len(branches):
 
     for n in forward().getLabels():
         for prev in previously_enumerated:
-            if forward(n)['TY'] in ['LP']:
+            # if forward(n)['TY'] in ['LP']:
+            if True:
                 diff=[[forward(n)['sigma']-prev[0],forward(n)['r']-prev[1],forward(n)['PERIOD']-prev[2]]]
                 if np.linalg.norm(diff)<1e-4:
                     print('previously enumerated')
                     stop=True
-        if forward(n)['TY'] in ['LP']:
+        # if forward(n)['TY'] in ['LP']:
+        if True:
             previously_enumerated=previously_enumerated+[[forward(n)['sigma'],forward(n)['r'],forward(n)['PERIOD']]]
 
         addbr=True
@@ -85,7 +87,7 @@ while br<=len(branches):
 
     while nlps<lpmax and not forward(forward.getLabels()[-1])['TY'] in ['MX'] and not stop:
         i=i+1
-        print(i,'continue:', forward(forward.getLabels()[-1])['TY'], 'lps:', nlps, 'ntst:', NTST, 'period:', period)
+        print(i,'continue:', forward(forward.getLabels()[-1])['TY'], 'lps:', nlps, 'ntst:', NTST, 'period:', period, 'checkbp:', checkbp)
         if os.path.exists('d.fw'+str(br)+'_'+str(i)):
             print('fw', br, i)
             forward=bd('fw'+str(br)+'_'+str(i))
@@ -105,14 +107,16 @@ while br<=len(branches):
             stop=True
         for n in forward().getLabels():
             for prev in previously_enumerated:
-                if forward(n)['TY'] in ['LP']:
+                # if forward(n)['TY'] in ['LP']:
+                if True:
                     diff=[[forward(n)['sigma']-prev[0],forward(n)['r']-prev[1],forward(n)['PERIOD']-prev[2]]]
 
                     if np.linalg.norm(diff)<1e-4:
                         print('previously enumerated')
                         stop=True
 
-            if forward(n)['TY'] in ['LP']:
+            # if forward(n)['TY'] in ['LP']:
+            if True:
                 previously_enumerated=previously_enumerated+[[forward(n)['sigma'],forward(n)['r'],forward(n)['PERIOD']]]
 
             addbr=True
@@ -166,12 +170,14 @@ while br<=len(branches):
 
     for n in reverse().getLabels():
         for prev in previously_enumerated:
-            if reverse(n)['TY'] in ['LP']:
+            # if reverse(n)['TY'] in ['LP']:
+            if True:
                 diff=[[reverse(n)['sigma']-prev[0],reverse(n)['r']-prev[1],reverse(n)['PERIOD']-prev[2]]]
                 if np.linalg.norm(diff)<1e-4:
                     print('previously enumerated')
                     stop=True
-        if reverse(n)['TY'] in ['LP']:
+        # if reverse(n)['TY'] in ['LP']:
+        if True:
             previously_enumerated=previously_enumerated+[[reverse(n)['sigma'],reverse(n)['r'],reverse(n)['PERIOD']]]
 
         addbr=True
@@ -212,7 +218,7 @@ while br<=len(branches):
 
     while nlps<lpmax and not reverse(reverse.getLabels()[-1])['TY'] in ['MX'] and not stop:
         i=i+1
-        print(i,'continue:', reverse(reverse.getLabels()[-1])['TY'], 'lps:', nlps, 'ntst:', NTST, 'period:', period)
+        print(i,'continue:', reverse(reverse.getLabels()[-1])['TY'], 'lps:', nlps, 'ntst:', NTST, 'period:', period, 'checkbp:', checkbp)
         if os.path.exists('d.rv'+str(br)+'_'+str(i)):
             print(i)
             reverse=bd('rv'+str(br)+'_'+str(i))
@@ -234,12 +240,14 @@ while br<=len(branches):
 
         for n in reverse().getLabels():
             for prev in previously_enumerated:
-                if reverse(n)['TY'] in ['LP']:
+                # if reverse(n)['TY'] in ['LP']:
+                if True:
                     diff=[[reverse(n)['sigma']-prev[0],reverse(n)['r']-prev[1],reverse(n)['PERIOD']-prev[2]]]
                     if np.linalg.norm(diff)<1e-4:
                         print('previously enumerated')
                         stop=True
-            if reverse(n)['TY'] in ['LP']:
+            # if reverse(n)['TY'] in ['LP']:
+            if True:
                 previously_enumerated=previously_enumerated+[[reverse(n)['sigma'],reverse(n)['r'],reverse(n)['PERIOD']]]
 
             addbr=True
