@@ -72,6 +72,18 @@ while br<=len(branches):
             else:
                 print('Bad UZ; turning off BP for branch')
                 checkbp=['LP0','UZ0','TR0','BP0']
+        if forward(n)['TY'] == 'LP':
+            if np.abs(forward(n)['lambda2'])<1E-3:
+                if len(branches)<bpmax and addbr:
+                    print('adding bp to branches')
+                    previously_branched=previously_branched+[[forward(n)['sigma'],forward(n)['r'],forward(n)['PERIOD']]]
+                    checkbp=['LP0','UZ0','TR0','BP0']
+                    newstart=run(forward(n),ISW=-1,DS=1E-3,NMX=5,SP=checkbp)
+                    if newstart(newstart.getLabels()[-1])['TY'] in ['MX']:
+                        newstart=run(forward(n),ISW=-1,DS=-1E-3,NMX=5,SP=checkbp)
+                    sv(newstart,'start_%i'%(len(branches)+1))
+                    branches=branches+[newstart]
+
 
 
     nlps=nlps+len(forward('LP'))
@@ -142,6 +154,17 @@ while br<=len(branches):
                 else:
                     print('Bad UZ; turning off BP for branch')
                     checkbp=['LP0','UZ0','TR0','BP0']
+            if forward(n)['TY'] == 'LP':
+                if np.abs(forward(n)['lambda2'])<1E-3:
+                    if len(branches)<bpmax and addbr:
+                        print('adding bp to branches')
+                        previously_branched=previously_branched+[[forward(n)['sigma'],forward(n)['r'],forward(n)['PERIOD']]]
+                        checkbp=['LP0','UZ0','TR0','BP0']
+                        newstart=run(forward(n),ISW=-1,NMX=5,DS=1E-3,SP=checkbp)
+                        if newstart(newstart.getLabels()[-1])['TY'] in ['MX']:
+                            newstart=run(forward(n),ISW=-1,DS=-1E-3,NMX=5,SP=checkbp)
+                        sv(newstart,'start_%i'%(len(branches)+1))
+                        branches=branches+[newstart]
 
         nlps=nlps+len(forward('LP'))
         sv(forward,'fw'+str(br)+'_'+str(i))
@@ -203,6 +226,17 @@ while br<=len(branches):
             else:
                 print('Bad UZ; turning off BP for branch')
                 checkbp=['LP0','UZ0','TR0','BP0']
+        if reverse(n)['TY'] == 'LP':
+            if  np.abs(reverse(n)['lambda2'])<1E-3:
+                if len(branches)<bpmax and addbr:
+                    print('adding bp to branches')
+                    previously_branched=previously_branched+[[reverse(n)['sigma'],reverse(n)['r'],reverse(n)['PERIOD']]]
+                    checkbp=['LP0','UZ0','TR0','BP0']
+                    newstart=run(reverse(n),ISW=-1,NMX=5,DS=1E-3,SP=checkbp)
+                    if newstart(newstart.getLabels()[-1])['TY'] in ['MX']:
+                        newstart=run(reverse(n),ISW=-1,DS=-1E-3,NMX=5,SP=checkbp)
+                    sv(newstart,'start_%i'%(len(branches)+1))
+                    branches=branches+[newstart]
 
 
     nlps=nlps+len(reverse('LP'))
@@ -273,6 +307,17 @@ while br<=len(branches):
                 else:
                     print('Bad UZ; turning off BP for branch')
                     checkbp=['LP0','UZ0','TR0','BP0']
+            if reverse(n)['TY'] == 'LP':
+                if np.abs(reverse(n)['lambda2'])<1E-3:
+                    if len(branches)<bpmax and addbr:
+                        print('adding bp to branches')
+                        previously_branched=previously_branched+[[reverse(n)['sigma'],reverse(n)['r'],reverse(n)['PERIOD']]]
+                        checkbp=['LP0','UZ0','TR0','BP0']
+                        newstart=run(reverse(n),ISW=-1,NMX=5,DS=1E-3,SP=checkbp)
+                        if newstart(newstart.getLabels()[-1])['TY'] in ['MX']:
+                            newstart=run(reverse(n),ISW=-1,DS=-1E-3,NMX=5,SP=checkbp)
+                        sv(newstart,'start_%i'%(len(branches)+1))
+                        branches=branches+[newstart]
 
 
         nlps=nlps+len(reverse('LP'))
