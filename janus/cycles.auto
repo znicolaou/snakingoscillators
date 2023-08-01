@@ -94,7 +94,7 @@ while br<=len(branches):
 
     nlps=nlps+len(forward('LP'))
     sv(forward,'fw'+str(br)+'_'+str(i))
-    rm 's.fw'+str(br)+'_'+str(i)
+    os.remove('s.fw%i_%i'%(br,i))
     cl()
     initial=forward(forward.getLabels()[0])
     dat=[initial['t']]
@@ -183,8 +183,7 @@ while br<=len(branches):
 
         nlps=nlps+len(forward('LP'))
         sv(forward,'fw'+str(br)+'_'+str(i))
-        rm 's.fw'+str(br)+'_'+str(i)
-        rm *~
+        os.remove('s.fw%i_%i'%(br,i))
 
     nfw=i
     final=forward(forward.getLabels()[-1])
@@ -265,8 +264,7 @@ while br<=len(branches):
 
     nlps=nlps+len(reverse('LP'))
     sv(reverse,'rv'+str(br)+'_'+str(i))
-    rm 's.rv'+str(br)+'_'+str(i)
-    rm *~
+    os.remove('s.rv%i_%i'%(br,i))
     initial=reverse(reverse.getLabels()[0])
     dat=[initial['t']]
     dat=dat+[initial['U(%i)'%(i)] for i in range(1,initial['NDIM']+1)]
@@ -353,8 +351,7 @@ while br<=len(branches):
 
         nlps=nlps+len(reverse('LP'))
         sv(reverse,'rv'+str(br)+'_'+str(i))
-        rm 's.rv'+str(br)+'_'+str(i)
-        cl()
+        os.remove('s.rv%i_%i'%(br,i))
 
     nrv=i
     final=reverse(reverse.getLabels()[-1])
