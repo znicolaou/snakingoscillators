@@ -78,7 +78,7 @@ while br<=len(branches):
                 nmx=3
 
         if forward(n)['TY'] == 'LP':
-            if np.abs(forward(n)['lambda2'])<1E-3:
+            if np.abs(forward(n)['lambda2'])<1E-2:
                 if len(branches)<bpmax and addbr:
                     print('adding bp to branches')
                     previously_branched=previously_branched+[[forward(n)['sigma'],forward(n)['r'],forward(n)['PERIOD']]]
@@ -131,16 +131,14 @@ while br<=len(branches):
 
         for n in forward().getLabels():
             for prev in previously_enumerated:
-                # if forward(n)['TY'] in ['LP']:
-                if True:
+                if forward(n)['TY'] not in ['EP']:
                     diff=[[forward(n)['sigma']-prev[0],forward(n)['r']-prev[1],forward(n)['PERIOD']-prev[2]]]
 
                     if np.linalg.norm(diff)<1e-4:
                         print('previously enumerated')
                         stop=True
 
-            # if forward(n)['TY'] in ['LP']:
-            if True:
+            if forward(n)['TY'] not in in ['EP']:
                 previously_enumerated=previously_enumerated+[[forward(n)['sigma'],forward(n)['r'],forward(n)['PERIOD']]]
 
             addbr=True
@@ -169,7 +167,7 @@ while br<=len(branches):
                     nmx=3
 
             if forward(n)['TY'] == 'LP':
-                if np.abs(forward(n)['lambda2'])<1E-3:
+                if np.abs(forward(n)['lambda2'])<1E-2:
                     if len(branches)<bpmax and addbr:
                         print('adding bp to branches')
                         previously_branched=previously_branched+[[forward(n)['sigma'],forward(n)['r'],forward(n)['PERIOD']]]
@@ -214,14 +212,12 @@ while br<=len(branches):
 
     for n in reverse().getLabels():
         for prev in previously_enumerated:
-            # if reverse(n)['TY'] in ['LP']:
-            if True:
+            if reverse(n)['TY'] not in ['EP']:
                 diff=[[reverse(n)['sigma']-prev[0],reverse(n)['r']-prev[1],reverse(n)['PERIOD']-prev[2]]]
                 if np.linalg.norm(diff)<1e-4:
                     print('previously enumerated')
                     stop=True
-        # if reverse(n)['TY'] in ['LP']:
-        if True:
+        if reverse(n)['TY'] not in ['EP']:
             previously_enumerated=previously_enumerated+[[reverse(n)['sigma'],reverse(n)['r'],reverse(n)['PERIOD']]]
 
         addbr=True
@@ -249,7 +245,7 @@ while br<=len(branches):
                 nmx=3
 
         if reverse(n)['TY'] == 'LP':
-            if  np.abs(reverse(n)['lambda2'])<1E-3:
+            if  np.abs(reverse(n)['lambda2'])<1E-2:
                 if len(branches)<bpmax and addbr:
                     print('adding bp to branches')
                     previously_branched=previously_branched+[[reverse(n)['sigma'],reverse(n)['r'],reverse(n)['PERIOD']]]
@@ -301,14 +297,12 @@ while br<=len(branches):
 
         for n in reverse().getLabels():
             for prev in previously_enumerated:
-                # if reverse(n)['TY'] in ['LP']:
-                if True:
+                if reverse(n)['TY'] not in ['EP']:
                     diff=[[reverse(n)['sigma']-prev[0],reverse(n)['r']-prev[1],reverse(n)['PERIOD']-prev[2]]]
                     if np.linalg.norm(diff)<1e-4:
                         print('previously enumerated')
                         stop=True
-            # if reverse(n)['TY'] in ['LP']:
-            if True:
+            if reverse(n)['TY'] not in ['EP']:
                 previously_enumerated=previously_enumerated+[[reverse(n)['sigma'],reverse(n)['r'],reverse(n)['PERIOD']]]
 
             addbr=True
@@ -336,7 +330,7 @@ while br<=len(branches):
                     nmx=3
 
             if reverse(n)['TY'] == 'LP':
-                if np.abs(reverse(n)['lambda2'])<1E-3:
+                if np.abs(reverse(n)['lambda2'])<1E-2:
                     if len(branches)<bpmax and addbr:
                         print('adding bp to branches')
                         previously_branched=previously_branched+[[reverse(n)['sigma'],reverse(n)['r'],reverse(n)['PERIOD']]]

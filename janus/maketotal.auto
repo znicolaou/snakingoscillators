@@ -4,12 +4,18 @@ br=1
 total=bd([])
 while(os.path.exists('b.fw'+str(br)+'_1')):
 	i=1
-	print(br)
 	fw=bd([])
 	while True:
 		try:
-			fw=fw+bd('fw'+str(br)+'_'+str(i))
-			print(i)
+			next=bd('fw'+str(br)+'_'+str(i))
+			fw=fw+next
+			if len(next.getLabels())==1:
+				if next(next.getLabels()[0])['TY']=='EP':
+					try:
+						os.remove('s.fw'+str(br)+'_'+str(i))
+					except:
+						pass
+			print('fw',br,i,end='\r')
 			i=i+1
 		except:
 			break
@@ -17,13 +23,29 @@ while(os.path.exists('b.fw'+str(br)+'_1')):
 	rv=bd([])
 	while True:
 		try:
-			rv=rv+bd('rv'+str(br)+'_'+str(i))
-			print(i)
+			next=bd('fw'+str(br)+'_'+str(i))
+			rv=rv+next
+			if len(next.getLabels())==1:
+				if next(next.getLabels()[0])['TY']=='EP':
+					try:
+						os.remove('s.fw'+str(br)+'_'+str(i))
+					except:
+						pass
+			print('rv',br,i,end='\r')
 			i=i+1
 		except:
 			break
 
 	total=total+fw+rv
+	try:
+		fw.writeRawFilename('fw%i.dat'%(br))
+		rv.writeRawFilename('rv%i.dat'%(br))
+		tot=np.concatenate([np.flip(np.loadtxt('rv%i.dat'%(br)),axis=0),np.loadtxt('fw%i.dat'%(br))],axis=0)
+		np.savetxt('total%i.dat'%(br),tot)
+	except:
+		tot=np.loadtxt('fw%i.dat'%(br))
+		np.savetxt('total%i.dat'%(br),tot)
+		break
 	br=br+1
 
 sv(total,'total')
