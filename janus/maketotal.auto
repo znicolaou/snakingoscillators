@@ -8,39 +8,31 @@ while(os.path.exists('b.fw'+str(br)+'_1')):
 	while True:
 		try:
 			next=bd('fw'+str(br)+'_'+str(i))
-			if len(next.getLabels())==1:
-				if next(next.getLabels()[0])['TY']=='EP':
-					try:
-						os.remove('s.fw'+str(br)+'_'+str(i))
-					except:
-						pass
-			next=dsp(next,'EP')
+			next=dsp(next,['EP','TR'])
 			sv(next,'fw'+str(br)+'_'+str(i))
-			fw=fw+next
+			next=bd('fw'+str(br)+'_'+str(i))
+			sv(next,'fw'+str(br)+'_'+str(i))
+			fw=rl(fw+next)
 			print('fw',br,i,end='\r')
 			i=i+1
-		except:
+		except Exception as e:
 			break
 	i=1
 	rv=bd([])
 	while True:
 		try:
 			next=bd('rv'+str(br)+'_'+str(i))
-			if len(next.getLabels())==1:
-				if next(next.getLabels()[0])['TY']=='EP':
-					try:
-						os.remove('s.rv'+str(br)+'_'+str(i))
-					except:
-						pass
-			next=dsp(next,'EP')
+			next=dsp(next,['EP','TR'])
 			sv(next,'rv'+str(br)+'_'+str(i))
-			rv=rv+next
+			next=bd('rv'+str(br)+'_'+str(i))
+			sv(next,'rv'+str(br)+'_'+str(i))
+			rv=rl(rv+next)
 			print('rv',br,i,end='\r')
 			i=i+1
-		except:
+		except Exception as e:
 			break
 
-	total=total+fw+rv
+	total=rl(total+fw+rv)
 	try:
 		fw.writeRawFilename('fw%i.dat'%(br))
 		rv.writeRawFilename('rv%i.dat'%(br))
@@ -53,3 +45,4 @@ while(os.path.exists('b.fw'+str(br)+'_1')):
 	br=br+1
 
 sv(total,'total')
+rm *~
