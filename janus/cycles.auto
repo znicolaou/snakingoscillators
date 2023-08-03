@@ -65,9 +65,9 @@ while br<=len(branches):
                     previously_branched=previously_branched+[[forward(n)['sigma'],forward(n)['r'],forward(n)['PERIOD']]]
                     checkbp=['LP0','UZ0','TR0','BP0']
                     nmx=5
-                    newstart=run(forward(n),ISW=-1,DS=ds,NMX=nmx,SP=checkbp)
+                    newstart=run(forward(n),ISW=-1,DS=-ds,NMX=nmx,SP=checkbp)
                     if newstart(newstart.getLabels()[-1])['TY'] in ['MX']:
-                        newstart=run(forward(n),ISW=-1,DS=-ds,NMX=nmx,SP=checkbp)
+                        newstart=run(forward(n),ISW=-1,DS=ds,NMX=nmx,SP=checkbp)
                     sv(newstart,'start_%i'%(len(branches)+1))
                     branches=branches+[newstart]
             else:
@@ -82,9 +82,9 @@ while br<=len(branches):
                     previously_branched=previously_branched+[[forward(n)['sigma'],forward(n)['r'],forward(n)['PERIOD']]]
                     checkbp=['LP0','UZ0','TR0','BP0']
                     nmx=5
-                    newstart=run(forward(n),ISW=-1,DS=ds,NMX=nmx,SP=checkbp)
+                    newstart=run(forward(n),ISW=-1,DS=-ds,NMX=nmx,SP=checkbp)
                     if newstart(newstart.getLabels()[-1])['TY'] in ['MX']:
-                        newstart=run(forward(n),ISW=-1,DS=-ds,NMX=nmx,SP=checkbp)
+                        newstart=run(forward(n),ISW=-1,DS=ds,NMX=nmx,SP=checkbp)
                     sv(newstart,'start_%i'%(len(branches)+1))
                     branches=branches+[newstart]
 
@@ -135,7 +135,7 @@ while br<=len(branches):
                         print('previously enumerated')
                         stop=True
 
-            if forward(n)['TY'] not in in ['EP']:
+            if forward(n)['TY'] not in ['EP']:
                 previously_enumerated=previously_enumerated+[[forward(n)['sigma'],forward(n)['r'],forward(n)['PERIOD']]]
 
             addbr=True
@@ -153,9 +153,9 @@ while br<=len(branches):
                         previously_branched=previously_branched+[[forward(n)['sigma'],forward(n)['r'],forward(n)['PERIOD']]]
                         checkbp=['LP0','UZ0','TR0','BP0']
                         nmx=5
-                        newstart=run(forward(n),ISW=-1,NMX=nmx,DS=ds,SP=checkbp)
+                        newstart=run(forward(n),ISW=-1,NMX=nmx,DS=-ds,SP=checkbp)
                         if newstart(newstart.getLabels()[-1])['TY'] in ['MX']:
-                            newstart=run(forward(n),ISW=-1,DS=-ds,NMX=nmx,SP=checkbp)
+                            newstart=run(forward(n),ISW=-1,DS=ds,NMX=nmx,SP=checkbp)
                         sv(newstart,'start_%i'%(len(branches)+1))
                         branches=branches+[newstart]
                 else:
@@ -170,9 +170,9 @@ while br<=len(branches):
                         previously_branched=previously_branched+[[forward(n)['sigma'],forward(n)['r'],forward(n)['PERIOD']]]
                         checkbp=['LP0','UZ0','TR0','BP0']
                         nmx=5
-                        newstart=run(forward(n),ISW=-1,NMX=nmx,DS=ds,SP=checkbp)
+                        newstart=run(forward(n),ISW=-1,NMX=nmx,DS=-ds,SP=checkbp)
                         if newstart(newstart.getLabels()[-1])['TY'] in ['MX']:
-                            newstart=run(forward(n),ISW=-1,DS=-ds,NMX=nmx,SP=checkbp)
+                            newstart=run(forward(n),ISW=-1,DS=ds,NMX=nmx,SP=checkbp)
                         sv(newstart,'start_%i'%(len(branches)+1))
                         branches=branches+[newstart]
 
@@ -230,9 +230,9 @@ while br<=len(branches):
                     previously_branched=previously_branched+[[reverse(n)['sigma'],reverse(n)['r'],reverse(n)['PERIOD']]]
                     checkbp=['LP0','UZ0','TR0','BP0']
                     nmx=5
-                    newstart=run(reverse(n),ISW=-1,NMX=nmx,DS=ds,SP=checkbp)
+                    newstart=run(reverse(n),ISW=-1,NMX=nmx,DS=-ds,SP=checkbp)
                     if newstart(newstart.getLabels()[-1])['TY'] in ['MX']:
-                        newstart=run(reverse(n),ISW=-1,DS=-ds,NMX=nmx,SP=checkbp)
+                        newstart=run(reverse(n),ISW=-1,DS=ds,NMX=nmx,SP=checkbp)
                     sv(newstart,'start_%i'%(len(branches)+1))
                     branches=branches+[newstart]
             else:
@@ -247,9 +247,9 @@ while br<=len(branches):
                     previously_branched=previously_branched+[[reverse(n)['sigma'],reverse(n)['r'],reverse(n)['PERIOD']]]
                     checkbp=['LP0','UZ0','TR0','BP0']
                     nmx=5
-                    newstart=run(reverse(n),ISW=-1,NMX=nmx,DS=ds,SP=checkbp)
+                    newstart=run(reverse(n),ISW=-1,NMX=nmx,DS=-ds,SP=checkbp)
                     if newstart(newstart.getLabels()[-1])['TY'] in ['MX']:
-                        newstart=run(reverse(n),ISW=-1,DS=-ds,NMX=nmx,SP=checkbp)
+                        newstart=run(reverse(n),ISW=-1,DS=ds,NMX=nmx,SP=checkbp)
                     sv(newstart,'start_%i'%(len(branches)+1))
                     branches=branches+[newstart]
 
@@ -314,9 +314,9 @@ while br<=len(branches):
                         previously_branched=previously_branched+[[reverse(n)['sigma'],reverse(n)['r'],reverse(n)['PERIOD']]]
                         checkbp=['LP0','UZ0','TR0','BP0']
                         nmx=5
-                        newstart=run(reverse(n),ISW=-1,NMX=nmx,DS=ds,SP=checkbp)
+                        newstart=run(reverse(n),ISW=-1,NMX=nmx,DS=-ds,SP=checkbp)
                         if newstart(newstart.getLabels()[-1])['TY'] in ['MX']:
-                            newstart=run(reverse(n),ISW=-1,DS=-ds,NMX=nmx,SP=checkbp)
+                            newstart=run(reverse(n),ISW=-1,DS=ds,NMX=nmx,SP=checkbp)
                         sv(newstart,'start_%i'%(len(branches)+1))
                         branches=branches+[newstart]
                 else:
@@ -331,9 +331,9 @@ while br<=len(branches):
                         previously_branched=previously_branched+[[reverse(n)['sigma'],reverse(n)['r'],reverse(n)['PERIOD']]]
                         checkbp=['LP0','UZ0','TR0','BP0']
                         nmx=5
-                        newstart=run(reverse(n),ISW=-1,NMX=nmx,DS=ds,SP=checkbp)
+                        newstart=run(reverse(n),ISW=-1,NMX=nmx,DS=-ds,SP=checkbp)
                         if newstart(newstart.getLabels()[-1])['TY'] in ['MX']:
-                            newstart=run(reverse(n),ISW=-1,DS=-ds,NMX=nmx,SP=checkbp)
+                            newstart=run(reverse(n),ISW=-1,DS=ds,NMX=nmx,SP=checkbp)
                         sv(newstart,'start_%i'%(len(branches)+1))
                         branches=branches+[newstart]
 
