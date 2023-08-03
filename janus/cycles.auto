@@ -45,7 +45,7 @@ while br<=len(branches):
         for prev in previously_enumerated:
             if forward(n)['TY'] not in ['EP']:
                 diff=[[forward(n)['sigma']-prev[0],forward(n)['r']-prev[1],forward(n)['PERIOD']-prev[2]]]
-                if np.linalg.norm(diff)<1e-4:
+                if np.linalg.norm(diff/(1+np.abs(prev)))<1e-4:
                     print('previously enumerated')
                     stop=True
         if forward(n)['TY'] not in ['EP']:
@@ -55,7 +55,7 @@ while br<=len(branches):
         for prev in previously_branched:
             if forward(n)['TY'] in ['UZ']:
                 diff=[[forward(n)['sigma']-prev[0],forward(n)['r']-prev[1],forward(n)['PERIOD']-prev[2]]]
-                if np.linalg.norm(diff)<1e-4:
+                if np.linalg.norm(diff/(1+np.abs(prev)))<1e-4:
                     print('previously branched')
                     addbr=False
         if forward(n)['TY'] == 'UZ':
@@ -126,20 +126,20 @@ while br<=len(branches):
             for prev in previously_enumerated:
                 if forward(n)['TY'] not in ['EP']:
                     diff=[[forward(n)['sigma']-prev[0],forward(n)['r']-prev[1],forward(n)['PERIOD']-prev[2]]]
-
-                    if np.linalg.norm(diff)<1e-4:
+                    if np.linalg.norm(diff/(1+np.abs(prev)))<1e-4:
                         print('previously enumerated')
                         stop=True
 
             if forward(n)['TY'] not in ['EP']:
                 previously_enumerated=previously_enumerated+[[forward(n)['sigma'],forward(n)['r'],forward(n)['PERIOD']]]
+                np.save('previously_enumerated', previously_enumerated)
 
             addbr=True
 
             for prev in previously_branched:
                 if forward(n)['TY'] in ['UZ']:
                     diff=[[forward(n)['sigma']-prev[0],forward(n)['r']-prev[1],forward(n)['PERIOD']-prev[2]]]
-                    if np.linalg.norm(diff)<1e-4:
+                    if np.linalg.norm(diff/(1+np.abs(prev)))<1e-4:
                         print('previously branched')
                         addbr=False
             if forward(n)['TY'] == 'UZ':
@@ -206,7 +206,7 @@ while br<=len(branches):
         for prev in previously_enumerated:
             if reverse(n)['TY'] not in ['EP']:
                 diff=[[reverse(n)['sigma']-prev[0],reverse(n)['r']-prev[1],reverse(n)['PERIOD']-prev[2]]]
-                if np.linalg.norm(diff)<1e-4:
+                if np.linalg.norm(diff/(1+np.abs(prev)))<1e-4:
                     print('previously enumerated')
                     stop=True
         if reverse(n)['TY'] not in ['EP']:
@@ -216,7 +216,7 @@ while br<=len(branches):
         for prev in previously_branched:
             if reverse(n)['TY'] in ['UZ']:
                 diff=[[reverse(n)['sigma']-prev[0],reverse(n)['r']-prev[1],reverse(n)['PERIOD']-prev[2]]]
-                if np.linalg.norm(diff)<1e-4:
+                if np.linalg.norm(diff/(1+np.abs(prev)))<1e-4:
                     print('previously branched')
                     addbr=False
         if reverse(n)['TY'] == 'UZ':
@@ -286,17 +286,18 @@ while br<=len(branches):
             for prev in previously_enumerated:
                 if reverse(n)['TY'] not in ['EP']:
                     diff=[[reverse(n)['sigma']-prev[0],reverse(n)['r']-prev[1],reverse(n)['PERIOD']-prev[2]]]
-                    if np.linalg.norm(diff)<1e-4:
+                    if np.linalg.norm(diff/(1+np.abs(prev)))<1e-4:
                         print('previously enumerated')
                         stop=True
             if reverse(n)['TY'] not in ['EP']:
                 previously_enumerated=previously_enumerated+[[reverse(n)['sigma'],reverse(n)['r'],reverse(n)['PERIOD']]]
+                np.save('previously_enumerated', previously_enumerated)
 
             addbr=True
             for prev in previously_branched:
                 if not reverse(n)['TY'] in ['UZ']:
                     diff=[[reverse(n)['sigma']-prev[0],reverse(n)['r']-prev[1],reverse(n)['PERIOD']-prev[2]]]
-                    if np.linalg.norm(diff)<1e-4:
+                    if np.linalg.norm(diff/(1+np.abs(prev)))<1e-4:
                         print('previously branched')
                         addbr=False
             if reverse(n)['TY'] == 'UZ':
@@ -340,18 +341,5 @@ while br<=len(branches):
     np.save('rv%ifinal.dat'%(br),dat)
 
     cl()
-
-    total=bd('rv'+str(br)+'_1')
-    for j in range(2,nrv+1,1):
-        total=total+bd('rv'+str(br)+'_'+str(j))
-    total.writeRawFilename('rv%i.dat'%(br))
-
-    total=bd('fw'+str(br)+'_1')
-    for j in range(2,nfw+1,1):
-        total=total+bd('fw'+str(br)+'_'+str(j))
-    total.writeRawFilename('fw%i.dat'%(br))
-
-    total=np.concatenate([np.flip(np.loadtxt('rv%i.dat'%(br)),axis=0),np.loadtxt('fw%i.dat'%(br))],axis=0)
-    np.savetxt('total%i.dat'%(br),total)
 
     br=br+1
