@@ -93,10 +93,6 @@ while br<=len(branches):
     nlps=nlps+len(forward('LP'))
     sv(forward,'fw'+str(br)+'_'+str(i))
     cl()
-    initial=forward(forward.getLabels()[0])
-    dat=[initial['t']]
-    dat=dat+[initial['U(%i)'%(i)] for i in range(1,initial['NDIM']+1)]
-    np.save('fwinitial%i.dat'%(br),dat)
 
     period=forward(forward.getLabels()[-1])['PERIOD']
     NTST=np.max([1000,int(period/140*500)])
@@ -104,9 +100,9 @@ while br<=len(branches):
         print('Period large')
         stop=True
 
-    while nlps<lpmax and i<imx and not forward(forward.getLabels()[-1])['TY'] in ['MX'] and not stop:
+    while nlps<lpmax and i<imx and not forward[0][-1]['TY'] in ['MX'] and not stop:
         i=i+1
-        print(i,'continue:', forward(forward.getLabels()[-1])['TY'], 'lps:', nlps, 'ntst:', NTST, 'period:', period, 'checkbp:', checkbp)
+        print(i,'continue:', forward[0][-1]['TY'], 'lps:', nlps, 'ntst:', NTST, 'period:', period, 'checkbp:', checkbp)
         if os.path.exists('d.fw'+str(br)+'_'+str(i)):
             print('fw', br, i)
             forward=bd('fw'+str(br)+'_'+str(i))
@@ -119,7 +115,7 @@ while br<=len(branches):
             print('Turning off BP for branch')
             checkbp=['LP0','UZ0','TR0','BP0']
 
-        period=forward(forward.getLabels()[-1])['PERIOD']
+        period=forward[0][-1]['PERIOD']
         NTST=np.max([1000,int(period/140*500)])
         nmx=100
         if period>1499:
@@ -256,20 +252,16 @@ while br<=len(branches):
 
     nlps=nlps+len(reverse('LP'))
     sv(reverse,'rv'+str(br)+'_'+str(i))
-    initial=reverse(reverse.getLabels()[0])
-    dat=[initial['t']]
-    dat=dat+[initial['U(%i)'%(i)] for i in range(1,initial['NDIM']+1)]
-    np.save('rvinitial%i.dat'%(br),dat)
 
-    period=reverse(reverse.getLabels()[-1])['PERIOD']
+    period=reverse[0][-1]['PERIOD']
     NTST=np.max([1000,int(period/140*500)])
     if period>1499:
         print('Period large')
         stop=True
 
-    while nlps<lpmax and i<imx and not reverse(reverse.getLabels()[-1])['TY'] in ['MX'] and not stop:
+    while nlps<lpmax and i<imx and not reverse[0][-1]['TY'] in ['MX'] and not stop:
         i=i+1
-        print(i,'continue:', reverse(reverse.getLabels()[-1])['TY'], 'lps:', nlps, 'ntst:', NTST, 'period:', period, 'checkbp:', checkbp)
+        print(i,'continue:', reverse[0][-1]['TY'], 'lps:', nlps, 'ntst:', NTST, 'period:', period, 'checkbp:', checkbp)
         if os.path.exists('d.rv'+str(br)+'_'+str(i)):
             print(i)
             reverse=bd('rv'+str(br)+'_'+str(i))
@@ -283,7 +275,7 @@ while br<=len(branches):
             checkbp=['LP0','UZ0','TR0','BP0']
 
 
-        period=reverse(reverse.getLabels()[-1])['PERIOD']
+        period=reverse[0][-1]['PERIOD']
         NTST=np.max([1000,int(period/140*500)])
         nmx=100
         if period>=1499:
