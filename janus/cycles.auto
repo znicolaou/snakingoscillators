@@ -73,6 +73,7 @@ while br<=len(branches):
                     newstartrv=run(forward(n),ISW=-1,DS=-10*ds,NMX=nmx,SP=checkbp)
                     sv(newstartrv,'start_rv%i'%(len(branches)+1))
                     branches=branches+[[newstartfw,newstartrv]]
+                    nmx=100
             else:
                 print('Bad UZ; turning off BP for branch')
                 checkbp=['LP0','UZ0','TR0','BP0']
@@ -90,6 +91,7 @@ while br<=len(branches):
                     newstartrv=run(forward(n),ISW=-1,DS=-10*ds,NMX=nmx,SP=checkbp)
                     sv(newstartrv,'start_rv%i'%(len(branches)+1))
                     branches=branches+[[newstartfw,newstartrv]]
+                    nmx=100
 
 
 
@@ -157,6 +159,7 @@ while br<=len(branches):
                         newstartrv=run(forward(n),ISW=-1,DS=-10*ds,NMX=nmx,SP=checkbp)
                         sv(newstartrv,'start_rv%i'%(len(branches)+1))
                         branches=branches+[[newstartfw,newstartrv]]
+                        nmx=100
                 else:
                     print('Bad UZ; turning off BP for branch')
                     checkbp=['LP0','UZ0','TR0','BP0']
@@ -174,6 +177,7 @@ while br<=len(branches):
                         newstartrv=run(forward(n),ISW=-1,DS=-10*ds,NMX=nmx,SP=checkbp)
                         sv(newstartrv,'start_rv%i'%(len(branches)+1))
                         branches=branches+[[newstartfw,newstartrv]]
+                        nmx=100
 
         nlps=nlps+len(forward('LP'))
         sv(forward,'fw'+str(br)+'_'+str(i))
@@ -235,6 +239,7 @@ while br<=len(branches):
                     newstartrv=run(reverse(n),ISW=-1,DS=-10*ds,NMX=nmx,SP=checkbp)
                     sv(newstartrv,'start_rv%i'%(len(branches)+1))
                     branches=branches+[[newstartfw,newstartrv]]
+                    nmx=100
             else:
                 print('Bad UZ; turning off BP for branch')
                 checkbp=['LP0','UZ0','TR0','BP0']
@@ -252,6 +257,7 @@ while br<=len(branches):
                     newstartrv=run(reverse(n),ISW=-1,DS=-10*ds,NMX=nmx,SP=checkbp)
                     sv(newstartrv,'start_rv%i'%(len(branches)+1))
                     branches=branches+[[newstartfw,newstartrv]]
+                    nmx=100
 
 
     nlps=nlps+len(reverse('LP'))
@@ -316,6 +322,7 @@ while br<=len(branches):
                         newstartrv=run(reverse(n),ISW=-1,DS=-10*ds,NMX=nmx,SP=checkbp)
                         sv(newstartrv,'start_rv%i'%(len(branches)+1))
                         branches=branches+[[newstartfw,newstartrv]]
+                        nmx=100
                 else:
                     print('Bad UZ; turning off BP for branch')
                     checkbp=['LP0','UZ0','TR0','BP0']
@@ -333,6 +340,7 @@ while br<=len(branches):
                         newstartrv=run(reverse(n),ISW=-1,DS=-10*ds,NMX=nmx,SP=checkbp)
                         sv(newstartrv,'start_rv%i'%(len(branches)+1))
                         branches=branches+[[newstartfw,newstartrv]]
+                        nmx=100
 
 
         nlps=nlps+len(reverse('LP'))
