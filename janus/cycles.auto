@@ -9,10 +9,10 @@ previously_enumerated=[]
 previously_branched=[]
 br=1
 nmx=5
-ds=1E-2
+ds=1E-3
 
 checkbp=['LP0','UZ0','TR0','BP0']
-start=run('janus_rel',c='forward',dat='cycle.dat',DS=ds/10,SP=checkbp,NMX=nmx)
+start=run('janus_rel',c='forward',dat='cycle.dat',DS=ds,SP=checkbp,NMX=nmx)
 sv(start,'start_%i'%br)
 branches=[start]
 
@@ -34,8 +34,8 @@ while br<=len(branches):
         nmx=5
         forward=run(start,ISW=1,NMX=nmx,DS=ds/10,SP=checkbp)
 
-    checkbp=['LP1','UZ1','TR','BP0']
-    nmx=20
+    checkbp=['LP1','UZ1','TR1','BP0']
+    nmx=100
 
     if np.max(np.abs(forward['lambda1'])) < 1e-3:
         print('Turning off BP for branch')
@@ -43,14 +43,12 @@ while br<=len(branches):
 
     for n in forward().getLabels():
         for prev in previously_enumerated:
-            # if forward(n)['TY'] in ['LP']:
-            if True:
+            if forward(n)['TY'] not in ['EP']:
                 diff=[[forward(n)['sigma']-prev[0],forward(n)['r']-prev[1],forward(n)['PERIOD']-prev[2]]]
                 if np.linalg.norm(diff)<1e-4:
                     print('previously enumerated')
                     stop=True
-        # if forward(n)['TY'] in ['LP']:
-        if True:
+        if forward(n)['TY'] not in ['EP']:
             previously_enumerated=previously_enumerated+[[forward(n)['sigma'],forward(n)['r'],forward(n)['PERIOD']]]
 
         addbr=True
@@ -61,15 +59,15 @@ while br<=len(branches):
                     print('previously branched')
                     addbr=False
         if forward(n)['TY'] == 'UZ':
-            if np.abs(forward(n)['lambda3'])<1E-3:
+            if np.abs(forward(n)['lambda3'])<1E-1:
                 if len(branches)<bpmax and addbr:
                     print('adding bp to branches')
                     previously_branched=previously_branched+[[forward(n)['sigma'],forward(n)['r'],forward(n)['PERIOD']]]
                     checkbp=['LP0','UZ0','TR0','BP0']
                     nmx=5
-                    newstart=run(forward(n),ISW=-1,DS=ds/10,NMX=nmx,SP=checkbp)
+                    newstart=run(forward(n),ISW=-1,DS=ds,NMX=nmx,SP=checkbp)
                     if newstart(newstart.getLabels()[-1])['TY'] in ['MX']:
-                        newstart=run(forward(n),ISW=-1,DS=-ds/10,NMX=nmx,SP=checkbp)
+                        newstart=run(forward(n),ISW=-1,DS=-ds,NMX=nmx,SP=checkbp)
                     sv(newstart,'start_%i'%(len(branches)+1))
                     branches=branches+[newstart]
             else:
@@ -84,9 +82,9 @@ while br<=len(branches):
                     previously_branched=previously_branched+[[forward(n)['sigma'],forward(n)['r'],forward(n)['PERIOD']]]
                     checkbp=['LP0','UZ0','TR0','BP0']
                     nmx=5
-                    newstart=run(forward(n),ISW=-1,DS=ds/10,NMX=nmx,SP=checkbp)
+                    newstart=run(forward(n),ISW=-1,DS=ds,NMX=nmx,SP=checkbp)
                     if newstart(newstart.getLabels()[-1])['TY'] in ['MX']:
-                        newstart=run(forward(n),ISW=-1,DS=-ds/10,NMX=nmx,SP=checkbp)
+                        newstart=run(forward(n),ISW=-1,DS=-ds,NMX=nmx,SP=checkbp)
                     sv(newstart,'start_%i'%(len(branches)+1))
                     branches=branches+[newstart]
 
@@ -94,7 +92,6 @@ while br<=len(branches):
 
     nlps=nlps+len(forward('LP'))
     sv(forward,'fw'+str(br)+'_'+str(i))
-    os.remove('s.fw%i_%i'%(br,i))
     cl()
     initial=forward(forward.getLabels()[0])
     dat=[initial['t']]
@@ -117,14 +114,14 @@ while br<=len(branches):
         else:
             forward=run(forward(forward.getLabels()[-1]),DS=ds,SP=checkbp,NTST=NTST,NMX=nmx)
 
-        checkbp=['LP1','UZ1','TR','BP0']
+        checkbp=['LP1','UZ1','TR1','BP0']
         if np.max(np.abs(forward['lambda1'])) < 1e-3:
             print('Turning off BP for branch')
             checkbp=['LP0','UZ0','TR0','BP0']
 
         period=forward(forward.getLabels()[-1])['PERIOD']
         NTST=np.max([1000,int(period/140*500)])
-        nmx=20
+        nmx=100
         if period>1499:
             print('Period large')
             stop=True
@@ -150,15 +147,15 @@ while br<=len(branches):
                         print('previously branched')
                         addbr=False
             if forward(n)['TY'] == 'UZ':
-                if np.abs(forward(n)['lambda3'])<1E-3:
+                if np.abs(forward(n)['lambda3'])<1E-1:
                     if len(branches)<bpmax and addbr:
                         print('adding bp to branches')
                         previously_branched=previously_branched+[[forward(n)['sigma'],forward(n)['r'],forward(n)['PERIOD']]]
                         checkbp=['LP0','UZ0','TR0','BP0']
                         nmx=5
-                        newstart=run(forward(n),ISW=-1,NMX=nmx,DS=ds/10,SP=checkbp)
+                        newstart=run(forward(n),ISW=-1,NMX=nmx,DS=ds,SP=checkbp)
                         if newstart(newstart.getLabels()[-1])['TY'] in ['MX']:
-                            newstart=run(forward(n),ISW=-1,DS=-ds/10,NMX=nmx,SP=checkbp)
+                            newstart=run(forward(n),ISW=-1,DS=-ds,NMX=nmx,SP=checkbp)
                         sv(newstart,'start_%i'%(len(branches)+1))
                         branches=branches+[newstart]
                 else:
@@ -173,15 +170,14 @@ while br<=len(branches):
                         previously_branched=previously_branched+[[forward(n)['sigma'],forward(n)['r'],forward(n)['PERIOD']]]
                         checkbp=['LP0','UZ0','TR0','BP0']
                         nmx=5
-                        newstart=run(forward(n),ISW=-1,NMX=nmx,DS=ds/10,SP=checkbp)
+                        newstart=run(forward(n),ISW=-1,NMX=nmx,DS=ds,SP=checkbp)
                         if newstart(newstart.getLabels()[-1])['TY'] in ['MX']:
-                            newstart=run(forward(n),ISW=-1,DS=-ds/10,NMX=nmx,SP=checkbp)
+                            newstart=run(forward(n),ISW=-1,DS=-ds,NMX=nmx,SP=checkbp)
                         sv(newstart,'start_%i'%(len(branches)+1))
                         branches=branches+[newstart]
 
         nlps=nlps+len(forward('LP'))
         sv(forward,'fw'+str(br)+'_'+str(i))
-        os.remove('s.fw%i_%i'%(br,i))
 
     nfw=i
     final=forward(forward.getLabels()[-1])
@@ -203,8 +199,8 @@ while br<=len(branches):
         nmx=5
         reverse=run(start,ISW=1,NMX=nmx,DS=-ds/10,SP=checkbp)
 
-    checkbp=['LP1','UZ1','TR','BP0']
-    nmx=20
+    checkbp=['LP1','UZ1','TR1','BP0']
+    nmx=100
 
     if np.max(np.abs(reverse['lambda1'])) < 1e-3:
         print('Turning off BP for branch')
@@ -228,15 +224,15 @@ while br<=len(branches):
                     print('previously branched')
                     addbr=False
         if reverse(n)['TY'] == 'UZ':
-            if  np.abs(reverse(n)['lambda3'])<1E-3:
+            if  np.abs(reverse(n)['lambda3'])<1E-1:
                 if len(branches)<bpmax and addbr:
                     print('adding bp to branches')
                     previously_branched=previously_branched+[[reverse(n)['sigma'],reverse(n)['r'],reverse(n)['PERIOD']]]
                     checkbp=['LP0','UZ0','TR0','BP0']
                     nmx=5
-                    newstart=run(reverse(n),ISW=-1,NMX=nmx,DS=ds/10,SP=checkbp)
+                    newstart=run(reverse(n),ISW=-1,NMX=nmx,DS=ds,SP=checkbp)
                     if newstart(newstart.getLabels()[-1])['TY'] in ['MX']:
-                        newstart=run(reverse(n),ISW=-1,DS=-ds/10,NMX=nmx,SP=checkbp)
+                        newstart=run(reverse(n),ISW=-1,DS=-ds,NMX=nmx,SP=checkbp)
                     sv(newstart,'start_%i'%(len(branches)+1))
                     branches=branches+[newstart]
             else:
@@ -251,16 +247,15 @@ while br<=len(branches):
                     previously_branched=previously_branched+[[reverse(n)['sigma'],reverse(n)['r'],reverse(n)['PERIOD']]]
                     checkbp=['LP0','UZ0','TR0','BP0']
                     nmx=5
-                    newstart=run(reverse(n),ISW=-1,NMX=nmx,DS=ds/10,SP=checkbp)
+                    newstart=run(reverse(n),ISW=-1,NMX=nmx,DS=ds,SP=checkbp)
                     if newstart(newstart.getLabels()[-1])['TY'] in ['MX']:
-                        newstart=run(reverse(n),ISW=-1,DS=-ds/10,NMX=nmx,SP=checkbp)
+                        newstart=run(reverse(n),ISW=-1,DS=-ds,NMX=nmx,SP=checkbp)
                     sv(newstart,'start_%i'%(len(branches)+1))
                     branches=branches+[newstart]
 
 
     nlps=nlps+len(reverse('LP'))
     sv(reverse,'rv'+str(br)+'_'+str(i))
-    os.remove('s.rv%i_%i'%(br,i))
     initial=reverse(reverse.getLabels()[0])
     dat=[initial['t']]
     dat=dat+[initial['U(%i)'%(i)] for i in range(1,initial['NDIM']+1)]
@@ -282,7 +277,7 @@ while br<=len(branches):
         else:
             reverse=run(reverse(reverse.getLabels()[-1]),NMX=nmx,DS=-ds,SP=checkbp, NTST=NTST)
 
-        checkbp=['LP1','UZ1','TR','BP0']
+        checkbp=['LP1','UZ1','TR1','BP0']
         if np.max(np.abs(reverse['lambda1'])) < 1e-3:
             print('Turning off BP for branch')
             checkbp=['LP0','UZ0','TR0','BP0']
@@ -290,7 +285,7 @@ while br<=len(branches):
 
         period=reverse(reverse.getLabels()[-1])['PERIOD']
         NTST=np.max([1000,int(period/140*500)])
-        nmx=20
+        nmx=100
         if period>=1499:
             print('Period large')
             stop=True
@@ -313,15 +308,15 @@ while br<=len(branches):
                         print('previously branched')
                         addbr=False
             if reverse(n)['TY'] == 'UZ':
-                if np.abs(reverse(n)['lambda3'])<1E-3:
+                if np.abs(reverse(n)['lambda3'])<1E-1:
                     if len(branches)<bpmax and addbr:
                         print('adding bp to branches')
                         previously_branched=previously_branched+[[reverse(n)['sigma'],reverse(n)['r'],reverse(n)['PERIOD']]]
                         checkbp=['LP0','UZ0','TR0','BP0']
                         nmx=5
-                        newstart=run(reverse(n),ISW=-1,NMX=nmx,DS=ds/10,SP=checkbp)
+                        newstart=run(reverse(n),ISW=-1,NMX=nmx,DS=ds,SP=checkbp)
                         if newstart(newstart.getLabels()[-1])['TY'] in ['MX']:
-                            newstart=run(reverse(n),ISW=-1,DS=-ds/10,NMX=nmx,SP=checkbp)
+                            newstart=run(reverse(n),ISW=-1,DS=-ds,NMX=nmx,SP=checkbp)
                         sv(newstart,'start_%i'%(len(branches)+1))
                         branches=branches+[newstart]
                 else:
@@ -336,16 +331,15 @@ while br<=len(branches):
                         previously_branched=previously_branched+[[reverse(n)['sigma'],reverse(n)['r'],reverse(n)['PERIOD']]]
                         checkbp=['LP0','UZ0','TR0','BP0']
                         nmx=5
-                        newstart=run(reverse(n),ISW=-1,NMX=nmx,DS=ds/10,SP=checkbp)
+                        newstart=run(reverse(n),ISW=-1,NMX=nmx,DS=ds,SP=checkbp)
                         if newstart(newstart.getLabels()[-1])['TY'] in ['MX']:
-                            newstart=run(reverse(n),ISW=-1,DS=-ds/10,NMX=nmx,SP=checkbp)
+                            newstart=run(reverse(n),ISW=-1,DS=-ds,NMX=nmx,SP=checkbp)
                         sv(newstart,'start_%i'%(len(branches)+1))
                         branches=branches+[newstart]
 
 
         nlps=nlps+len(reverse('LP'))
         sv(reverse,'rv'+str(br)+'_'+str(i))
-        os.remove('s.rv%i_%i'%(br,i))
 
     nrv=i
     final=reverse(reverse.getLabels()[-1])
