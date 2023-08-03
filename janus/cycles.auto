@@ -94,7 +94,7 @@ while br<=len(branches):
     sv(forward,'fw'+str(br)+'_'+str(i))
     cl()
 
-    period=forward(forward.getLabels()[-1])['PERIOD']
+    period=forward[0][-1]['PERIOD']
     NTST=np.max([1000,int(period/140*500)])
     if period>1499:
         print('Period large')
