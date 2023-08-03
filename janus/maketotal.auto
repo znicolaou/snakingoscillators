@@ -8,13 +8,15 @@ while(os.path.exists('b.fw'+str(br)+'_1')):
 	while True:
 		try:
 			next=bd('fw'+str(br)+'_'+str(i))
-			fw=fw+next
 			if len(next.getLabels())==1:
 				if next(next.getLabels()[0])['TY']=='EP':
 					try:
 						os.remove('s.fw'+str(br)+'_'+str(i))
 					except:
 						pass
+			next=dsp(next,'EP')
+			sv(next,'fw'+str(br)+'_'+str(i))
+			fw=fw+next
 			print('fw',br,i,end='\r')
 			i=i+1
 		except:
@@ -23,14 +25,16 @@ while(os.path.exists('b.fw'+str(br)+'_1')):
 	rv=bd([])
 	while True:
 		try:
-			next=bd('fw'+str(br)+'_'+str(i))
-			rv=rv+next
+			next=bd('rv'+str(br)+'_'+str(i))
 			if len(next.getLabels())==1:
 				if next(next.getLabels()[0])['TY']=='EP':
 					try:
-						os.remove('s.fw'+str(br)+'_'+str(i))
+						os.remove('s.rv'+str(br)+'_'+str(i))
 					except:
 						pass
+			next=dsp(next,'EP')
+			sv(next,'rv'+str(br)+'_'+str(i))
+			rv=rv+next
 			print('rv',br,i,end='\r')
 			i=i+1
 		except:
