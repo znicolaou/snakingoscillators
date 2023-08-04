@@ -186,10 +186,13 @@ while br<=len(branches):
         sv(forward,'fw'+str(br)+'_'+str(i))
 
     nfw=i
-    final=forward(forward.getLabels()[-1])
-    dat=[final['t']]
-    dat=dat+[final['U(%i)'%(i)] for i in range(1,final['NDIM']+1)]
-    np.save('fw%ifinal.dat'%(br),dat)
+    try:
+        final=forward(forward.getLabels()[-1])
+        dat=[final['t']]
+        dat=dat+[final['U(%i)'%(i)] for i in range(1,final['NDIM']+1)]
+        np.save('fw%ifinal.dat'%(br),dat)
+    except:
+        pass
     cl()
 
     i=1
@@ -353,10 +356,13 @@ while br<=len(branches):
         sv(reverse,'rv'+str(br)+'_'+str(i))
 
     nrv=i
-    final=reverse(reverse.getLabels()[-1])
-    dat=[final['t']]
-    dat=dat+[final['U(%i)'%(i)] for i in range(1,final['NDIM']+1)]
-    np.save('rv%ifinal.dat'%(br),dat)
+    try:
+        final=reverse(reverse.getLabels()[-1])
+        dat=[final['t']]
+        dat=dat+[final['U(%i)'%(i)] for i in range(1,final['NDIM']+1)]
+        np.save('rv%ifinal.dat'%(br),dat)
+    except:
+        pass
 
     cl()
 
