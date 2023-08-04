@@ -113,6 +113,9 @@ while br<=len(branches):
             forward=bd('fw'+str(br)+'_'+str(i))
             print(forward)
         else:
+            if len(forward.getLabels())==0:
+                stop=True
+                continue
             forward=run(forward(forward.getLabels()[-1]),DS=ds,SP=checkbp,NTST=NTST,NMX=nmx)
 
         checkbp=['LP1','UZ1','TR1','BP0']
@@ -277,6 +280,9 @@ while br<=len(branches):
             reverse=bd('rv'+str(br)+'_'+str(i))
             print(reverse)
         else:
+            if len(reverse.getLabels())==0:
+                stop=True
+                continue
             reverse=run(reverse(reverse.getLabels()[-1]),NMX=nmx,DS=-ds,SP=checkbp, NTST=NTST)
 
         checkbp=['LP1','UZ1','TR1','BP0']
