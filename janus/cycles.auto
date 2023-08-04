@@ -35,7 +35,7 @@ while br<=len(branches):
     else:
         checkbp=['LP1','UZ1','TR1','BP0']
         nmx=100
-        forward=run(startfw,ISW=1,NMX=nmx,DS=ds,SP=checkbp)
+        forward=startfw+run(startfw,ISW=1,NMX=nmx,DS=ds,SP=checkbp)
 
     checkbp=['LP1','UZ1','TR1','BP0']
     nmx=100
@@ -201,7 +201,7 @@ while br<=len(branches):
     else:
         checkbp=['LP1','UZ1','TR1','BP0']
         nmx=100
-        reverse=run(startrv,ISW=1,NMX=nmx,DS=-ds,SP=checkbp)
+        reverse=startrv+run(startrv,ISW=1,NMX=nmx,DS=-ds,SP=checkbp)
 
     checkbp=['LP1','UZ1','TR1','BP0']
     nmx=100
