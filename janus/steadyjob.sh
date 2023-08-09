@@ -12,8 +12,8 @@
 
 # Your programs to run.
 cd $SLURM_ARRAY_TASK_ID
+cd steadys
 if [ -f steadys.auto ]; then
-	cp ../c.steady ./
 	auto steadys.auto
 fi
 

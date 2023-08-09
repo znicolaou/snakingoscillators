@@ -16,3 +16,4 @@ cp ../cycles.auto ./
 cp ../c.forward ./
 cp ../janus_rel.c ./
 auto cycles.auto
+#auto ../maketotal.auto
