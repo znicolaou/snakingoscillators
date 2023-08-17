@@ -269,8 +269,12 @@ int pvls (integer ndim, const doublereal *u,
   double *vec=malloc(ndim*sizeof(double));
   int *vorder=malloc(ndim*sizeof(int));
 
+  int neutral=0;
   for(int i=0; i<ndim; i++){
     vec[i]=fabs(log(getp("EIG",2*i+1,u)*getp("EIG",2*i+1,u)+getp("EIG",2*i+2,u)*getp("EIG",2*i+2,u)));
+    if (vec[i]<1E-6){
+      neutral++;
+    }
   }
   int nreal=0;
   double *rvec=malloc(ndim*sizeof(double));
@@ -300,6 +304,7 @@ int pvls (integer ndim, const doublereal *u,
   }
   par[8]=getp("STP",0,u);
   par[9]=getp("STA",0,u);
+  par[10]=neutral;
   free(rvec);
   free(vec);
   free(vorder);
