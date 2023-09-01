@@ -3,7 +3,7 @@ This repository contains Python scripts to simulate rings of Janus oscillators a
 
 # Repository prerequisites 
 Create a conda environment with required packages:
-`conda create -n oscillator_env numpy scipy jupyter matplotlib`.  Activate this environment to run the scripts: `conda activate oscillator_env`. 
+`conda create -n oscillator_env python=3.10 numpy pip wheel matplotlib scipy jupyter ffmpeg pyqt`.  Activate this environment to run the scripts: `conda activate oscillator_env`. 
 
 Our fork of auto-07p contains modified AUTO package for detecting SBPs: https://github.com/znicolaou/auto-07p. Clone and install the package, as in
 ```
