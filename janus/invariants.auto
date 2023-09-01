@@ -86,7 +86,7 @@ while bps<=bpmax:
                             ds=-ds
                             newbr=run(forward(forward.getLabels()[-1]),DS=ds,DSMAX=-ds,SP=checkbp,NTST=NTST,NMX=nmx,PAR={13:neutral},ISW=1,EPSU=1E-6,EPSL=1E-6,NPR=0)
                             if np.sign(newbr['r'][-1]-newbr['r'][0]) != np.sign(forward[-1]['r'][-1] - forward[0]['r'][0]):
-                                print('Couldn't continue! Possible SBP.')
+                                print('Could not continue! Possible SBP.')
                                 stop=True
 
 
