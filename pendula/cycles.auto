@@ -3,6 +3,7 @@ import numpy as np
 
 lpmax=20
 bpmax=20
+thu=dict([[3*n+2,0] for n in range(32)] + [[3*n+3,0] for n in range(32)]+[[98,0]])
 
 if os.path.exists('s.rv1_1'):
     previously_enumerated=np.load('previously_enumerated.npy').tolist()
@@ -20,7 +21,7 @@ else:
     previously_enumerated=[]
     previously_branched=[]
     br=1
-    start=run('pendula',c='forward',dat='cycle.dat',NMX=1)
+    start=run('pendula',c='forward',dat='cycle.dat',NMX=1,THU=thu)
     sv(start,'start_%i'%br)
     branches=[start]
 

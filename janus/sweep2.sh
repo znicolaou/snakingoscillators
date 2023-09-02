@@ -27,7 +27,6 @@ for seed in $seeds; do
 	if [ ! -f ${filebase}/cycles/${seed}cycle.dat ]; then
 		cp ${filebase}/${seed}fs.npy ${filebase}/cycles/${seed}ic.npy
 		echo $seed
-		#./janus.py --filebase data/randomjanus/cycles/$seed --seed $seed --sigma 0.3 --beta 0.3 --dt 0.01 --sym 0 --num 16 --time 2000 --rtime 0 --output 3 &
 		./janus.py --filebase ${filebase}/cycles/$seed --seed $seed --sigma $sigma --beta $beta --dt 0.01 --sym 0 --num 16 --time 2000 --rtime 0 --output 3 &
 	fi
 done

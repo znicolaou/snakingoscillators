@@ -79,7 +79,7 @@ int, required=False, dest='output', default=1, help='Output style, 0 for no stdo
     parser.add_argument("--rtime", type=float, required=False, dest='rtime', default=0., help='Time to start averaging order parameter. Default 1000.')
     parser.add_argument("--dt", type=float, required=False, dest='dt', default=0.1, help='Time step for averaging and output. Default 0.1.')
     parser.add_argument("--seed", type=int, required=False, dest='seed', default=1, help='Initial condition random seed. Default 1.')
-    parser.add_argument("--symmetrize", type=int, required=False, dest='sym', default=1, help='Symmetrize the coupling. 1 for symmetric, 0 for chiral. Default 1.')
+    parser.add_argument("--symmetrize", type=int, required=False, dest='sym', default=1, help='Symmetrize the coupling. 1 for symmetric, 0 for chiral. Default 0.')
 
     args = parser.parse_args()
 

@@ -21,7 +21,7 @@ for seed in $@; do
 	done
 	#if [ ! -f data/randompendula/${seed}out.dat ]; then
 		echo $seed
-		./pendula.py --frequency 3.5 --amplitude 0.055 --delta 0.15 --init 0.5 --cycles 5000 --outcycle 4900 --dt 0.01 --num 32 --seed $seed --filebase data/randompendula/$seed --verbose 1 &
+		./pendula.py --frequency 3.5 --amplitude 0.045 --delta 0.25 --init 0.5 --cycles 5000 --outcycle 4900 --dt 0.01 --num 32 --seed $seed --filebase data/randompendula/$seed --verbose 1 &
 	#fi
 done
 wait

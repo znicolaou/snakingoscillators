@@ -292,7 +292,9 @@ int pvls (integer ndim, const doublereal *u,
   par[1]=pow(order,0.5);
   par[2]=pow(order2,0.5);
   par[3]=pow(order3,0.5);
-  par[4]=log(getp("EIG",2*vorder[1]+1,u)*getp("EIG",2*vorder[1]+1,u)+getp("EIG",2*vorder[1]+2,u)*getp("EIG",2*vorder[1]+2,u));
+  // par[4]=log(getp("EIG",2*vorder[1]+1,u)*getp("EIG",2*vorder[1]+1,u)+getp("EIG",2*vorder[1]+2,u)*getp("EIG",2*vorder[1]+2,u));
+  int start=(int)par[12];
+  par[4]=fabs(log(getp("EIG",2*vorder[start]+1,u)*getp("EIG",2*vorder[start]+1,u)+getp("EIG",2*vorder[start]+2,u)*getp("EIG",2*vorder[start]+2,u)))-1E-6;
   par[5]=log(getp("EIG",2*vorder[2]+1,u)*getp("EIG",2*vorder[2]+1,u)+getp("EIG",2*vorder[2]+2,u)*getp("EIG",2*vorder[2]+2,u));
   if(nreal>2){
     par[6]=log(getp("EIG",2*rinds[rorder[1]]+1,u)*getp("EIG",2*rinds[rorder[1]]+1,u));
@@ -303,8 +305,9 @@ int pvls (integer ndim, const doublereal *u,
     par[7]=0;
   }
   par[8]=getp("STP",0,u);
-  par[9]=getp("STA",0,u);
-  par[10]=neutral;
+  // par[9]=getp("STA",0,u);
+  par[9]=neutral;
+  par[12]=start;
   free(rvec);
   free(vec);
   free(vorder);
