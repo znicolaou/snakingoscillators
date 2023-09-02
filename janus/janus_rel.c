@@ -11,7 +11,6 @@ int func (integer ndim, const doublereal *u, const integer *icp,
 
   double sigma = par[0];
   double omega=1.0;
-  //double beta=0.25;
   double beta = par[0];
   double gamma=1.0;
   int N = ((ndim+2)/4);
@@ -165,6 +164,7 @@ int stpnt (integer ndim, doublereal t,
            doublereal *u, doublereal *par)
 {
   par[0] = 0.3;
+  par[12] = 1.0;
   int N = (ndim+2)/4;
   double phi0=-asin(1.0/(2*(par[0]+0.25)));
   for (int k=0; k<N-1; k++){
@@ -305,7 +305,6 @@ int pvls (integer ndim, const doublereal *u,
     par[7]=0;
   }
   par[8]=getp("STP",0,u);
-  // par[9]=getp("STA",0,u);
   par[9]=neutral;
   par[12]=start;
   free(rvec);
