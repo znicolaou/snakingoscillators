@@ -12,10 +12,9 @@ git clone https://github.com/znicolaou/auto-07p.git
 cd auto-07p
 ./configure
 make
+make install
 ```
-The executable files will be compiled into `auto-07p/bin`. You may want to include these in your system PATH by appending your `source $HOME/auto/07p/cmds/auto.env.sh` to `~/.bashrc`.
-
-Batches were run on a SLURM cluster; some script modifications may be necessary if no cluster is available.
+Batches were run on a SLURM cluster; some script modifications may be necessary if no such cluster is available.
 
 # Files in the snakingoscillators repository
 The respository contains two main directorys.
@@ -44,6 +43,7 @@ options:
   --symmetrize SYM     Symmetrize the coupling. 1 for symmetric, 0 for chiral. Default 0.
 ```
 
+To generate the initial limit cycles, run the SLURM script `sbatch sweep.sh`, which will take an hour or so to complete. After the jobs complete, run the script `./makecycles.py` to generate the starting data for the AUTO continuation. To generate the main numerical continuation results, submit the SLURM script `sbatch job.sh`, which will take over a day to complete. After the job completes, run `./makesteadys.sh` and `sbatch steadyjob.sh` to find and numerically continue the steady states visited by the heteroclinic cycles (these jobs run in a few minutes).  Some solution branches generated in the continuation are neutrally stable invariant limit cycles, which possess symmetry-constrained unity Floquet multipliers. These solution branches exhibit spurious bifurcations and are difficult to continue. The script `invariant.auto` contains code for tracking the number of neutrally stable multipliers. Run `./makeinvariant.sh` to run the script on the exeplary branch in the manuscript. The Jupyter notebook `plotjanus.ipynb` contains code to plot and animate solutions.
 
 ## Pendula arrays
 The `pendula` directory contains a script a Python script `pendula.py` contains to numerically integrate an array of parameterically driven pendula. Running `./pendula.py --help` produces the following usage message:
@@ -76,3 +76,6 @@ options:
   --atol ATOL           Absolute error tolerance
   --verbose VERBOSE     Verbose output
 ```
+
+To generate the initial limit cycles, run the SLURM script `sbatch sweep.sh`, which will take an hour or so to complete. After the jobs complete, run the script `./makecycles.py` to generate the starting data for the AUTO continuation. To generate the main numerical continuation results, submit the SLURM script `sbatch job.sh`, which will take a couple of hours to complete. To find the initial period doubling instabilities of the homogeneous state, run `auto flat.auto`. The Jupyter notebook `plotpendula.ipynb` contains code to plot and animate solutions.
+
