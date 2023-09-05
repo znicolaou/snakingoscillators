@@ -141,7 +141,6 @@ while br<=len(branches):
 
             if forward(n)['TY'] not in ['EP']:
                 previously_enumerated=previously_enumerated+[[forward(n)['sigma'],forward(n)['r'],forward(n)['PERIOD']]]
-                np.save('previously_enumerated', previously_enumerated)
 
             addbr=True
 
@@ -311,7 +310,6 @@ while br<=len(branches):
                         stop=True
             if reverse(n)['TY'] not in ['EP']:
                 previously_enumerated=previously_enumerated+[[reverse(n)['sigma'],reverse(n)['r'],reverse(n)['PERIOD']]]
-                np.save('previously_enumerated', previously_enumerated)
 
             addbr=True
             for prev in previously_branched:
@@ -366,5 +364,6 @@ while br<=len(branches):
         pass
 
     cl()
+    auto 'maketotal.auto'
 
     br=br+1

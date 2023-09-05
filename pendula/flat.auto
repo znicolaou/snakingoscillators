@@ -2,6 +2,9 @@ import numpy as np
 import os 
 
 br=19
+shell ./makeflat.py --file data/pendula/flat.dat
+cp c.flat data/pendula
+cd data/pendula
 flat=run('pendula',c='flat',DSMAX=1E-3)
 if not os.path.exists('%i'%(br)):
   os.mkdir('%i'%(br))

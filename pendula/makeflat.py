@@ -7,8 +7,8 @@ if __name__ == "__main__":
 	#Command line arguments
 	parser = argparse.ArgumentParser(description='Driven pendula.')
 	parser.add_argument("--file", type=str, required=True, dest='file', help='Base string for file output')
-	parser.add_argument("--num", type=int, default=32, dest='num', help='Number of pendula')
-	parser.add_argument("--dt", type=float, default=0.05, dest='dt', help='Time step')
+	parser.add_argument("--num", type=int, default=16, dest='num', help='Number of pendula')
+	parser.add_argument("--dt", type=float, default=0.01, dest='dt', help='Time step')
 	parser.add_argument("--invert", type=int, default=0, dest='invert', help='Zero for stable, 1 for unstable')
 	args = parser.parse_args()
 

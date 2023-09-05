@@ -305,8 +305,9 @@ int pvls (integer ndim, const doublereal *u,
     par[7]=0;
   }
   par[8]=getp("STP",0,u);
-  par[9]=neutral;
+  par[9]=getp("STA",0,u);
   par[12]=start;
+  par[13]=neutral;
   free(rvec);
   free(vec);
   free(vorder);

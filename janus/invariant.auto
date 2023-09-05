@@ -1,0 +1,132 @@
+import os.path
+import numpy as np
+
+
+lpmax=10
+bpmax=10
+imx=100
+
+previously_enumerated=[]
+checkbp=['LP0','UZ1','TR0','BP0']
+
+nmx=3
+ds=1E-3
+thu=dict([[2*n,0] for n in range(1,32)])
+
+neutral=bd('start')['neutral'][-1]
+ds=np.abs(ds)*np.sign(bd('start')[-1]['ds'][0])
+if not os.path.exists('s.newstart'):
+    start=run(bd('start'),ISW=1,DS=ds,SP=checkbp,NMX=nmx,PAR={13:neutral},UZR={'lambda1':0},ITNW=100,NWTN=100,THU=thu)
+    sv(start,'newstart')
+else:
+    start=bd('newstart')
+bps=0
+while bps<=bpmax:
+    i=1
+    stop=False
+
+    if os.path.exists('d.fw'+'_'+str(i)):
+      print('fw', i)
+      forward=bd('fw'+'_'+str(i))
+      ds=np.abs(ds)*np.sign(forward[-1]['ds'][0])
+      print(forward)
+    else:
+      nmx=100
+      neutral=start['neutral'][-1]
+      forward=bd('newstart')+run(start,ISW=1,NMX=nmx,DS=ds,SP=checkbp,PAR={13:neutral})
+      sv(forward,'fw'+'_'+str(i))
+
+    nmx=100
+    for n in forward().getLabels():
+        for prev in previously_enumerated:
+            if forward(n)['TY'] not in ['EP']:
+                diff=[[forward(n)['sigma']-prev[0],forward(n)['r']-prev[1],forward(n)['PERIOD']-prev[2]]]
+                if np.linalg.norm(diff/(1+np.abs(prev)))<1e-4:
+                    print('previously enumerated')
+                    stop=True
+        if forward(n)['TY'] not in ['EP']:
+            previously_enumerated=previously_enumerated+[[forward(n)['sigma'],forward(n)['r'],forward(n)['PERIOD']]]
+        if forward(n)['TY'] == 'UZ':
+            if np.abs(forward(n)['lambda3'])<1E-1:
+                print('SBP!')
+                bps=bps+1
+
+    period=forward[-1][-1]['PERIOD']
+    NTST=np.max([1000,int(period/140*500)])
+    if period>1499:
+        print('Period large')
+        stop=True
+
+    while bps<bpmax and i<imx and not stop:
+        i=i+1
+        print(i,'continue:', forward[-1][-1]['TY'], 'bps:', bps, 'ntst:', NTST, 'period:', period, 'neutral:', forward[-1]['neutral'][-1])
+        if os.path.exists('d.fw'+'_'+str(i)):
+            print('fw', br, i)
+            forward=bd('fw'+'_'+str(i))
+            ds=np.abs(ds)*np.sign(forward[-1]['ds'][0])
+            print(forward)
+        else:
+            if len(forward.getLabels())==0:
+                stop=True
+                continue
+            neutral=forward[-1]['neutral'][-1]
+            if forward[-1][-1]['TY']=='MX':
+                neutral=forward[-1]['neutral'][-2]
+                print('Possible SBP! Trying to switch...')
+                nmx=3
+                ds=1E-1
+
+                newbr=run(forward(forward.getLabels()[-1]),DS=ds,DSMAX=ds,SP=checkbp,NTST=NTST,NMX=nmx,PAR={13:neutral},ISW=-1,EPSU=1E-6,EPSL=1E-6,NPR=0)
+                if np.sign(newbr['r'][-1]-newbr['r'][0]) != np.sign(forward[-1]['r'][-1] - forward[0]['r'][0]):
+                    ds=-ds
+                    newbr=run(forward(forward.getLabels()[-1]),DS=ds,DSMAX=-ds,SP=checkbp,NTST=NTST,NMX=nmx,PAR={13:neutral},ISW=-1,EPSU=1E-6,EPSL=1E-6,NPR=0)
+                    if np.sign(newbr['r'][-1]-newbr['r'][0]) != np.sign(forward[-1]['r'][-1] - forward[0]['r'][0]):
+                        newbr=run(forward(forward.getLabels()[-1]),DS=ds,DSMAX=-ds,SP=checkbp,NTST=NTST,NMX=nmx,PAR={13:neutral},ISW=1,EPSU=1E-6,EPSL=1E-6,NPR=0)
+                        if np.sign(newbr['r'][-1]-newbr['r'][0]) != np.sign(forward[-1]['r'][-1] - forward[0]['r'][0]):
+                            ds=-ds
+                            newbr=run(forward(forward.getLabels()[-1]),DS=ds,DSMAX=-ds,SP=checkbp,NTST=NTST,NMX=nmx,PAR={13:neutral},ISW=1,EPSU=1E-6,EPSL=1E-6,NPR=0)
+                            if np.sign(newbr['r'][-1]-newbr['r'][0]) != np.sign(forward[-1]['r'][-1] - forward[0]['r'][0]):
+                                print('Could not continue! Possible SBP.')
+                                stop=True
+
+
+                ds=1E-6*np.sign(ds)
+                nmx=10
+                forward=newbr+run(newbr,ISW=1,NMX=nmx,DS=ds,DSMAX=1E-2,EPSU=1E-8,EPSL=1E-8)
+
+            else:
+                forward=run(forward(forward.getLabels()[-1]),DS=ds,SP=checkbp,NTST=NTST,NMX=nmx,PAR={13:neutral},ISW=1,IADS=1,NWTN=100,ITNW=100)
+
+
+        period=forward[-1][-1]['PERIOD']
+        NTST=np.max([1000,int(period/140*500)])
+        nmx=100
+        if period>1499:
+            print('Period large')
+            stop=True
+
+        for n in forward().getLabels():
+            for prev in previously_enumerated:
+                if forward(n)['TY'] not in ['EP','MX']:
+                    diff=[[forward(n)['sigma']-prev[0],forward(n)['r']-prev[1],forward(n)['PERIOD']-prev[2]]]
+                    if np.linalg.norm(diff/(1+np.abs(prev)))<1e-4:
+                        print('previously enumerated')
+                        stop=True
+
+            if forward(n)['TY'] not in ['EP']:
+                previously_enumerated=previously_enumerated+[[forward(n)['sigma'],forward(n)['r'],forward(n)['PERIOD']]]
+            if forward(n)['TY'] == 'UZ':
+                if np.abs(forward(n)['lambda3'])<1E-1:
+                    print('SBP!')
+                    bps=bps+1
+        sv(forward,'fw'+'_'+str(i))
+        cl()
+
+        final=forward(forward.getLabels()[-1])
+        dat=[final['t']]
+        dat=dat+[final['U(%i)'%(i)] for i in range(1,final['NDIM']+1)]
+        np.save('fwfinal.dat',dat)
+        forward.writeRawFilename('fw.dat')
+    cl()
+
+    break
