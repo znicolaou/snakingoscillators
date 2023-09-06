@@ -7,8 +7,9 @@
 #SBATCH --mem=5G
 #SBATCH --time=02-00:00:00 # Max runtime in DD-HH:MM:SS format.
 #SBATCH --export=all
-#SBATCH --output=%a/out.dat # where STDOUT goes
-#SBATCH --error=%a/err.dat # where STDERR goes
+#SBATCH --output=data/pendula/%a/out.dat # where STDOUT goes
+#SBATCH --error=data/pendula/%a/err.dat # where STDERR goes
+#SBATCH --array=0-18
 
 # Your programs to run.
 cd $SLURM_ARRAY_TASK_ID

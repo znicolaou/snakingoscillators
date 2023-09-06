@@ -19,10 +19,10 @@ for seed in $@; do
 		sleep 1;
 		jobs=`jobs | wc -l`;
 	done
-	#if [ ! -f data/randompendula/${seed}out.dat ]; then
+	if [ ! -f data/randompendula/${seed}dat.npy ]; then
 		echo $seed
 		./pendula.py --frequency 3.5 --amplitude 0.045 --delta 0.25 --init 0.5 --cycles 5000 --outcycle 4900 --dt 0.01 --num 32 --seed $seed --filebase data/randompendula/$seed --verbose 1 &
-	#fi
+	fi
 done
 wait
 
