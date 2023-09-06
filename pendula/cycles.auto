@@ -39,7 +39,7 @@ while br<=len(branches):
     np.save('previously_enumerated',previously_enumerated)
     np.save('previously_branched',previously_branched)
 
-    if np.max(np.abs(forward['abs'])) < 1e-4:
+    if np.max(np.abs(forward['lambda1'])) < 1e-4:
         print('Turning off BP for branch')
         checkbp='BP0'
     else:
@@ -82,7 +82,7 @@ while br<=len(branches):
         i=i+1
         print(i,'continue:', forward(forward.getLabels()[-1])['TY'], 'lps:', nlps)
         forward=run(forward(forward.getLabels()[-1]),SP=['LP1',checkbp])
-        if np.max(np.abs(forward['abs'])) < 1e-4:
+        if np.max(np.abs(forward['lambda1'])) < 1e-4:
             print('Turning off BP for branch')
             checkbp='BP0'
         else:
@@ -132,7 +132,7 @@ while br<=len(branches):
 
     # reverse=run(start,ISW=1,NMX=0,DS='-',SP=['LP1','BP1','PD','TR'])
     reverse=run(start,ISW=1,NMX=100,DS='-',SP=['LP0','BP0'])
-    if np.max(np.abs(reverse['abs'])) < 1e-4:
+    if np.max(np.abs(reverse['lambda1'])) < 1e-4:
         print('Turning off BP for branch')
         checkbp='BP0'
     else:
@@ -174,7 +174,7 @@ while br<=len(branches):
         i=i+1
         print(i,'continue:', reverse(reverse.getLabels()[-1])['TY'], 'lps:', nlps)
         reverse=run(reverse(reverse.getLabels()[-1]),NMX=0,SP=['LP1',checkbp])
-        if np.max(np.abs(reverse['abs'])) < 1e-4:
+        if np.max(np.abs(reverse['lambda1'])) < 1e-4:
             print('Turning off BP for branch')
             checkbp='BP0'
         else:

@@ -1,24 +1,24 @@
 import numpy as np
 import os 
 
-br=19
-shell ./makeflat.py --file data/pendula/flat.dat
-cp c.flat data/pendula
-cd data/pendula
-flat=run('pendula',c='flat',DSMAX=1E-3)
+br=0
+thu=dict([[3*n+2,0] for n in range(32)] + [[3*n+3,0] for n in range(32)]+[[98,0]])
+flat=run('pendula',c='flat',DSMAX=1E-3,THU=thu)
 if not os.path.exists('%i'%(br)):
   os.mkdir('%i'%(br))
 sv(flat,'fw')
 flat.writeRawFilename('total1.dat')
-os.system('mv {s.fw,b.fw,d.fw,total1.dat} %i/'%(br))
+os.system('mv {s.fw,b.fw,d.fw,total1.dat} 0/')
 br=br+1
+pds=bd([])
 for pd in flat('PD'):
-  print("Branch: %i"%(br))
-  branch=run(pd,ISW=-1,UZSTOP={'norm1':5.0,1:0.15},SP=['LP0','BP0'],DSMAX=2E-2)
+  print(br)
+  branch=run(pd,ISW=-1,UZSTOP={'amp':0.15},UZR={'lambda4':0},SP=['LP0','BP0'],DSMAX=1E-1)
   if not os.path.exists('%i'%(br)):
     os.mkdir('%i'%(br))
   sv(branch,'fw')
   branch.writeRawFilename('total1.dat')
   os.system('mv {s.fw,b.fw,d.fw,total1.dat} %i/'%(br))
+
   br=br+1
 cl()

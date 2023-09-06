@@ -12,9 +12,9 @@
 #SBATCH --array=0-18
 
 # Your programs to run.
-cd $SLURM_ARRAY_TASK_ID
-cp ../cycles.auto ./
-cp ../c.forward ./
-cp ../pendula.c ./
+cd data/pendula/$SLURM_ARRAY_TASK_ID
+cp ../../../cycles.auto ./
+cp ../../../c.forward ./
+cp ../../../pendula.c ./
 auto cycles.auto
 grep 'Time' out.dat | awk '{s=s+$3}END{print("Runtime:", s)}'

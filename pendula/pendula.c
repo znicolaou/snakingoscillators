@@ -1,7 +1,6 @@
 #include "auto_f2c.h"
 #define PI 3.14159265359
 
-void quicksort(double *vec,int first,int last);
 void argsort(double *vec,int *order,int ndim);
 
 int func (integer ndim, const doublereal *w, const integer *icp,
@@ -166,9 +165,6 @@ int pvls (integer ndim, const doublereal *u,
 
   doublereal t=0;
   doublereal dt,weight,norm1=0,norm2=0;
-  double *vec=malloc(ndim*sizeof(double));
-  int *order=malloc(ndim*sizeof(int));
-
   dt = getp("DTM",1,u);
 
   for (int i=0; i<NTST; i++){
@@ -181,21 +177,63 @@ int pvls (integer ndim, const doublereal *u,
       }
     }
   }
+
+  // double *vec=malloc(ndim*sizeof(double));
+  // int *order=malloc(ndim*sizeof(int));
+  //
+  // for(int i=0; i<ndim; i++){
+  //   vec[i]=fabs(getp("EIG",2*i+1,u)*getp("EIG",2*i+1,u)+getp("EIG",2*i+2,u)*getp("EIG",2*i+2,u)-1);
+  // }
+  // argsort(vec,order,ndim);
+  double *vec=malloc(ndim*sizeof(double));
+  int *vorder=malloc(ndim*sizeof(int));
+
+  int neutral=0;
   for(int i=0; i<ndim; i++){
-    vec[i]=fabs(getp("EIG",2*i+1,u)*getp("EIG",2*i+1,u)+getp("EIG",2*i+2,u)*getp("EIG",2*i+2,u)-1);
+    vec[i]=fabs(log(getp("EIG",2*i+1,u)*getp("EIG",2*i+1,u)+getp("EIG",2*i+2,u)*getp("EIG",2*i+2,u)));
+    if (vec[i]<1E-6){
+      neutral++;
+    }
   }
-  argsort(vec,order,ndim);
-  quicksort(vec,1,ndim-1);
+  int nreal=0;
+  double *rvec=malloc(ndim*sizeof(double));
+  int *rorder=malloc(ndim*sizeof(int));
+  int *rinds=malloc(ndim*sizeof(int));
+  for(int i=0; i<ndim; i++){
+    if(getp("EIG",2*i+2,u)==0.){
+      rinds[nreal] = i;
+      rvec[nreal++]=fabs(log(getp("EIG",2*i+1,u)*getp("EIG",2*i+1,u)));
+    }
+  }
+  argsort(rvec,rorder,nreal);
+  argsort(vec,vorder,ndim);
+
 
 
   par[3]=getp("STA",0,u);
   par[4]=sqrt(norm1);
   par[5]=sqrt(norm2);
-  par[6]=getp("EIG",2*order[1]+1,u)*getp("EIG",2*order[1]+1,u)+getp("EIG",2*order[1]+2,u)*getp("EIG",2*order[1]+2,u)-1;
-  par[7]=getp("EIG",2*order[2]+1,u);
-  par[8]=getp("EIG",2*order[2]+2,u);
-  par[9]=getp("STP",0,u);
+  // par[6]=getp("EIG",2*order[1]+1,u)*getp("EIG",2*order[1]+1,u)+getp("EIG",2*order[1]+2,u)*getp("EIG",2*order[1]+2,u)-1;
+  // par[7]=getp("EIG",2*order[2]+1,u);
+  // par[8]=getp("EIG",2*order[2]+2,u);
+  par[6]=log(getp("EIG",2*vorder[1]+1,u)*getp("EIG",2*vorder[1]+1,u)+getp("EIG",2*vorder[1]+2,u)*getp("EIG",2*vorder[1]+2,u));
+  par[7]=log(getp("EIG",2*vorder[2]+1,u)*getp("EIG",2*vorder[2]+1,u)+getp("EIG",2*vorder[2]+2,u)*getp("EIG",2*vorder[2]+2,u));
+  if(nreal>2){
+    par[8]=log(getp("EIG",2*rinds[rorder[1]]+1,u)*getp("EIG",2*rinds[rorder[1]]+1,u));
+    par[9]=log(getp("EIG",2*rinds[rorder[2]]+1,u)*getp("EIG",2*rinds[rorder[2]]+1,u));
+  }
+  else{
+    par[8]=0;
+    par[9]=0;
+  }
+  
+  //par[12]=neutral;
+  //par[13]=getp("STP",0,u);
   free(vec);
+  free(rvec);
+  free(rorder);
+  free(vorder);
+  free(rinds);
   return 0;
 }
 
@@ -235,39 +273,6 @@ void argsort(doublereal *vec, int *order, int ndim){
           order[i]=j;
         }
       }
-  }
-}
-
-void quicksort(doublereal *vec, int first, int last){
-  int i, j, pivot;
-  doublereal temp;
-
-  if(first<last){
-    pivot=first;
-    i=first;
-    j=last;
-
-    while(i<j){
-      // while(vec[i]<=vec[pivot]&&i<last){
-      while(fabs(vec[i])<=fabs(vec[pivot])&&i<last){
-        i++;
-      }
-      // while(vec[j]>vec[pivot]){
-      while(fabs(vec[j])>fabs(vec[pivot])){
-        j--;
-      }
-      if(i<j){
-        temp=vec[i];
-        vec[i]=vec[j];
-        vec[j]=temp;
-      }
-    }
-
-    temp=vec[pivot];
-    vec[pivot]=vec[j];
-    vec[j]=temp;
-    quicksort(vec,first,j-1);
-    quicksort(vec,j+1,last);
   }
 }
 
