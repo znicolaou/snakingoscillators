@@ -43,7 +43,13 @@ options:
   --symmetrize SYM     Symmetrize the coupling. 1 for symmetric, 0 for chiral. Default 0.
 ```
 
-To generate the initial limit cycles, run the SLURM script `sbatch sweep.sh`, which will take an hour or so to complete. After the jobs complete, run the script `./makecycles.py` to generate the starting data for the AUTO continuation. To generate the main numerical continuation results, submit the SLURM script `sbatch job.sh`, which will take over a day to complete. After the job completes, run `./makesteadys.sh` and `sbatch steadyjob.sh` to find and numerically continue the steady states visited by the heteroclinic cycles (these jobs run in a few minutes).  Some solution branches generated in the continuation are neutrally stable invariant limit cycles, which possess symmetry-constrained unity Floquet multipliers. These solution branches exhibit spurious bifurcations and are difficult to continue. The script `invariant.auto` contains code for tracking the number of neutrally stable multipliers. Run `./makeinvariant.sh` to run the script on the exeplary branch in the manuscript. The Jupyter notebook `plotjanus.ipynb` contains code to plot and animate solutions.
+Batches of this script are used to generate the initial limit cycles. To do so, the SLURM batch script `sbatch sweep.sh`, which should take an hour or so to complete. After the jobs complete, run the script `./makecycles.py` to generate the starting data for the AUTO continuation. 
+
+To generate the main numerical continuation results, submit the SLURM script `sbatch job.sh`, which should take over a day to complete. After the job completes, run `./makesteadys.sh` and `sbatch steadyjob.sh` to find and numerically continue the steady states visited by the heteroclinic cycles (these jobs run in a few minutes).  
+
+Some solution branches generated in the continuation are neutrally stable invariant limit cycles, which possess symmetry-constrained unity Floquet multipliers. The direciton vector in such branches can spuriously change signs because of the singularlity of the Jacobian, and are thus difficult to continue. The script `invariant.auto` contains code for tracking the number of neutrally stable multipliers and ensuring that the direction of the change in the order parameter does not change. (This was designed specifically for the exemplary solution branch; additional modifications would be required for branches that do exhibit extrema in the order parameter.) Run `sbatch invariantjob.sh` to run the script on the exemplary branch in the manuscript. 
+
+Finally, the Jupyter notebook `plotjanus.ipynb` contains code to plot and animate solutions. A few example solution branches are stored in `data/janus/examples`, which are plotted in the notebook.
 
 ## Pendula arrays
 The `pendula` directory contains a script a Python script `pendula.py` contains to numerically integrate an array of parameterically driven pendula. Running `./pendula.py --help` produces the following usage message:
@@ -77,5 +83,9 @@ options:
   --verbose VERBOSE     Verbose output
 ```
 
-To generate the initial limit cycles, run the SLURM script `sbatch sweep.sh`, which will take an hour or so to complete. After the jobs complete, run the script `./makecycles.py` to generate the starting data for the AUTO continuation. To generate the main numerical continuation results, submit the SLURM script `sbatch job.sh`, which will take a couple of hours to complete. To find the initial period doubling instabilities of the homogeneous state, run `auto flat.auto`. The Jupyter notebook `plotpendula.ipynb` contains code to plot and animate solutions.
+Batches of this script are used to generate the initial limit cycles. To do so, the SLURM batch script `sbatch sweep.sh`, which should take an hour or so to complete. After the jobs complete, run the script `./makecycles.py` to generate the starting data for the AUTO continuation. 
+
+To generate the main numerical continuation results from the starting cycles, submit the SLURM script `sbatch job.sh`, which should take a couple of hours to complete. To find the initial period doubling instabilities of the homogeneous state and the branches emerging from them, submit the batch `sbatch flatjob.sh`, which should complete in an hour or so. 
+
+The Jupyter notebook `plotpendula.ipynb` contains code to plot and animate solutions. A few example solution branches are stored in `data/pendula/examples`, which are plotted in the notebook.
 
