@@ -73,26 +73,34 @@ while bps<=bpmax:
             if forward[-1][-1]['TY']=='MX':
                 neutral=forward[-1]['neutral'][-2]
                 print('Possible SBP! Trying to switch...')
-                nmx=3
-                ds=1E-1
-
-                newbr=run(forward(forward.getLabels()[-1]),DS=ds,DSMAX=ds,SP=checkbp,NTST=NTST,NMX=nmx,PAR={13:neutral},ISW=-1,EPSU=1E-6,EPSL=1E-6,NPR=0)
-                if np.sign(newbr['r'][-1]-newbr['r'][0]) != np.sign(forward[-1]['r'][-1] - forward[0]['r'][0]):
-                    ds=-ds
-                    newbr=run(forward(forward.getLabels()[-1]),DS=ds,DSMAX=-ds,SP=checkbp,NTST=NTST,NMX=nmx,PAR={13:neutral},ISW=-1,EPSU=1E-6,EPSL=1E-6,NPR=0)
-                    if np.sign(newbr['r'][-1]-newbr['r'][0]) != np.sign(forward[-1]['r'][-1] - forward[0]['r'][0]):
-                        newbr=run(forward(forward.getLabels()[-1]),DS=ds,DSMAX=-ds,SP=checkbp,NTST=NTST,NMX=nmx,PAR={13:neutral},ISW=1,EPSU=1E-6,EPSL=1E-6,NPR=0)
-                        if np.sign(newbr['r'][-1]-newbr['r'][0]) != np.sign(forward[-1]['r'][-1] - forward[0]['r'][0]):
-                            ds=-ds
-                            newbr=run(forward(forward.getLabels()[-1]),DS=ds,DSMAX=-ds,SP=checkbp,NTST=NTST,NMX=nmx,PAR={13:neutral},ISW=1,EPSU=1E-6,EPSL=1E-6,NPR=0)
-                            if np.sign(newbr['r'][-1]-newbr['r'][0]) != np.sign(forward[-1]['r'][-1] - forward[0]['r'][0]):
-                                print('Could not continue! Possible SBP.')
-                                stop=True
-
-
-                ds=1E-6*np.sign(ds)
-                nmx=10
-                forward=newbr+run(newbr,ISW=1,NMX=nmx,DS=ds,DSMAX=1E-2,EPSU=1E-8,EPSL=1E-8)
+                nmx=5
+                ds=np.sign(ds)*1E-1
+                checkbp=['LP0','UZ','TR0','BP0']
+                found=False
+                while not found and np.abs(ds)>1E-6:
+                  found=True
+                  print('Trying ds=',ds)
+                  newbr=run(forward(forward.getLabels()[-1]),DS=ds,DSMAX=ds,SP=checkbp,NTST=NTST,NMX=nmx,PAR={13:neutral},ISW=1,EPSU=1E-6,EPSL=1E-6,NPR=0)
+                  if np.sign(newbr['r'][-1]-newbr['r'][0]) != np.sign(forward[-1]['r'][-1] - forward[0]['r'][0]):
+                      ds=-ds
+                      newbr=run(forward(forward.getLabels()[-1]),DS=ds,DSMAX=-ds,SP=checkbp,NTST=NTST,NMX=nmx,PAR={13:neutral},ISW=1,EPSU=1E-6,EPSL=1E-6,NPR=0)
+                      if np.sign(newbr['r'][-1]-newbr['r'][0]) != np.sign(forward[-1]['r'][-1] - forward[0]['r'][0]):
+                          newbr=run(forward(forward.getLabels()[-1]),DS=ds,DSMAX=-ds,SP=checkbp,NTST=NTST,NMX=nmx,PAR={13:neutral},ISW=-1,EPSU=1E-6,EPSL=1E-6,NPR=0)
+                          if np.sign(newbr['r'][-1]-newbr['r'][0]) != np.sign(forward[-1]['r'][-1] - forward[0]['r'][0]):
+                              ds=-ds
+                              newbr=run(forward(forward.getLabels()[-1]),DS=ds,DSMAX=-ds,SP=checkbp,NTST=NTST,NMX=nmx,PAR={13:neutral},ISW=-1,EPSU=1E-6,EPSL=1E-6,NPR=0)
+                              if np.sign(newbr['r'][-1]-newbr['r'][0]) != np.sign(forward[-1]['r'][-1] - forward[0]['r'][0]):
+                                  print('Could not continue! Possible SBP.')
+                                  found=False
+                  ds=ds/10
+                if found:
+                  print('Found...continuing')
+                  ds=1E-12*np.sign(ds)
+                  nmx=100
+                  checkbp=['LP0','UZ1','TR0','BP0']
+                  forward=newbr+run(newbr,ISW=1,NMX=nmx,DS=ds,DSMAX=1E-2,EPSU=1E-8,EPSL=1E-8)
+                else:
+                  stop=True
 
             else:
                 forward=run(forward(forward.getLabels()[-1]),DS=ds,SP=checkbp,NTST=NTST,NMX=nmx,PAR={13:neutral},ISW=1,IADS=1,NWTN=100,ITNW=100)

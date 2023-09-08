@@ -10,6 +10,13 @@
 #SBATCH --output=out.dat # where STDOUT goes
 #SBATCH --error=err.dat # where STDERR goes
 
-# Your programs to run.
-auto invariants.auto
-#auto ../maketotal.auto
+i=8
+br='rv5'
+filebase='data/janus'
+mkdir -p $filebase/$i/invariant
+cp {janus_rel.c,c.forward,invariant.auto} $filebase/$i/invariant
+cp $filebase/$i/s.start_$br $filebase/$i/invariant/s.start
+cp $filebase/$i/b.start_$br $filebase/$i/invariant/b.start
+cp $filebase/$i/d.start_$br $filebase/$i/invariant/d.start
+cd $filebase/$i/invariant 
+auto invariant.auto
