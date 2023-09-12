@@ -9,10 +9,11 @@ Our fork of auto-07p contains modified AUTO package for detecting SBPs: https://
 ```
 cd ~
 git clone https://github.com/znicolaou/auto-07p.git
+mkdir auto && mv auto-07p auto/07p
 cd auto-07p
 ./configure
 make
-make install
+source cmds/auto.env.sh
 ```
 Batches were run on a SLURM cluster; some script modifications may be necessary if no such cluster is available.
 
