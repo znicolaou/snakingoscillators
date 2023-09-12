@@ -10,7 +10,7 @@ Our fork of auto-07p contains modified AUTO package for detecting SBPs: https://
 cd ~
 git clone https://github.com/znicolaou/auto-07p.git
 mkdir auto && mv auto-07p auto/07p
-cd auto-07p
+cd auto/07p
 ./configure
 make
 source cmds/auto.env.sh
